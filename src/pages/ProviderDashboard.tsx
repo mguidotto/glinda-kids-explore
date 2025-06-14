@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,7 +90,7 @@ const ProviderDashboard = () => {
       });
 
     if (!error) {
-      setMessage("Provider creato con successo!");
+      setMessage("Profilo gestore creato con successo!");
       fetchProvider();
     }
   };
@@ -137,7 +136,11 @@ const ProviderDashboard = () => {
         <div className="max-w-2xl mx-auto pt-8 px-4">
           <Card>
             <CardHeader>
-              <CardTitle>Crea il tuo Provider</CardTitle>
+              <CardTitle>Crea il tuo Profilo Gestore</CardTitle>
+              <p className="text-gray-600">
+                Registra la tua attività per bambini e famiglie sulla nostra piattaforma. 
+                Potrai gestire corsi, eventi, servizi educativi e molto altro.
+              </p>
             </CardHeader>
             <CardContent>
               <form onSubmit={(e) => {
@@ -145,35 +148,35 @@ const ProviderDashboard = () => {
                 createProvider(new FormData(e.currentTarget));
               }} className="space-y-4">
                 <div>
-                  <Label htmlFor="businessName">Nome Attività</Label>
-                  <Input id="businessName" name="businessName" required />
+                  <Label htmlFor="businessName">Nome dell'Attività *</Label>
+                  <Input id="businessName" name="businessName" required placeholder="Es. Asilo Nido Arcobaleno" />
                 </div>
                 <div>
-                  <Label htmlFor="description">Descrizione</Label>
-                  <Textarea id="description" name="description" />
+                  <Label htmlFor="description">Descrizione della tua attività</Label>
+                  <Textarea id="description" name="description" placeholder="Racconta cosa offri alle famiglie..." />
                 </div>
                 <div>
                   <Label htmlFor="website">Sito Web</Label>
-                  <Input id="website" name="website" type="url" />
+                  <Input id="website" name="website" type="url" placeholder="https://tuosito.it" />
                 </div>
                 <div>
                   <Label htmlFor="address">Indirizzo</Label>
-                  <Input id="address" name="address" />
+                  <Input id="address" name="address" placeholder="Via Roma 123" />
                 </div>
                 <div>
-                  <Label htmlFor="city">Città</Label>
-                  <Input id="city" name="city" />
+                  <Label htmlFor="city">Città *</Label>
+                  <Input id="city" name="city" required placeholder="Milano" />
                 </div>
                 <div>
                   <Label htmlFor="phone">Telefono</Label>
-                  <Input id="phone" name="phone" />
+                  <Input id="phone" name="phone" placeholder="+39 02 1234567" />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" />
+                  <Label htmlFor="email">Email di contatto</Label>
+                  <Input id="email" name="email" type="email" placeholder="info@tuaattivita.it" />
                 </div>
                 <Button type="submit" className="w-full">
-                  Crea Provider
+                  Registra la mia Attività
                 </Button>
               </form>
             </CardContent>
@@ -194,8 +197,15 @@ const ProviderDashboard = () => {
         )}
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Dashboard Provider</h1>
-          <p className="text-gray-600">Benvenuto, {provider.business_name}</p>
+          <h1 className="text-3xl font-bold mb-2">Area Gestori</h1>
+          <p className="text-gray-600">Benvenuto/a, {provider.business_name}</p>
+          {!provider.verified && (
+            <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800 text-sm">
+                ⚠️ Il tuo profilo è in attesa di verifica. Una volta verificato, i tuoi contenuti saranno più visibili.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -210,7 +220,7 @@ const ProviderDashboard = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold">0</div>
-                <p className="text-gray-600">Prenotazioni</p>
+                <p className="text-gray-600">Prenotazioni Ricevute</p>
               </CardContent>
             </Card>
             <Card>
@@ -227,7 +237,7 @@ const ProviderDashboard = () => {
               <h2 className="text-xl font-semibold">I Tuoi Contenuti</h2>
               <Button onClick={() => setIsEditing(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Nuovo Contenuto
+                Aggiungi Contenuto
               </Button>
             </div>
 
@@ -272,7 +282,7 @@ const ProviderDashboard = () => {
             <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
-                  <CardTitle>Nuovo Contenuto</CardTitle>
+                  <CardTitle>Aggiungi Nuovo Contenuto</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={(e) => {
@@ -280,15 +290,15 @@ const ProviderDashboard = () => {
                     createContent(new FormData(e.currentTarget));
                   }} className="space-y-4">
                     <div>
-                      <Label htmlFor="title">Titolo</Label>
-                      <Input id="title" name="title" required />
+                      <Label htmlFor="title">Titolo *</Label>
+                      <Input id="title" name="title" required placeholder="Es. Corso di Musica per Bambini" />
                     </div>
                     <div>
                       <Label htmlFor="description">Descrizione</Label>
-                      <Textarea id="description" name="description" />
+                      <Textarea id="description" name="description" placeholder="Descrivi la tua attività..." />
                     </div>
                     <div>
-                      <Label htmlFor="categoryId">Categoria</Label>
+                      <Label htmlFor="categoryId">Categoria *</Label>
                       <Select name="categoryId" required>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleziona categoria" />
@@ -303,7 +313,7 @@ const ProviderDashboard = () => {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="contentType">Tipo</Label>
+                      <Label htmlFor="contentType">Tipo di Attività *</Label>
                       <Select name="contentType" required>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleziona tipo" />
@@ -318,7 +328,7 @@ const ProviderDashboard = () => {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="modality">Modalità</Label>
+                      <Label htmlFor="modality">Modalità *</Label>
                       <Select name="modality" required>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleziona modalità" />
@@ -332,21 +342,21 @@ const ProviderDashboard = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <Label htmlFor="priceFrom">Prezzo da</Label>
-                        <Input id="priceFrom" name="priceFrom" type="number" step="0.01" />
+                        <Label htmlFor="priceFrom">Prezzo da (€)</Label>
+                        <Input id="priceFrom" name="priceFrom" type="number" step="0.01" placeholder="10.00" />
                       </div>
                       <div>
-                        <Label htmlFor="priceTo">Prezzo a</Label>
-                        <Input id="priceTo" name="priceTo" type="number" step="0.01" />
+                        <Label htmlFor="priceTo">Prezzo a (€)</Label>
+                        <Input id="priceTo" name="priceTo" type="number" step="0.01" placeholder="25.00" />
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="city">Città</Label>
-                      <Input id="city" name="city" />
+                      <Label htmlFor="city">Città *</Label>
+                      <Input id="city" name="city" required placeholder="Milano" />
                     </div>
                     <div className="flex gap-2">
                       <Button type="submit" className="flex-1">
-                        Salva
+                        Pubblica Contenuto
                       </Button>
                       <Button 
                         type="button" 

@@ -1,6 +1,6 @@
 
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,79 +9,58 @@ import Navigation from "@/components/Navigation";
 import CategoryFilter from "@/components/CategoryFilter";
 import ContentCard from "@/components/ContentCard";
 import Hero from "@/components/Hero";
+import { useContents } from "@/hooks/useContents";
+import { Database } from "@/integrations/supabase/types";
+
+type Content = Database["public"]["Tables"]["contents"]["Row"] & {
+  providers: { business_name: string; verified: boolean };
+  categories: { name: string; slug: string };
+};
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const { contents, categories, loading, fetchContents } = useContents();
 
-  // Demo content data
-  const featuredContent = [
-    {
-      id: 1,
-      title: "Corso Preparto Completo",
-      description: "Un percorso di 8 incontri per prepararsi al meglio al parto e all'arrivo del bambino",
-      category: "corsi",
-      ageGroup: "0-12m",
-      price: 180,
-      location: "Milano Centro",
-      rating: 4.8,
-      reviews: 24,
-      image: "/placeholder.svg",
-      mode: "presenza",
-      provider: "Centro Nascita Serena"
-    },
-    {
-      id: 2,
-      title: "Spettacolo per Bambini - Il Piccolo Principe",
-      description: "Spettacolo teatrale interattivo per bambini dai 3 ai 8 anni",
-      category: "eventi",
-      ageGroup: "3-6a",
-      price: 15,
-      location: "Teatro San Marco, Roma",
-      rating: 4.9,
-      reviews: 156,
-      image: "/placeholder.svg",
-      mode: "presenza",
-      provider: "Teatro dell'Opera dei Burattini"
-    },
-    {
-      id: 3,
-      title: "Nido Bilingue Montessori",
-      description: "Nido d'infanzia con metodo Montessori e approccio bilingue italiano-inglese",
-      category: "servizi",
-      ageGroup: "1-3a",
-      price: 650,
-      location: "Torino",
-      rating: 4.7,
-      reviews: 43,
-      image: "/placeholder.svg",
-      mode: "presenza",
-      provider: "Nido Piccoli Esploratori"
-    },
-    {
-      id: 4,
-      title: "Campus Estivo Natura e Avventura",
-      description: "Centro estivo immerso nella natura con attività outdoor e laboratori creativi",
-      category: "centri-estivi",
-      ageGroup: "6-10a",
-      price: 280,
-      location: "Parco delle Madonie",
-      rating: 4.6,
-      reviews: 67,
-      image: "/placeholder.svg",
-      mode: "presenza",
-      provider: "Avventura Verde"
-    }
+  useEffect(() => {
+    fetchContents({ 
+      category: selectedCategory === "all" ? undefined : selectedCategory,
+      search: searchQuery || undefined 
+    });
+  }, [selectedCategory, searchQuery]);
+
+  // Transform categories for CategoryFilter component
+  const categoryOptions = [
+    { id: "all", name: "Tutti", count: contents.length },
+    ...categories.map(cat => ({
+      id: cat.slug,
+      name: cat.name,
+      count: contents.filter(c => (c as any).categories?.slug === cat.slug).length
+    }))
   ];
 
-  const categories = [
-    { id: "all", name: "Tutti", count: 1247 },
-    { id: "corsi", name: "Corsi", count: 340 },
-    { id: "servizi", name: "Servizi Educativi", count: 189 },
-    { id: "eventi", name: "Eventi", count: 523 },
-    { id: "centri", name: "Centri & Associazioni", count: 95 },
-    { id: "centri-estivi", name: "Centri Estivi", count: 100 }
-  ];
+  // Transform contents for ContentCard component
+  const transformedContents = contents.map((content: Content) => ({
+    id: content.id,
+    title: content.title || "",
+    description: content.description || "",
+    category: (content as any).categories?.slug || "",
+    ageGroup: content.age_groups?.[0] || "1-3a",
+    price: content.price_from || 0,
+    location: content.city || "",
+    rating: 4.8, // Mock data for now
+    reviews: 24, // Mock data for now
+    image: "/placeholder.svg",
+    mode: content.modality === "presenza" ? "presenza" : "online",
+    provider: (content as any).providers?.business_name || "Provider"
+  }));
+
+  const handleSearch = () => {
+    fetchContents({ 
+      category: selectedCategory === "all" ? undefined : selectedCategory,
+      search: searchQuery || undefined 
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50">
@@ -100,6 +79,7 @@ const Index = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-12 text-lg"
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
             <div className="flex gap-2">
@@ -111,7 +91,11 @@ const Index = () => {
                 <Filter className="h-4 w-4" />
                 Filtri
               </Button>
-              <Button size="lg" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                onClick={handleSearch}
+              >
                 Cerca
               </Button>
             </div>
@@ -122,7 +106,7 @@ const Index = () => {
       {/* Categories */}
       <section className="py-8 px-4 max-w-6xl mx-auto">
         <CategoryFilter 
-          categories={categories}
+          categories={categoryOptions}
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
         />
@@ -131,15 +115,36 @@ const Index = () => {
       {/* Featured Content */}
       <section className="py-12 px-4 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">In Evidenza</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Contenuti Disponibili</h2>
           <Button variant="outline">Vedi Tutti</Button>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {featuredContent.map((content) => (
-            <ContentCard key={content.id} content={content} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <div className="h-48 bg-gray-300 rounded-t-lg"></div>
+                <CardContent className="p-4">
+                  <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-300 rounded mb-4"></div>
+                  <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {transformedContents.map((content) => (
+              <ContentCard key={content.id} content={content} />
+            ))}
+          </div>
+        )}
+
+        {!loading && transformedContents.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">Nessun contenuto trovato per la ricerca corrente.</p>
+          </div>
+        )}
       </section>
 
       {/* Stats Section */}
@@ -147,7 +152,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">1,247</div>
+              <div className="text-3xl font-bold text-orange-600 mb-2">{contents.length}</div>
               <div className="text-gray-600">Contenuti Disponibili</div>
             </div>
             <div>
@@ -177,10 +182,9 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Categorie</h4>
               <ul className="space-y-2 text-gray-300">
-                <li>Corsi</li>
-                <li>Servizi Educativi</li>
-                <li>Eventi</li>
-                <li>Centri Estivi</li>
+                {categories.slice(0, 4).map(cat => (
+                  <li key={cat.id}>{cat.name}</li>
+                ))}
               </ul>
             </div>
             <div>

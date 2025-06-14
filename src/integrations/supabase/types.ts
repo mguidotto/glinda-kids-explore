@@ -9,7 +9,359 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_date: string | null
+          content_id: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          participants: number | null
+          status: string | null
+          total_price: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          booking_date?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          participants?: number | null
+          status?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          booking_date?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          participants?: number | null
+          status?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      contents: {
+        Row: {
+          address: string | null
+          age_groups: Database["public"]["Enums"]["age_group"][]
+          available_dates: Json | null
+          category_id: string | null
+          city: string | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          email: string | null
+          featured: boolean | null
+          id: string
+          images: string[] | null
+          latitude: number | null
+          longitude: number | null
+          max_participants: number | null
+          modality: Database["public"]["Enums"]["modality"]
+          phone: string | null
+          price_from: number | null
+          price_to: number | null
+          provider_id: string | null
+          published: boolean | null
+          title: string
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          age_groups?: Database["public"]["Enums"]["age_group"][]
+          available_dates?: Json | null
+          category_id?: string | null
+          city?: string | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          email?: string | null
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          max_participants?: number | null
+          modality?: Database["public"]["Enums"]["modality"]
+          phone?: string | null
+          price_from?: number | null
+          price_to?: number | null
+          provider_id?: string | null
+          published?: boolean | null
+          title: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          age_groups?: Database["public"]["Enums"]["age_group"][]
+          available_dates?: Json | null
+          category_id?: string | null
+          city?: string | null
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          email?: string | null
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          max_participants?: number | null
+          modality?: Database["public"]["Enums"]["modality"]
+          phone?: string | null
+          price_from?: number | null
+          price_to?: number | null
+          provider_id?: string | null
+          published?: boolean | null
+          title?: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contents_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorites: {
+        Row: {
+          content_id: string | null
+          created_at: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      providers: {
+        Row: {
+          address: string | null
+          business_name: string
+          city: string | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+          user_id: string | null
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_name: string
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_name?: string
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "providers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          content_id: string | null
+          created_at: string | null
+          id: string
+          rating: number | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +370,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      age_group: "0-12m" | "1-3a" | "3-6a" | "6-10a"
+      content_type: "corso" | "servizio" | "evento" | "centro" | "campo_estivo"
+      modality: "online" | "presenza" | "ibrido"
+      user_role: "genitore" | "provider" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +488,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      age_group: ["0-12m", "1-3a", "3-6a", "6-10a"],
+      content_type: ["corso", "servizio", "evento", "centro", "campo_estivo"],
+      modality: ["online", "presenza", "ibrido"],
+      user_role: ["genitore", "provider", "admin"],
+    },
   },
 } as const

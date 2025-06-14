@@ -1,11 +1,10 @@
-
 import { Heart, MapPin, Star, Users, Calendar, Euro } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface Content {
-  id: number;
+  id: string; // Changed from number to string to match UUID
   title: string;
   description: string;
   category: string;

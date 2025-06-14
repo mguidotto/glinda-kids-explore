@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Info } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import Navigation from "@/components/Navigation";
+import { useNavigate } from "react-router-dom";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type Content = Database["public"]["Tables"]["contents"]["Row"];
@@ -19,24 +20,35 @@ type Category = Database["public"]["Tables"]["categories"]["Row"];
 
 const ProviderDashboard = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [provider, setProvider] = useState<Provider | null>(null);
   const [contents, setContents] = useState<Content[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchProvider();
-      fetchContents();
-      fetchCategories();
+    if (!user) {
+      navigate("/auth");
+      return;
     }
-  }, [user]);
+    
+    fetchProvider();
+    fetchCategories();
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (provider) {
+      fetchContents();
+    }
+  }, [provider]);
 
   const fetchProvider = async () => {
     if (!user) return;
     
+    setLoading(true);
     const { data } = await supabase
       .from("providers")
       .select("*")
@@ -44,15 +56,16 @@ const ProviderDashboard = () => {
       .single();
     
     setProvider(data);
+    setLoading(false);
   };
 
   const fetchContents = async () => {
-    if (!user) return;
+    if (!provider) return;
     
     const { data } = await supabase
       .from("contents")
       .select("*")
-      .eq("provider_id", provider?.id || "");
+      .eq("provider_id", provider.id);
     
     setContents(data || []);
   };
@@ -60,7 +73,8 @@ const ProviderDashboard = () => {
   const fetchCategories = async () => {
     const { data } = await supabase
       .from("categories")
-      .select("*");
+      .select("*")
+      .eq("active", true);
     
     setCategories(data || []);
   };
@@ -90,8 +104,16 @@ const ProviderDashboard = () => {
       });
 
     if (!error) {
-      setMessage("Profilo gestore creato con successo!");
+      setMessage("Profilo gestore creato con successo! Ora puoi iniziare a pubblicare i tuoi contenuti.");
       fetchProvider();
+      
+      // Update user role to provider
+      await supabase
+        .from("profiles")
+        .update({ role: "provider" })
+        .eq("id", user.id);
+    } else {
+      setMessage("Errore durante la creazione del profilo: " + error.message);
     }
   };
 
@@ -106,6 +128,10 @@ const ProviderDashboard = () => {
     const priceTo = parseFloat(formData.get("priceTo") as string);
     const city = formData.get("city") as string;
     const categoryId = formData.get("categoryId") as string;
+    const address = formData.get("address") as string;
+    const phone = formData.get("phone") as string;
+    const email = formData.get("email") as string;
+    const website = formData.get("website") as string;
 
     const { error } = await supabase
       .from("contents")
@@ -116,9 +142,13 @@ const ProviderDashboard = () => {
         description,
         content_type: contentType as any,
         modality: modality as any,
-        price_from: priceFrom,
-        price_to: priceTo,
+        price_from: priceFrom || null,
+        price_to: priceTo || null,
         city,
+        address,
+        phone,
+        email,
+        website,
         published: true,
       });
 
@@ -126,8 +156,21 @@ const ProviderDashboard = () => {
       setMessage("Contenuto creato con successo!");
       setIsEditing(false);
       fetchContents();
+    } else {
+      setMessage("Errore durante la creazione del contenuto: " + error.message);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-2xl mx-auto pt-8 px-4 text-center">
+          <p>Caricamento...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!provider) {
     return (
@@ -136,47 +179,72 @@ const ProviderDashboard = () => {
         <div className="max-w-2xl mx-auto pt-8 px-4">
           <Card>
             <CardHeader>
-              <CardTitle>Crea il tuo Profilo Gestore</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-6 w-6 text-blue-600" />
+                Diventa un Provider - Registra la tua Attività
+              </CardTitle>
               <p className="text-gray-600">
-                Registra la tua attività per bambini e famiglie sulla nostra piattaforma. 
-                Potrai gestire corsi, eventi, servizi educativi e molto altro.
+                Benvenuto! Per iniziare a pubblicare corsi, eventi e servizi per bambini e famiglie, 
+                compila i dati della tua attività. Dopo la registrazione potrai gestire tutti i tuoi contenuti 
+                e ricevere prenotazioni direttamente dalla piattaforma.
               </p>
             </CardHeader>
             <CardContent>
+              {message && (
+                <Alert className="mb-4">
+                  <AlertDescription>{message}</AlertDescription>
+                </Alert>
+              )}
+              
               <form onSubmit={(e) => {
                 e.preventDefault();
                 createProvider(new FormData(e.currentTarget));
               }} className="space-y-4">
                 <div>
                   <Label htmlFor="businessName">Nome dell'Attività *</Label>
-                  <Input id="businessName" name="businessName" required placeholder="Es. Asilo Nido Arcobaleno" />
+                  <Input 
+                    id="businessName" 
+                    name="businessName" 
+                    required 
+                    placeholder="Es. Asilo Nido Arcobaleno, Centro Sportivo Kids, Studio Danza..." 
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="description">Descrizione della tua attività</Label>
-                  <Textarea id="description" name="description" placeholder="Racconta cosa offri alle famiglie..." />
+                  <Label htmlFor="description">Descrizione della tua attività *</Label>
+                  <Textarea 
+                    id="description" 
+                    name="description" 
+                    required
+                    placeholder="Descrivi cosa offri alle famiglie: tipologia di servizi, età dei bambini, metodologie utilizzate..." 
+                    rows={4}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="city">Città *</Label>
+                    <Input id="city" name="city" required placeholder="Milano" />
+                  </div>
+                  <div>
+                    <Label htmlFor="address">Indirizzo</Label>
+                    <Input id="address" name="address" placeholder="Via Roma 123" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="phone">Telefono *</Label>
+                    <Input id="phone" name="phone" required placeholder="+39 02 1234567" />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email di contatto *</Label>
+                    <Input id="email" name="email" type="email" required placeholder="info@tuaattivita.it" />
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="website">Sito Web</Label>
                   <Input id="website" name="website" type="url" placeholder="https://tuosito.it" />
                 </div>
-                <div>
-                  <Label htmlFor="address">Indirizzo</Label>
-                  <Input id="address" name="address" placeholder="Via Roma 123" />
-                </div>
-                <div>
-                  <Label htmlFor="city">Città *</Label>
-                  <Input id="city" name="city" required placeholder="Milano" />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Telefono</Label>
-                  <Input id="phone" name="phone" placeholder="+39 02 1234567" />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email di contatto</Label>
-                  <Input id="email" name="email" type="email" placeholder="info@tuaattivita.it" />
-                </div>
                 <Button type="submit" className="w-full">
-                  Registra la mia Attività
+                  Registra la mia Attività e Inizia
                 </Button>
               </form>
             </CardContent>
@@ -242,38 +310,52 @@ const ProviderDashboard = () => {
             </div>
 
             <div className="space-y-4">
-              {contents.map((content) => (
-                <Card key={content.id}>
-                  <CardContent className="pt-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold">{content.title}</h3>
-                        <p className="text-gray-600 text-sm">{content.description}</p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                          <span>{content.city}</span>
-                          <span>€{content.price_from} - €{content.price_to}</span>
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            content.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {content.published ? 'Pubblicato' : 'Bozza'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+              {contents.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <p className="text-gray-500 mb-4">Non hai ancora pubblicato nessun contenuto.</p>
+                    <Button onClick={() => setIsEditing(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Pubblica il tuo primo contenuto
+                    </Button>
                   </CardContent>
                 </Card>
-              ))}
+              ) : (
+                contents.map((content) => (
+                  <Card key={content.id}>
+                    <CardContent className="pt-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">{content.title}</h3>
+                          <p className="text-gray-600 text-sm">{content.description}</p>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                            <span>{content.city}</span>
+                            {content.price_from && content.price_to && (
+                              <span>€{content.price_from} - €{content.price_to}</span>
+                            )}
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              content.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {content.published ? 'Pubblicato' : 'Bozza'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
 
@@ -294,8 +376,8 @@ const ProviderDashboard = () => {
                       <Input id="title" name="title" required placeholder="Es. Corso di Musica per Bambini" />
                     </div>
                     <div>
-                      <Label htmlFor="description">Descrizione</Label>
-                      <Textarea id="description" name="description" placeholder="Descrivi la tua attività..." />
+                      <Label htmlFor="description">Descrizione *</Label>
+                      <Textarea id="description" name="description" required placeholder="Descrivi la tua attività..." />
                     </div>
                     <div>
                       <Label htmlFor="categoryId">Categoria *</Label>
@@ -353,6 +435,22 @@ const ProviderDashboard = () => {
                     <div>
                       <Label htmlFor="city">Città *</Label>
                       <Input id="city" name="city" required placeholder="Milano" />
+                    </div>
+                    <div>
+                      <Label htmlFor="address">Indirizzo</Label>
+                      <Input id="address" name="address" placeholder="Via Roma 123" />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Telefono</Label>
+                      <Input id="phone" name="phone" placeholder="+39 02 1234567" />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" name="email" type="email" placeholder="info@tuaattivita.it" />
+                    </div>
+                    <div>
+                      <Label htmlFor="website">Sito Web</Label>
+                      <Input id="website" name="website" type="url" placeholder="https://tuosito.it" />
                     </div>
                     <div className="flex gap-2">
                       <Button type="submit" className="flex-1">

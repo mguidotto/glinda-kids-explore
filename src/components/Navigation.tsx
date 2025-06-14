@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePWA } from "@/hooks/usePWA";
 import { useAppTexts } from "@/hooks/useAppTexts";
 import { useBranding } from "@/hooks/useBranding";
-import { Menu, X, Download } from "lucide-react";
+import { Menu, X, Download, Store } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -34,6 +34,15 @@ const Navigation = () => {
       navigate("/provider-dashboard");
     } else {
       navigate("/dashboard");
+    }
+    setIsOpen(false);
+  };
+
+  const handleBecomeProviderClick = () => {
+    if (user) {
+      navigate("/provider-dashboard");
+    } else {
+      navigate("/auth");
     }
     setIsOpen(false);
   };
@@ -68,6 +77,17 @@ const Navigation = () => {
             <Link to="/" className="text-gray-700 hover:text-blue-600">
               {getText('nav.home', 'Home')}
             </Link>
+            
+            {/* Diventa Provider Link */}
+            <Button
+              variant="outline"
+              onClick={handleBecomeProviderClick}
+              className="flex items-center gap-2"
+            >
+              <Store className="h-4 w-4" />
+              Diventa Provider
+            </Button>
+
             {showInstallButton && (
               <Button
                 variant="outline"
@@ -122,6 +142,17 @@ const Navigation = () => {
                   >
                     {getText('nav.home', 'Home')}
                   </Link>
+                  
+                  {/* Diventa Provider Link Mobile */}
+                  <Button
+                    variant="outline"
+                    onClick={handleBecomeProviderClick}
+                    className="flex items-center gap-2 justify-start"
+                  >
+                    <Store className="h-4 w-4" />
+                    Diventa Provider
+                  </Button>
+
                   {user ? (
                     <>
                       <Button variant="outline" onClick={handleDashboardClick}>

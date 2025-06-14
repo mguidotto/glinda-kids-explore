@@ -9,25 +9,36 @@ import Navigation from "@/components/Navigation";
 import CategoryFilter from "@/components/CategoryFilter";
 import ContentCard from "@/components/ContentCard";
 import Hero from "@/components/Hero";
+import LocationSearch from "@/components/LocationSearch";
 import { useContents } from "@/hooks/useContents";
 import { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers: { business_name: string; verified: boolean };
   categories: { name: string; slug: string };
+  distance_km?: number;
 };
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showLocationSearch, setShowLocationSearch] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    address?: string;
+  } | null>(null);
   const { contents, categories, loading, fetchContents } = useContents();
 
   useEffect(() => {
     fetchContents({ 
       category: selectedCategory === "all" ? undefined : selectedCategory,
-      search: searchQuery || undefined 
+      search: searchQuery || undefined,
+      latitude: currentLocation?.latitude,
+      longitude: currentLocation?.longitude,
+      radius: 50
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, currentLocation]);
 
   // Transform categories for CategoryFilter component
   const categoryOptions = [
@@ -52,14 +63,27 @@ const Index = () => {
     reviews: 24, // Mock data for now
     image: "/placeholder.svg",
     mode: content.modality === "presenza" ? "presenza" : "online",
-    provider: (content as any).providers?.business_name || "Provider"
+    provider: (content as any).providers?.business_name || "Provider",
+    distance: content.distance_km
   }));
 
   const handleSearch = () => {
     fetchContents({ 
       category: selectedCategory === "all" ? undefined : selectedCategory,
-      search: searchQuery || undefined 
+      search: searchQuery || undefined,
+      latitude: currentLocation?.latitude,
+      longitude: currentLocation?.longitude,
+      radius: 50
     });
+  };
+
+  const handleLocationSelect = (latitude: number, longitude: number, address?: string) => {
+    setCurrentLocation({ latitude, longitude, address });
+    setShowLocationSearch(false);
+  };
+
+  const clearLocation = () => {
+    setCurrentLocation(null);
   };
 
   return (
@@ -71,34 +95,69 @@ const Index = () => {
       {/* Search Section */}
       <section className="py-12 px-4 max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg p-8 -mt-8 relative z-10">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <Input
-                placeholder="Cerca corsi, eventi, servizi..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 text-lg"
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Input
+                  placeholder="Cerca corsi, eventi, servizi..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-12 text-lg"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant={currentLocation ? "default" : "outline"} 
+                  size="lg" 
+                  className="flex items-center gap-2"
+                  onClick={() => setShowLocationSearch(!showLocationSearch)}
+                >
+                  <MapPin className="h-4 w-4" />
+                  {currentLocation ? "Vicino a te" : "Località"}
+                </Button>
+                <Button variant="outline" size="lg" className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  Filtri
+                </Button>
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                  onClick={handleSearch}
+                >
+                  Cerca
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="lg" className="flex items-center gap-2">
+
+            {/* Location Search */}
+            {showLocationSearch && (
+              <div className="border-t pt-4">
+                <LocationSearch 
+                  onLocationSelect={handleLocationSelect}
+                  className="max-w-md mx-auto"
+                />
+              </div>
+            )}
+
+            {/* Current Location Display */}
+            {currentLocation && (
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
                 <MapPin className="h-4 w-4" />
-                Località
-              </Button>
-              <Button variant="outline" size="lg" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Filtri
-              </Button>
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                onClick={handleSearch}
-              >
-                Cerca
-              </Button>
-            </div>
+                <span>
+                  Risultati vicino a: {currentLocation.address || "Posizione attuale"}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearLocation}
+                  className="text-xs"
+                >
+                  Rimuovi
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -115,7 +174,9 @@ const Index = () => {
       {/* Featured Content */}
       <section className="py-12 px-4 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Contenuti Disponibili</h2>
+          <h2 className="text-3xl font-bold text-gray-900">
+            {currentLocation ? "Contenuti Vicino a Te" : "Contenuti Disponibili"}
+          </h2>
           <Button variant="outline">Vedi Tutti</Button>
         </div>
         

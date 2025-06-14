@@ -367,7 +367,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_distance: {
+        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Returns: number
+      }
+      get_contents_within_radius: {
+        Args: { center_lat: number; center_lon: number; radius_km?: number }
+        Returns: {
+          id: string
+          title: string
+          description: string
+          city: string
+          latitude: number
+          longitude: number
+          distance_km: number
+        }[]
+      }
     }
     Enums: {
       age_group: "0-12m" | "1-3a" | "3-6a" | "6-10a"

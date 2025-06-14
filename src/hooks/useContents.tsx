@@ -15,34 +15,92 @@ export const useContents = () => {
     category?: string;
     search?: string;
     city?: string;
+    latitude?: number;
+    longitude?: number;
+    radius?: number;
   }) => {
     setLoading(true);
     
-    let query = supabase
-      .from("contents")
-      .select(`
-        *,
-        providers!inner(business_name, verified),
-        categories(name, slug)
-      `)
-      .eq("published", true);
+    try {
+      // If geolocation is provided, use the spatial search function
+      if (filters?.latitude && filters?.longitude) {
+        const { data, error } = await supabase.rpc('get_contents_within_radius', {
+          center_lat: filters.latitude,
+          center_lon: filters.longitude,
+          radius_km: filters.radius || 50
+        });
 
-    if (filters?.category && filters.category !== "all") {
-      query = query.eq("categories.slug", filters.category);
-    }
+        if (!error && data) {
+          // Get full content details for the nearby contents
+          const contentIds = data.map(item => item.id);
+          
+          let query = supabase
+            .from("contents")
+            .select(`
+              *,
+              providers!inner(business_name, verified),
+              categories(name, slug)
+            `)
+            .in('id', contentIds)
+            .eq("published", true);
 
-    if (filters?.search) {
-      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
-    }
+          if (filters?.category && filters.category !== "all") {
+            query = query.eq("categories.slug", filters.category);
+          }
 
-    if (filters?.city) {
-      query = query.ilike("city", `%${filters.city}%`);
-    }
+          if (filters?.search) {
+            query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+          }
 
-    const { data, error } = await query;
-    
-    if (!error && data) {
-      setContents(data as any);
+          const { data: contentsData } = await query;
+          
+          if (contentsData) {
+            // Add distance information to contents
+            const contentsWithDistance = contentsData.map(content => {
+              const distanceInfo = data.find(d => d.id === content.id);
+              return {
+                ...content,
+                distance_km: distanceInfo?.distance_km || null
+              };
+            });
+            
+            // Sort by distance
+            contentsWithDistance.sort((a, b) => (a.distance_km || 999) - (b.distance_km || 999));
+            
+            setContents(contentsWithDistance as any);
+          }
+        }
+      } else {
+        // Standard search without geolocation
+        let query = supabase
+          .from("contents")
+          .select(`
+            *,
+            providers!inner(business_name, verified),
+            categories(name, slug)
+          `)
+          .eq("published", true);
+
+        if (filters?.category && filters.category !== "all") {
+          query = query.eq("categories.slug", filters.category);
+        }
+
+        if (filters?.search) {
+          query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+        }
+
+        if (filters?.city) {
+          query = query.ilike("city", `%${filters.city}%`);
+        }
+
+        const { data, error } = await query;
+        
+        if (!error && data) {
+          setContents(data as any);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching contents:", error);
     }
     
     setLoading(false);

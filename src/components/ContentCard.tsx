@@ -1,10 +1,11 @@
+
 import { Heart, MapPin, Star, Users, Calendar, Euro } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface Content {
-  id: string; // Changed from number to string to match UUID
+  id: string;
   title: string;
   description: string;
   category: string;
@@ -16,6 +17,7 @@ interface Content {
   image: string;
   mode: string;
   provider: string;
+  distance?: number;
 }
 
 interface ContentCardProps {
@@ -56,6 +58,11 @@ const ContentCard = ({ content }: ContentCardProps) => {
           {content.category === 'centri-estivi' && 'Centro Estivo'}
           {content.category === 'centri' && 'Centro'}
         </Badge>
+        {content.distance && (
+          <Badge className="absolute bottom-2 right-2 bg-green-500 text-white">
+            {content.distance.toFixed(1)} km
+          </Badge>
+        )}
       </div>
       
       <CardContent className="p-4">
@@ -81,6 +88,11 @@ const ContentCard = ({ content }: ContentCardProps) => {
           <div className="flex items-center gap-1 text-sm text-gray-600">
             <MapPin className="h-3 w-3" />
             <span className="truncate">{content.location}</span>
+            {content.distance && (
+              <span className="text-green-600 font-medium ml-auto">
+                {content.distance.toFixed(1)} km
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-1 text-sm text-gray-600">

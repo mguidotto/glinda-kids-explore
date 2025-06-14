@@ -1,18 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Plus, Edit, Trash2, Eye, Users, FileText, Building } from "lucide-react";
+import { Users, FileText, Building, Type } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import Navigation from "@/components/Navigation";
 import { Navigate } from "react-router-dom";
+import TextsManagement from "@/components/admin/TextsManagement";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type Content = Database["public"]["Tables"]["contents"]["Row"];
@@ -148,6 +144,13 @@ const AdminDashboard = () => {
           >
             <Users className="h-4 w-4 mr-2" />
             Utenti
+          </Button>
+          <Button 
+            variant={activeTab === "texts" ? "default" : "outline"}
+            onClick={() => setActiveTab("texts")}
+          >
+            <Type className="h-4 w-4 mr-2" />
+            Testi
           </Button>
         </div>
 
@@ -287,6 +290,9 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Texts Management Tab */}
+        {activeTab === "texts" && <TextsManagement />}
       </div>
     </div>
   );

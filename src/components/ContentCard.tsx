@@ -3,6 +3,7 @@ import { Heart, MapPin, Star, Users, Calendar, Euro } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import PurchaseButton from "./PurchaseButton";
 
 interface Content {
   id: string;
@@ -18,6 +19,14 @@ interface Content {
   mode: string;
   provider: string;
   distance?: number;
+  // New payment fields
+  purchasable?: boolean;
+  payment_type?: string;
+  price_from?: number;
+  price_to?: number;
+  booking_required?: boolean;
+  stripe_price_id?: string;
+  providers?: { business_name: string; verified: boolean };
 }
 
 interface ContentCardProps {
@@ -109,17 +118,22 @@ const ContentCard = ({ content }: ContentCardProps) => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <Euro className="h-4 w-4 text-green-600" />
-            <span className="font-bold text-lg text-green-600">
-              {content.price}€
-            </span>
+        {/* Show purchase button if content is purchasable */}
+        {content.purchasable ? (
+          <PurchaseButton content={content as any} />
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <Euro className="h-4 w-4 text-green-600" />
+              <span className="font-bold text-lg text-green-600">
+                {content.price}€
+              </span>
+            </div>
+            <Button size="sm" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
+              Dettagli
+            </Button>
           </div>
-          <Button size="sm" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
-            Dettagli
-          </Button>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

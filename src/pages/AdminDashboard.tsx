@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, FileText, Building, Type } from "lucide-react";
+import { Users, FileText, Building, Type, Grid3X3 } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import Navigation from "@/components/Navigation";
 import { Navigate } from "react-router-dom";
 import TextsManagement from "@/components/admin/TextsManagement";
+import CategoriesManagement from "@/components/admin/CategoriesManagement";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type Content = Database["public"]["Tables"]["contents"]["Row"];
@@ -144,6 +145,13 @@ const AdminDashboard = () => {
           >
             <Users className="h-4 w-4 mr-2" />
             Utenti
+          </Button>
+          <Button 
+            variant={activeTab === "categories" ? "default" : "outline"}
+            onClick={() => setActiveTab("categories")}
+          >
+            <Grid3X3 className="h-4 w-4 mr-2" />
+            Categorie
           </Button>
           <Button 
             variant={activeTab === "texts" ? "default" : "outline"}
@@ -290,6 +298,9 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Categories Management Tab */}
+        {activeTab === "categories" && <CategoriesManagement />}
 
         {/* Texts Management Tab */}
         {activeTab === "texts" && <TextsManagement />}

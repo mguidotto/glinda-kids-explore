@@ -95,27 +95,36 @@ export type Database = {
       }
       categories: {
         Row: {
+          active: boolean | null
           color: string | null
           created_at: string | null
           description: string | null
+          display_order: number | null
+          editable: boolean | null
           icon: string | null
           id: string
           name: string
           slug: string
         }
         Insert: {
+          active?: boolean | null
           color?: string | null
           created_at?: string | null
           description?: string | null
+          display_order?: number | null
+          editable?: boolean | null
           icon?: string | null
           id?: string
           name: string
           slug: string
         }
         Update: {
+          active?: boolean | null
           color?: string | null
           created_at?: string | null
           description?: string | null
+          display_order?: number | null
+          editable?: boolean | null
           icon?: string | null
           id?: string
           name?: string
@@ -128,6 +137,7 @@ export type Database = {
           address: string | null
           age_groups: Database["public"]["Enums"]["age_group"][]
           available_dates: Json | null
+          booking_required: boolean | null
           category_id: string | null
           city: string | null
           content_type: Database["public"]["Enums"]["content_type"]
@@ -142,11 +152,14 @@ export type Database = {
           longitude: number | null
           max_participants: number | null
           modality: Database["public"]["Enums"]["modality"]
+          payment_type: string | null
           phone: string | null
           price_from: number | null
           price_to: number | null
           provider_id: string | null
           published: boolean | null
+          purchasable: boolean | null
+          stripe_price_id: string | null
           title: string
           updated_at: string | null
           website: string | null
@@ -155,6 +168,7 @@ export type Database = {
           address?: string | null
           age_groups?: Database["public"]["Enums"]["age_group"][]
           available_dates?: Json | null
+          booking_required?: boolean | null
           category_id?: string | null
           city?: string | null
           content_type: Database["public"]["Enums"]["content_type"]
@@ -169,11 +183,14 @@ export type Database = {
           longitude?: number | null
           max_participants?: number | null
           modality?: Database["public"]["Enums"]["modality"]
+          payment_type?: string | null
           phone?: string | null
           price_from?: number | null
           price_to?: number | null
           provider_id?: string | null
           published?: boolean | null
+          purchasable?: boolean | null
+          stripe_price_id?: string | null
           title: string
           updated_at?: string | null
           website?: string | null
@@ -182,6 +199,7 @@ export type Database = {
           address?: string | null
           age_groups?: Database["public"]["Enums"]["age_group"][]
           available_dates?: Json | null
+          booking_required?: boolean | null
           category_id?: string | null
           city?: string | null
           content_type?: Database["public"]["Enums"]["content_type"]
@@ -196,11 +214,14 @@ export type Database = {
           longitude?: number | null
           max_participants?: number | null
           modality?: Database["public"]["Enums"]["modality"]
+          payment_type?: string | null
           phone?: string | null
           price_from?: number | null
           price_to?: number | null
           provider_id?: string | null
           published?: boolean | null
+          purchasable?: boolean | null
+          stripe_price_id?: string | null
           title?: string
           updated_at?: string | null
           website?: string | null
@@ -251,6 +272,72 @@ export type Database = {
           },
           {
             foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          amount: number
+          booking_date: string | null
+          content_id: string | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          notes: string | null
+          participants: number | null
+          payment_method: string | null
+          status: string | null
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_date?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          participants?: number | null
+          payment_method?: string | null
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_date?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          participants?: number | null
+          payment_method?: string | null
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -401,6 +488,16 @@ export type Database = {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
       }
+      create_category: {
+        Args: {
+          category_name: string
+          category_slug: string
+          category_description?: string
+          category_icon?: string
+          category_color?: string
+        }
+        Returns: string
+      }
       get_contents_within_radius: {
         Args: { center_lat: number; center_lon: number; radius_km?: number }
         Returns: {
@@ -415,6 +512,18 @@ export type Database = {
       }
       update_app_text: {
         Args: { text_key: string; new_value: string }
+        Returns: undefined
+      }
+      update_category: {
+        Args: {
+          category_id: string
+          category_name: string
+          category_slug: string
+          category_description?: string
+          category_icon?: string
+          category_color?: string
+          category_active?: boolean
+        }
         Returns: undefined
       }
     }

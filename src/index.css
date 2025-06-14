@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -37,20 +38,22 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom branding variables */
+    --primary-color: #3b82f6;
+    --secondary-color: #64748b;
+    --accent-color: #06b6d4;
+    --background-color: #ffffff;
+    --text-color: #1f2937;
+    --font-primary: Inter, system-ui, sans-serif;
+    --font-heading: Inter, system-ui, sans-serif;
   }
 
   .dark {
@@ -99,5 +102,37 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-primary);
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  /* Custom utility classes for branding */
+  .text-brand-primary {
+    color: var(--primary-color);
+  }
+
+  .bg-brand-primary {
+    background-color: var(--primary-color);
+  }
+
+  .text-brand-secondary {
+    color: var(--secondary-color);
+  }
+
+  .bg-brand-secondary {
+    background-color: var(--secondary-color);
+  }
+
+  .text-brand-accent {
+    color: var(--accent-color);
+  }
+
+  .bg-brand-accent {
+    background-color: var(--accent-color);
   }
 }

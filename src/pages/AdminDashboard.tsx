@@ -1,15 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, FileText, Building, Type, Grid3X3 } from "lucide-react";
+import { Users, FileText, Building, Type, Grid3X3, Palette } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import Navigation from "@/components/Navigation";
 import { Navigate } from "react-router-dom";
 import TextsManagement from "@/components/admin/TextsManagement";
 import CategoriesManagement from "@/components/admin/CategoriesManagement";
+import BrandingManagement from "@/components/admin/BrandingManagement";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type Content = Database["public"]["Tables"]["contents"]["Row"];
@@ -117,7 +119,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 mb-6 flex-wrap">
           <Button 
             variant={activeTab === "overview" ? "default" : "outline"}
             onClick={() => setActiveTab("overview")}
@@ -159,6 +161,13 @@ const AdminDashboard = () => {
           >
             <Type className="h-4 w-4 mr-2" />
             Testi
+          </Button>
+          <Button 
+            variant={activeTab === "branding" ? "default" : "outline"}
+            onClick={() => setActiveTab("branding")}
+          >
+            <Palette className="h-4 w-4 mr-2" />
+            Branding
           </Button>
         </div>
 
@@ -304,6 +313,9 @@ const AdminDashboard = () => {
 
         {/* Texts Management Tab */}
         {activeTab === "texts" && <TextsManagement />}
+
+        {/* Branding Management Tab */}
+        {activeTab === "branding" && <BrandingManagement />}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { usePWA } from "@/hooks/usePWA";
 import { useAppTexts } from "@/hooks/useAppTexts";
+import { useBranding } from "@/hooks/useBranding";
 import { Menu, X, Download } from "lucide-react";
 import {
   Sheet,
@@ -16,6 +17,7 @@ const Navigation = () => {
   const { user, profile, signOut } = useAuth();
   const { showInstallButton, installApp } = usePWA();
   const { getText } = useAppTexts();
+  const { getSetting } = useBranding();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -36,13 +38,28 @@ const Navigation = () => {
     setIsOpen(false);
   };
 
+  const logoUrl = getSetting('logo_url');
+  const siteTitle = getText('site.title', 'Glinda');
+
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-blue-600">
-              {getText('site.title', 'Glinda')}
+            <Link to="/" className="flex items-center gap-2">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt={siteTitle}
+                  className="h-8 w-auto object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : null}
+              <span className="text-xl font-bold text-blue-600">
+                {siteTitle}
+              </span>
             </Link>
           </div>
 

@@ -46,10 +46,10 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Custom branding variables */
-    --primary-color: #3b82f6;
-    --secondary-color: #64748b;
-    --accent-color: #06b6d4;
+    /* Custom branding variables with new logo colors */
+    --primary-color: #8B5A6B;
+    --secondary-color: #7BBCC7;
+    --accent-color: #F4C842;
     --background-color: #ffffff;
     --text-color: #1f2937;
     --font-primary: Inter, system-ui, sans-serif;

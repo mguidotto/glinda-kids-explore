@@ -128,7 +128,7 @@ const Index = () => {
                 </Button>
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                  className="bg-gradient-to-r from-[#8B5A6B] to-[#7BBCC7] hover:from-[#7A4958] hover:to-[#6AA3AE]"
                   onClick={handleSearch}
                 >
                   Cerca
@@ -235,19 +235,19 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">{contents.length}</div>
+              <div className="text-3xl font-bold text-[#8B5A6B] mb-2">{contents.length}</div>
               <div className="text-gray-600">Contenuti Disponibili</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-pink-600 mb-2">12,450</div>
+              <div className="text-3xl font-bold text-[#7BBCC7] mb-2">12,450</div>
               <div className="text-gray-600">Genitori Registrati</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">8,340</div>
+              <div className="text-3xl font-bold text-[#F4C842] mb-2">8,340</div>
               <div className="text-gray-600">Prenotazioni Completate</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">4.8</div>
+              <div className="text-3xl font-bold text-[#8B5A6B] mb-2">4.8</div>
               <div className="text-gray-600">Valutazione Media</div>
             </div>
           </div>
@@ -259,7 +259,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4 text-orange-400">Glinda</h3>
+              <h3 className="text-xl font-bold mb-4 text-[#F4C842]">Glinda</h3>
               <p className="text-gray-300">Il marketplace per genitori consapevoli.</p>
             </div>
             <div>

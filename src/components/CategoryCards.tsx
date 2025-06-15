@@ -33,17 +33,17 @@ const CategoryCards = ({ categories, onCategorySelect }: CategoryCardsProps) => 
         return (
           <Card 
             key={category.id}
-            className="hover:shadow-lg transition-all duration-300 cursor-pointer group bg-white/90 backdrop-blur-sm border-2 hover:border-orange-200"
+            className="hover:shadow-lg transition-all duration-300 cursor-pointer group bg-white/90 backdrop-blur-sm border-2 hover:border-[#7BBCC7]"
             onClick={() => onCategorySelect(category.slug)}
           >
             <CardContent className="p-6 text-center">
               <div className="mb-4">
                 <IconComponent 
-                  className="h-12 w-12 mx-auto text-gray-600 group-hover:text-orange-500 transition-colors"
+                  className="h-12 w-12 mx-auto text-gray-600 group-hover:text-[#8B5A6B] transition-colors"
                   style={{ color: category.color || undefined }}
                 />
               </div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
+              <h3 className="font-semibold text-gray-900 group-hover:text-[#8B5A6B] transition-colors">
                 {category.name}
               </h3>
             </CardContent>

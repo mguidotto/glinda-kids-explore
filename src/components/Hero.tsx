@@ -27,10 +27,10 @@ const Hero = () => {
             Esplora l'architettura modernista di Barcellona
           </p>
           
-          {/* CTA Button */}
+          {/* CTA Button with new brand colors */}
           <Button 
             size="lg" 
-            className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg px-8 py-4 h-auto"
+            className="bg-gradient-to-r from-[#8B5A6B] to-[#7BBCC7] hover:from-[#7A4958] hover:to-[#6AA3AE] text-lg px-8 py-4 h-auto"
           >
             Scopri di più
             <ArrowRight className="ml-2 h-5 w-5" />

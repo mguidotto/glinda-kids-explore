@@ -78,14 +78,14 @@ const Navigation = () => {
               {getText('nav.home', 'Home')}
             </Link>
             
-            {/* Diventa Provider Link */}
+            {/* Diventa Partner Link */}
             <Button
               variant="outline"
               onClick={handleBecomeProviderClick}
               className="flex items-center gap-2"
             >
               <Store className="h-4 w-4" />
-              Diventa Provider
+              Diventa Partner
             </Button>
 
             {showInstallButton && (
@@ -143,14 +143,14 @@ const Navigation = () => {
                     {getText('nav.home', 'Home')}
                   </Link>
                   
-                  {/* Diventa Provider Link Mobile */}
+                  {/* Diventa Partner Link Mobile */}
                   <Button
                     variant="outline"
                     onClick={handleBecomeProviderClick}
                     className="flex items-center gap-2 justify-start"
                   >
                     <Store className="h-4 w-4" />
-                    Diventa Provider
+                    Diventa Partner
                   </Button>
 
                   {user ? (

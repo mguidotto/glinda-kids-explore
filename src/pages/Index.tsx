@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import CategoryFilter from "@/components/CategoryFilter";
+import CategoryCards from "@/components/CategoryCards";
 import ContentCard from "@/components/ContentCard";
 import Hero from "@/components/Hero";
 import LocationSearch from "@/components/LocationSearch";
@@ -86,6 +87,10 @@ const Index = () => {
     setCurrentLocation(null);
   };
 
+  const handleCategorySelect = (categorySlug: string) => {
+    setSelectedCategory(categorySlug);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50">
       <Navigation />
@@ -162,7 +167,24 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* Category Cards Section */}
+      <section className="py-16 px-4 max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Esperienze culturali indimenticabili
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Scopri le migliori attività per i tuoi bambini nelle categorie più amate
+          </p>
+        </div>
+        
+        <CategoryCards 
+          categories={categories}
+          onCategorySelect={handleCategorySelect}
+        />
+      </section>
+
+      {/* Categories Filter */}
       <section className="py-8 px-4 max-w-6xl mx-auto">
         <CategoryFilter 
           categories={categoryOptions}

@@ -28,7 +28,7 @@ const ReviewsList = ({ contentId }: ReviewsListProps) => {
       .from("reviews")
       .select(`
         *,
-        profiles(first_name, last_name)
+        profiles!reviews_user_id_fkey(first_name, last_name)
       `)
       .eq("content_id", contentId)
       .eq("validated", true)

@@ -30,7 +30,7 @@ const ReviewsManagement = () => {
       .from("reviews")
       .select(`
         *,
-        profiles(first_name, last_name, email),
+        profiles!reviews_user_id_fkey(first_name, last_name, email),
         contents(title)
       `)
       .order("created_at", { ascending: false });

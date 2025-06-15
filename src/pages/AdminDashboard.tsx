@@ -1,17 +1,17 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, FileText, Building, Type, Grid3X3, Palette } from "lucide-react";
+import { Users, FileText, Building, Type, Grid3X3, Palette, MessageSquare } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import Navigation from "@/components/Navigation";
 import { Navigate } from "react-router-dom";
 import TextsManagement from "@/components/admin/TextsManagement";
 import CategoriesManagement from "@/components/admin/CategoriesManagement";
 import BrandingManagement from "@/components/admin/BrandingManagement";
+import ReviewsManagement from "@/components/admin/ReviewsManagement";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type Content = Database["public"]["Tables"]["contents"]["Row"];
@@ -154,6 +154,13 @@ const AdminDashboard = () => {
           >
             <Grid3X3 className="h-4 w-4 mr-2" />
             Categorie
+          </Button>
+          <Button 
+            variant={activeTab === "reviews" ? "default" : "outline"}
+            onClick={() => setActiveTab("reviews")}
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Recensioni
           </Button>
           <Button 
             variant={activeTab === "texts" ? "default" : "outline"}
@@ -310,6 +317,9 @@ const AdminDashboard = () => {
 
         {/* Categories Management Tab */}
         {activeTab === "categories" && <CategoriesManagement />}
+
+        {/* Reviews Management Tab */}
+        {activeTab === "reviews" && <ReviewsManagement />}
 
         {/* Texts Management Tab */}
         {activeTab === "texts" && <TextsManagement />}

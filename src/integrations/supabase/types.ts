@@ -443,6 +443,9 @@ export type Database = {
           rating: number | null
           title: string | null
           user_id: string | null
+          validated: boolean | null
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
           comment?: string | null
@@ -452,6 +455,9 @@ export type Database = {
           rating?: number | null
           title?: string | null
           user_id?: string | null
+          validated?: boolean | null
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
           comment?: string | null
@@ -461,6 +467,9 @@ export type Database = {
           rating?: number | null
           title?: string | null
           user_id?: string | null
+          validated?: boolean | null
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: [
           {
@@ -473,6 +482,13 @@ export type Database = {
           {
             foreignKeyName: "reviews_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_validated_by_fkey"
+            columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

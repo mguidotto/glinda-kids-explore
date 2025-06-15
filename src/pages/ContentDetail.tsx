@@ -1,12 +1,12 @@
-
 import { useState } from "react";
 import { ArrowLeft, Heart, Share2, MapPin, Calendar, Clock, Users, Star, Euro, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Navigation from "@/components/Navigation";
+import ReviewsList from "@/components/ReviewsList";
+import ReviewForm from "@/components/ReviewForm";
 
 const ContentDetail = () => {
   const [selectedDate, setSelectedDate] = useState("");
@@ -43,32 +43,10 @@ const ContentDetail = () => {
     ]
   };
 
-  const reviews = [
-    {
-      id: 1,
-      author: "Maria R.",
-      rating: 5,
-      date: "2024-01-15",
-      comment: "Corso fantastico! Le ostetriche sono molto preparate e disponibili. Mi sono sentita molto più sicura per il parto.",
-      helpful: 12
-    },
-    {
-      id: 2,
-      author: "Giulia M.",
-      rating: 5,
-      date: "2024-01-10",
-      comment: "Consiglio vivamente questo corso. Molto pratico e completo, ideale sia per prime gravidanze che per chi vuole un ripasso.",
-      helpful: 8
-    },
-    {
-      id: 3,
-      author: "Francesca L.",
-      rating: 4,
-      date: "2024-01-05",
-      comment: "Buon corso, ben organizzato. Forse avrei gradito più tempo dedicato all'allattamento, ma nel complesso molto soddisfatta.",
-      helpful: 5
-    }
-  ];
+  const handleReviewSubmitted = () => {
+    // This will trigger a re-fetch of reviews in the ReviewsList component
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -155,41 +133,14 @@ const ContentDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Reviews */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recensioni ({reviews.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {reviews.map((review) => (
-                    <div key={review.id}>
-                      <div className="flex items-start gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>{review.author[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium">{review.author}</span>
-                            <div className="flex">
-                              {Array.from({ length: review.rating }).map((_, i) => (
-                                <Star key={i} className="h-3 w-3 text-yellow-400 fill-current" />
-                              ))}
-                            </div>
-                            <span className="text-xs text-gray-500">{review.date}</span>
-                          </div>
-                          <p className="text-sm text-gray-700 mb-2">{review.comment}</p>
-                          <Button variant="ghost" size="sm" className="text-xs">
-                            Utile ({review.helpful})
-                          </Button>
-                        </div>
-                      </div>
-                      {review.id !== reviews[reviews.length - 1].id && <Separator className="mt-4" />}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Reviews Section */}
+            <ReviewsList contentId="1" />
+            
+            {/* Review Form */}
+            <ReviewForm 
+              contentId="1" 
+              onReviewSubmitted={handleReviewSubmitted}
+            />
           </div>
 
           {/* Booking sidebar */}

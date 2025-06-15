@@ -99,7 +99,7 @@ const ReviewsList = ({ contentId }: ReviewsListProps) => {
                       </span>
                       <div className="flex">{renderStars(review.rating || 0)}</div>
                       <span className="text-xs text-gray-500">
-                        {new Date(review.created_at || '').toLocaleDateString('it-IT')}
+                        {new Date(review.created_at || new Date()).toLocaleDateString('it-IT')}
                       </span>
                     </div>
                     {review.title && (

@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, FileText, Building, Type, Grid3X3, Palette, MessageSquare } from "lucide-react";
+import { Users, FileText, Building, Type, Grid3X3, Palette, MessageSquare, UserCog } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import Navigation from "@/components/Navigation";
 import { Navigate } from "react-router-dom";
@@ -12,6 +13,7 @@ import TextsManagement from "@/components/admin/TextsManagement";
 import CategoriesManagement from "@/components/admin/CategoriesManagement";
 import BrandingManagement from "@/components/admin/BrandingManagement";
 import ReviewsManagement from "@/components/admin/ReviewsManagement";
+import UsersManagement from "@/components/admin/UsersManagement";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type Content = Database["public"]["Tables"]["contents"]["Row"];
@@ -128,6 +130,13 @@ const AdminDashboard = () => {
             Panoramica
           </Button>
           <Button 
+            variant={activeTab === "users" ? "default" : "outline"}
+            onClick={() => setActiveTab("users")}
+          >
+            <UserCog className="h-4 w-4 mr-2" />
+            Gestione Utenti
+          </Button>
+          <Button 
             variant={activeTab === "providers" ? "default" : "outline"}
             onClick={() => setActiveTab("providers")}
           >
@@ -140,13 +149,6 @@ const AdminDashboard = () => {
           >
             <FileText className="h-4 w-4 mr-2" />
             Contenuti
-          </Button>
-          <Button 
-            variant={activeTab === "users" ? "default" : "outline"}
-            onClick={() => setActiveTab("users")}
-          >
-            <Users className="h-4 w-4 mr-2" />
-            Utenti
           </Button>
           <Button 
             variant={activeTab === "categories" ? "default" : "outline"}
@@ -209,6 +211,9 @@ const AdminDashboard = () => {
             </Card>
           </div>
         )}
+
+        {/* Users Management Tab */}
+        {activeTab === "users" && <UsersManagement />}
 
         {/* Providers Tab */}
         {activeTab === "providers" && (
@@ -274,40 +279,6 @@ const AdminDashboard = () => {
                     >
                       {content.published ? 'Nascondi' : 'Pubblica'}
                     </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Users Tab */}
-        {activeTab === "users" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Utenti</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {users.map((user) => (
-                  <div key={user.id} className="flex justify-between items-center p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-semibold">
-                        {user.first_name} {user.last_name}
-                      </h3>
-                      <p className="text-gray-600 text-sm">{user.email}</p>
-                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                        <span>{user.city}</span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                          user.role === 'provider' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {user.role === 'admin' ? 'Amministratore' :
-                           user.role === 'provider' ? 'Gestore di Attività' : 'Genitore'}
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 ))}
               </div>

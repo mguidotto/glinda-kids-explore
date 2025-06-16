@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import CategoryFilter from "@/components/CategoryFilter";
 import ContentCard from "@/components/ContentCard";
@@ -87,7 +88,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-teal-50 to-yellow-50">
       <Navigation />
       
       <Hero />
@@ -111,19 +112,19 @@ const Index = () => {
                 <Button 
                   variant={currentLocation ? "default" : "outline"} 
                   size="lg" 
-                  className="flex items-center gap-2"
+                  className={`flex items-center gap-2 ${currentLocation ? 'bg-[#8B4A6B] hover:bg-[#7A4060]' : 'border-[#8B4A6B] text-[#8B4A6B] hover:bg-[#8B4A6B] hover:text-white'}`}
                   onClick={() => setShowLocationSearch(!showLocationSearch)}
                 >
                   <MapPin className="h-4 w-4" />
                   {currentLocation ? "Vicino a te" : "Località"}
                 </Button>
-                <Button variant="outline" size="lg" className="flex items-center gap-2">
+                <Button variant="outline" size="lg" className="flex items-center gap-2 border-[#8B4A6B] text-[#8B4A6B] hover:bg-[#8B4A6B] hover:text-white">
                   <Filter className="h-4 w-4" />
                   Filtri
                 </Button>
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                  className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]"
                   onClick={handleSearch}
                 >
                   Cerca
@@ -177,7 +178,7 @@ const Index = () => {
           <h2 className="text-3xl font-bold text-gray-900">
             {currentLocation ? "Contenuti Vicino a Te" : "Contenuti Disponibili"}
           </h2>
-          <Button variant="outline">Vedi Tutti</Button>
+          <Button variant="outline" className="border-[#8B4A6B] text-[#8B4A6B] hover:bg-[#8B4A6B] hover:text-white">Vedi Tutti</Button>
         </div>
         
         {loading ? (
@@ -213,19 +214,19 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">{contents.length}</div>
+              <div className="text-3xl font-bold text-[#8B4A6B] mb-2">{contents.length}</div>
               <div className="text-gray-600">Contenuti Disponibili</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-pink-600 mb-2">12,450</div>
+              <div className="text-3xl font-bold text-[#FF6B7A] mb-2">12,450</div>
               <div className="text-gray-600">Genitori Registrati</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">8,340</div>
+              <div className="text-3xl font-bold text-[#7BB3BD] mb-2">8,340</div>
               <div className="text-gray-600">Prenotazioni Completate</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">4.8</div>
+              <div className="text-3xl font-bold text-[#F4D03F] mb-2">4.8</div>
               <div className="text-gray-600">Valutazione Media</div>
             </div>
           </div>
@@ -237,31 +238,35 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4 text-orange-400">Glinda</h3>
+              <h3 className="text-xl font-bold mb-4 text-[#F4D03F]">Glinda</h3>
               <p className="text-gray-300">Il marketplace per genitori consapevoli.</p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Categorie</h4>
               <ul className="space-y-2 text-gray-300">
                 {categories.slice(0, 4).map(cat => (
-                  <li key={cat.id}>{cat.name}</li>
+                  <li key={cat.id}>
+                    <Link to={`/?category=${cat.slug}`} className="hover:text-[#7BB3BD]">
+                      {cat.name}
+                    </Link>
+                  </li>
                 ))}
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Supporto</h4>
               <ul className="space-y-2 text-gray-300">
-                <li>Centro Assistenza</li>
-                <li>Contattaci</li>
-                <li>FAQ</li>
+                <li><Link to="/support" className="hover:text-[#7BB3BD]">Centro Assistenza</Link></li>
+                <li><Link to="/contact" className="hover:text-[#7BB3BD]">Contattaci</Link></li>
+                <li><Link to="/faq" className="hover:text-[#7BB3BD]">FAQ</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Partner</h4>
               <ul className="space-y-2 text-gray-300">
-                <li>Diventa Partner</li>
-                <li>Area Partner</li>
-                <li>Pubblicità</li>
+                <li><Link to="/auth" className="hover:text-[#7BB3BD]">Diventa Partner</Link></li>
+                <li><Link to="/provider-dashboard" className="hover:text-[#7BB3BD]">Area Partner</Link></li>
+                <li><Link to="/advertising" className="hover:text-[#7BB3BD]">Pubblicità</Link></li>
               </ul>
             </div>
           </div>

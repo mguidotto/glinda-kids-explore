@@ -66,7 +66,7 @@ const Navigation = () => {
                   }}
                 />
               ) : null}
-              <span className="text-xl font-bold text-blue-600">
+              <span className="text-xl font-bold text-[#8B4A6B]">
                 {siteTitle}
               </span>
             </Link>
@@ -74,18 +74,18 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/" className="text-gray-700 hover:text-blue-600">
+            <Link to="/" className="text-gray-700 hover:text-[#8B4A6B]">
               {getText('nav.home', 'Home')}
             </Link>
             
-            {/* Diventa Provider Link */}
+            {/* Diventa Partner Link */}
             <Button
               variant="outline"
               onClick={handleBecomeProviderClick}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-[#8B4A6B] text-[#8B4A6B] hover:bg-[#8B4A6B] hover:text-white"
             >
               <Store className="h-4 w-4" />
-              Diventa Provider
+              Diventa Partner
             </Button>
 
             {showInstallButton && (
@@ -110,7 +110,7 @@ const Navigation = () => {
               </>
             ) : (
               <Link to="/auth">
-                <Button>{getText('nav.login', 'Accedi')}</Button>
+                <Button className="bg-[#8B4A6B] hover:bg-[#7A4060]">{getText('nav.login', 'Accedi')}</Button>
               </Link>
             )}
           </div>
@@ -137,20 +137,20 @@ const Navigation = () => {
                 <div className="flex flex-col space-y-4 mt-4">
                   <Link 
                     to="/" 
-                    className="text-gray-700 hover:text-blue-600"
+                    className="text-gray-700 hover:text-[#8B4A6B]"
                     onClick={() => setIsOpen(false)}
                   >
                     {getText('nav.home', 'Home')}
                   </Link>
                   
-                  {/* Diventa Provider Link Mobile */}
+                  {/* Diventa Partner Link Mobile */}
                   <Button
                     variant="outline"
                     onClick={handleBecomeProviderClick}
-                    className="flex items-center gap-2 justify-start"
+                    className="flex items-center gap-2 justify-start border-[#8B4A6B] text-[#8B4A6B] hover:bg-[#8B4A6B] hover:text-white"
                   >
                     <Store className="h-4 w-4" />
-                    Diventa Provider
+                    Diventa Partner
                   </Button>
 
                   {user ? (
@@ -164,7 +164,7 @@ const Navigation = () => {
                     </>
                   ) : (
                     <Link to="/auth" onClick={() => setIsOpen(false)}>
-                      <Button className="w-full">{getText('nav.login', 'Accedi')}</Button>
+                      <Button className="w-full bg-[#8B4A6B] hover:bg-[#7A4060]">{getText('nav.login', 'Accedi')}</Button>
                     </Link>
                   )}
                 </div>

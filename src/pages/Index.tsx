@@ -3,14 +3,13 @@ import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import CategoryFilter from "@/components/CategoryFilter";
-import ContentCard from "@/components/ContentCard";
 import Hero from "@/components/Hero";
+import HomeSection from "@/components/HomeSections";
 import LocationSearch from "@/components/LocationSearch";
+import { DemoDataSeeder } from "@/components/DemoDataSeeder";
 import { useContents } from "@/hooks/useContents";
 import { Database } from "@/integrations/supabase/types";
 
@@ -51,22 +50,32 @@ const Index = () => {
     }))
   ];
 
-  // Transform contents for ContentCard component
+  // Transform contents for display
   const transformedContents = contents.map((content: Content) => ({
     id: content.id,
     title: content.title || "",
     description: content.description || "",
-    category: (content as any).categories?.slug || "",
-    ageGroup: content.age_groups?.[0] || "1-3a",
+    category: (content as any).categories?.name || "",
+    city: content.city || "",
     price: content.price_from || 0,
-    location: content.city || "",
-    rating: 4.8, // Mock data for now
-    reviews: 24, // Mock data for now
-    image: "/placeholder.svg",
-    mode: content.modality === "presenza" ? "presenza" : "online",
+    image: content.images?.[0] || "/placeholder.svg",
+    rating: 4.8, // Mock data
+    reviews: Math.floor(Math.random() * 50) + 5, // Mock data
     provider: (content as any).providers?.business_name || "Provider",
+    duration: content.duration_minutes,
+    participants: content.max_participants,
     distance: content.distance_km
   }));
+
+  // Filter contents by category for different sections
+  const nidiContents = transformedContents.filter(c => c.category.toLowerCase().includes('nido')).slice(0, 4);
+  const summerContents = transformedContents.filter(c => 
+    c.category.toLowerCase().includes('campo') || 
+    c.category.toLowerCase().includes('estiv') ||
+    c.category.toLowerCase().includes('sport')
+  ).slice(0, 4);
+  const featuredContents = transformedContents.filter((_, index) => index % 2 === 0).slice(0, 4);
+  const cityContents = transformedContents.slice(0, 4);
 
   const handleSearch = () => {
     fetchContents({ 
@@ -88,7 +97,8 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-teal-50 to-yellow-50">
+    <div className="min-h-screen bg-white">
+      <DemoDataSeeder />
       <Navigation />
       
       <Hero />
@@ -172,45 +182,45 @@ const Index = () => {
         />
       </section>
 
-      {/* Featured Content */}
-      <section className="py-12 px-4 max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">
-            {currentLocation ? "Contenuti Vicino a Te" : "Contenuti Disponibili"}
-          </h2>
-          <Button variant="outline" className="border-[#8B4A6B] text-[#8B4A6B] hover:bg-[#8B4A6B] hover:text-white">Vedi Tutti</Button>
-        </div>
-        
-        {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <div className="h-48 bg-gray-300 rounded-t-lg"></div>
-                <CardContent className="p-4">
-                  <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-3 bg-gray-300 rounded mb-4"></div>
-                  <div className="h-3 bg-gray-300 rounded w-1/2"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {transformedContents.map((content) => (
-              <ContentCard key={content.id} content={content} />
-            ))}
-          </div>
-        )}
+      {/* Homepage Sections in TripAdvisor style */}
+      {nidiContents.length > 0 && (
+        <HomeSection 
+          title="Nidi più apprezzati"
+          subtitle="I migliori asili nido scelti dalle famiglie"
+          contents={nidiContents}
+          sectionType="nidi"
+        />
+      )}
 
-        {!loading && transformedContents.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Nessun contenuto trovato per la ricerca corrente.</p>
-          </div>
-        )}
-      </section>
+      {summerContents.length > 0 && (
+        <HomeSection 
+          title="Le migliori attività per l'estate"
+          subtitle="Campi estivi, sport e divertimento all'aria aperta"
+          contents={summerContents}
+          sectionType="summer"
+        />
+      )}
+
+      {featuredContents.length > 0 && (
+        <HomeSection 
+          title="Corsi per bambini 0-12"
+          subtitle="Attività educative e ricreative per tutte le età"
+          contents={featuredContents}
+          sectionType="featured"
+        />
+      )}
+
+      {cityContents.length > 0 && (
+        <HomeSection 
+          title="Le città più attive"
+          subtitle="Scopri le migliori attività nelle principali città italiane"
+          contents={cityContents}
+          sectionType="cities"
+        />
+      )}
 
       {/* Stats Section */}
-      <section className="py-16 bg-white/80 backdrop-blur-sm">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>

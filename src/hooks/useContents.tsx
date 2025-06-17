@@ -39,10 +39,11 @@ export const useContents = () => {
             .select(`
               *,
               providers!inner(business_name, verified),
-              categories(name, slug)
+              categories!inner(name, slug, active)
             `)
             .in('id', contentIds)
-            .eq("published", true);
+            .eq("published", true)
+            .eq("categories.active", true);
 
           if (filters?.category && filters.category !== "all") {
             query = query.eq("categories.slug", filters.category);
@@ -77,9 +78,10 @@ export const useContents = () => {
           .select(`
             *,
             providers!inner(business_name, verified),
-            categories(name, slug)
+            categories!inner(name, slug, active)
           `)
-          .eq("published", true);
+          .eq("published", true)
+          .eq("categories.active", true);
 
         if (filters?.category && filters.category !== "all") {
           query = query.eq("categories.slug", filters.category);
@@ -110,6 +112,7 @@ export const useContents = () => {
     const { data } = await supabase
       .from("categories")
       .select("*")
+      .eq("active", true)
       .order("name");
     
     if (data) {

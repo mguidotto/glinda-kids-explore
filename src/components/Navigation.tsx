@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePWA } from "@/hooks/usePWA";
 import { useAppTexts } from "@/hooks/useAppTexts";
 import { useBranding } from "@/hooks/useBranding";
-import { Menu, X, Download, Store, Heart } from "lucide-react";
+import { Menu, X, Download, Store } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -47,7 +47,7 @@ const Navigation = () => {
     setIsOpen(false);
   };
 
-  const logoUrl = getSetting('logo_url');
+  const logoUrl = getSetting('logo_url') || '/lovable-uploads/e9fff924-0779-4466-b27f-77bdaf7ce9dc.png';
   const siteTitle = getText('site.title', 'Glinda');
 
   return (
@@ -56,23 +56,14 @@ const Navigation = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3">
-              {logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt={siteTitle}
-                  className="h-10 w-auto object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="h-10 w-10 bg-gradient-to-br from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
-                  <Heart className="h-6 w-6 text-white" />
-                </div>
-              )}
-              <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
-                {siteTitle}
-              </span>
+              <img 
+                src={logoUrl} 
+                alt={siteTitle}
+                className="h-10 w-10 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             </Link>
           </div>
 

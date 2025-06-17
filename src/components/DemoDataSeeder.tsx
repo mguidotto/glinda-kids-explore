@@ -2,6 +2,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import type { Database } from "@/integrations/supabase/types";
+
+type AgeGroup = Database["public"]["Enums"]["age_group"];
+type ContentType = Database["public"]["Enums"]["content_type"];
+type Modality = Database["public"]["Enums"]["modality"];
 
 export const DemoDataSeeder = () => {
   const { profile } = useAuth();
@@ -72,9 +77,9 @@ export const DemoDataSeeder = () => {
             description: "Corso di nuoto dedicato ai bambini che si avvicinano per la prima volta all'acqua. Istruttori qualificati e ambiente sicuro.",
             provider_id: provider.id,
             category_id: createdCategories.find(c => c.slug === "nuoto")?.id,
-            content_type: "corso",
-            age_groups: ["3-5", "6-8"],
-            modality: "presenza",
+            content_type: "corso" as ContentType,
+            age_groups: ["3-6a", "6-10a"] as AgeGroup[],
+            modality: "presenza" as Modality,
             price_from: 80,
             price_to: 120,
             duration_minutes: 45,
@@ -93,9 +98,9 @@ export const DemoDataSeeder = () => {
             description: "Corso di danza moderna che sviluppa creatività, coordinazione e espressività. Adatto a tutti i livelli.",
             provider_id: provider.id,
             category_id: createdCategories.find(c => c.slug === "danza")?.id,
-            content_type: "corso",
-            age_groups: ["6-8", "9-10"],
-            modality: "presenza",
+            content_type: "corso" as ContentType,
+            age_groups: ["6-10a"] as AgeGroup[],
+            modality: "presenza" as Modality,
             price_from: 60,
             price_to: 90,
             duration_minutes: 60,
@@ -113,9 +118,9 @@ export const DemoDataSeeder = () => {
             description: "Laboratorio artistico dove i bambini possono esprimere la loro creatività attraverso colori, forme e tecniche diverse.",
             provider_id: provider.id,
             category_id: createdCategories.find(c => c.slug === "arte")?.id,
-            content_type: "laboratorio",
-            age_groups: ["3-5", "6-8", "9-10"],
-            modality: "presenza",
+            content_type: "corso" as ContentType,
+            age_groups: ["3-6a", "6-10a"] as AgeGroup[],
+            modality: "presenza" as Modality,
             price_from: 35,
             price_to: 50,
             duration_minutes: 90,

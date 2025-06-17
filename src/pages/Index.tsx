@@ -103,7 +103,7 @@ const Index = () => {
       
       <Hero />
 
-      {/* Search Section */}
+      {/* Search Section - Semplificata */}
       <section className="py-12 px-4 max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg p-8 -mt-8 relative z-10">
           <div className="flex flex-col gap-4">

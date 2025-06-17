@@ -1,8 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Star, Users, MapPin, Search, Award, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Star, Users, MapPin, Search, Award } from "lucide-react";
 import { useState } from "react";
 
 const Hero = () => {
@@ -59,17 +58,12 @@ const Hero = () => {
           </div>
         </form>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+        {/* CTA Button */}
+        <div className="flex justify-center mb-16">
           <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-4 rounded-xl font-semibold shadow-lg">
             Esplora Attività
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-          <Link to="/auth">
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4 rounded-xl border-2 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm font-semibold">
-              Diventa Partner
-            </Button>
-          </Link>
         </div>
 
         {/* Trust indicators con design più accattivante */}

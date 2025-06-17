@@ -47,7 +47,7 @@ const Navigation = () => {
     setIsOpen(false);
   };
 
-  const logoUrl = getSetting('logo_url') || '/lovable-uploads/e9fff924-0779-4466-b27f-77bdaf7ce9dc.png';
+  const logoUrl = getSetting('logo_url') || '/lovable-uploads/df33b161-f952-484f-9188-9e42eb514df1.png';
   const siteTitle = getText('site.title', 'Glinda');
 
   return (
@@ -59,11 +59,9 @@ const Navigation = () => {
               <img 
                 src={logoUrl} 
                 alt={siteTitle}
-                className="h-10 w-10 object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
+                className="h-12 w-auto object-contain"
               />
+              <span className="text-xl font-bold text-[#8B4A6B]">Glinda</span>
             </Link>
           </div>
 

@@ -16,16 +16,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 345 30% 41%;
+    --primary: 24 100% 58%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 189 27% 60%;
+    --secondary: 324 100% 68%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 48 87% 60%;
+    --accent: 48 100% 67%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -33,25 +33,25 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 345 30% 41%;
+    --ring: 24 100% 58%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 345 30% 41%;
+    --sidebar-primary: 24 100% 58%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 345 30% 41%;
+    --sidebar-ring: 24 100% 58%;
 
-    /* Custom branding variables */
-    --primary-color: #8B4A6B;
-    --secondary-color: #7BB3BD;
-    --accent-color: #F4D03F;
+    /* Custom branding variables - colori più vivaci */
+    --primary-color: #FF6B35;
+    --secondary-color: #FF1B8D;
+    --accent-color: #FFD23F;
     --coral-color: #FF6B7A;
-    --pink-color: #F4C2C2;
+    --pink-color: #FF69B4;
     --background-color: #ffffff;
     --text-color: #1f2937;
     --font-primary: Inter, system-ui, sans-serif;

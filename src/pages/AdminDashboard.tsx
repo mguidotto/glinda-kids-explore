@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, FileText, Building, Type, Grid3X3, Palette, MessageSquare, UserCog } from "lucide-react";
+import { Users, FileText, Building, Type, Grid3X3, Palette, MessageSquare, UserCog, Globe } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import Navigation from "@/components/Navigation";
 import { Navigate } from "react-router-dom";
@@ -14,6 +14,8 @@ import CategoriesManagement from "@/components/admin/CategoriesManagement";
 import BrandingManagement from "@/components/admin/BrandingManagement";
 import ReviewsManagement from "@/components/admin/ReviewsManagement";
 import UsersManagement from "@/components/admin/UsersManagement";
+import PagesManagement from "@/components/admin/PagesManagement";
+import { DemoDataSeeder } from "@/components/DemoDataSeeder";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type Content = Database["public"]["Tables"]["contents"]["Row"];
@@ -108,6 +110,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
+      <DemoDataSeeder />
       <div className="max-w-7xl mx-auto pt-8 px-4">
         {message && (
           <Alert className="mb-4">
@@ -163,6 +166,13 @@ const AdminDashboard = () => {
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Recensioni
+          </Button>
+          <Button 
+            variant={activeTab === "pages" ? "default" : "outline"}
+            onClick={() => setActiveTab("pages")}
+          >
+            <Globe className="h-4 w-4 mr-2" />
+            Pagine
           </Button>
           <Button 
             variant={activeTab === "texts" ? "default" : "outline"}
@@ -291,6 +301,9 @@ const AdminDashboard = () => {
 
         {/* Reviews Management Tab */}
         {activeTab === "reviews" && <ReviewsManagement />}
+
+        {/* Pages Management Tab */}
+        {activeTab === "pages" && <PagesManagement />}
 
         {/* Texts Management Tab */}
         {activeTab === "texts" && <TextsManagement />}

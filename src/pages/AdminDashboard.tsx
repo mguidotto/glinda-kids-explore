@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +14,6 @@ import BrandingManagement from "@/components/admin/BrandingManagement";
 import ReviewsManagement from "@/components/admin/ReviewsManagement";
 import UsersManagement from "@/components/admin/UsersManagement";
 import PagesManagement from "@/components/admin/PagesManagement";
-import { DemoDataSeeder } from "@/components/DemoDataSeeder";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type Content = Database["public"]["Tables"]["contents"]["Row"];
@@ -110,7 +108,6 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <DemoDataSeeder />
       <div className="max-w-7xl mx-auto pt-8 px-4">
         {message && (
           <Alert className="mb-4">

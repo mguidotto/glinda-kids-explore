@@ -102,15 +102,11 @@ const ContentItemCard = ({ content }: { content: ContentItem }) => {
           </Link>
         </div>
         
-        <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
-          {shouldShowRating && (
-            <>
-              <span>{content.reviews} recensioni</span>
-              <span>•</span>
-            </>
-          )}
-          <span>{content.provider}</span>
-        </div>
+        {shouldShowRating && (
+          <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+            <span>{content.reviews} recensioni</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

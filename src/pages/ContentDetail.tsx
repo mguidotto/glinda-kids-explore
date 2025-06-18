@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import Navigation from "@/components/Navigation";
 import ReviewsList from "@/components/ReviewsList";
 import ReviewForm from "@/components/ReviewForm";
+import MapComponent from "@/components/MapComponent";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
@@ -54,7 +55,7 @@ const ContentDetail = () => {
   };
 
   const handleBackClick = () => {
-    navigate(-1);
+    navigate("/");
   };
 
   if (loading) {
@@ -82,6 +83,7 @@ const ContentDetail = () => {
   const shouldShowBooking = content.content_type !== 'centro' && content.booking_required;
   const shouldShowPrice = content.content_type !== 'centro' && content.price_from && content.payment_type !== 'free';
   const isBookableService = content.content_type === 'corso' || content.content_type === 'evento';
+  const hasImages = content.images && content.images.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -91,32 +93,38 @@ const ContentDetail = () => {
         {/* Back button */}
         <Button variant="ghost" className="mb-6" onClick={handleBackClick}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Torna ai risultati
+          Torna alla homepage
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Image gallery */}
-            <div className="grid grid-cols-3 gap-2">
-              <img 
-                src={content.images?.[0] || "/placeholder.svg"} 
-                alt={content.title}
-                className="col-span-2 w-full h-64 object-cover rounded-lg"
-              />
-              <div className="space-y-2">
+            {/* Image gallery - only show if images exist */}
+            {hasImages && (
+              <div className="grid grid-cols-3 gap-2">
                 <img 
-                  src={content.images?.[1] || "/placeholder.svg"} 
+                  src={content.images[0]} 
                   alt={content.title}
-                  className="w-full h-31 object-cover rounded-lg"
+                  className="col-span-2 w-full h-64 object-cover rounded-lg"
                 />
-                <img 
-                  src={content.images?.[2] || "/placeholder.svg"} 
-                  alt={content.title}
-                  className="w-full h-31 object-cover rounded-lg"
-                />
+                <div className="space-y-2">
+                  {content.images[1] && (
+                    <img 
+                      src={content.images[1]} 
+                      alt={content.title}
+                      className="w-full h-31 object-cover rounded-lg"
+                    />
+                  )}
+                  {content.images[2] && (
+                    <img 
+                      src={content.images[2]} 
+                      alt={content.title}
+                      className="w-full h-31 object-cover rounded-lg"
+                    />
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Content info */}
             <Card>
@@ -176,6 +184,18 @@ const ContentDetail = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Map - only show if address exists */}
+            {content.address && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Posizione</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MapComponent address={content.address} />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Reviews Section */}
             <ReviewsList contentId={id || ""} />

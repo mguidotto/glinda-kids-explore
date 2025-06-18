@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, Share2, MapPin, Calendar, Clock, Users, Star, Euro, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,7 @@ type Content = Database["public"]["Tables"]["contents"]["Row"] & {
 
 const ContentDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState("");
@@ -50,6 +51,10 @@ const ContentDetail = () => {
   const handleReviewSubmitted = () => {
     // This will trigger a re-fetch of reviews in the ReviewsList component
     window.location.reload();
+  };
+
+  const handleBackClick = () => {
+    navigate(-1);
   };
 
   if (loading) {
@@ -84,7 +89,7 @@ const ContentDetail = () => {
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Back button */}
-        <Button variant="ghost" className="mb-6">
+        <Button variant="ghost" className="mb-6" onClick={handleBackClick}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Torna ai risultati
         </Button>

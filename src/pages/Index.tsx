@@ -71,23 +71,18 @@ const Index = () => {
     payment_type: content.payment_type
   }));
 
-  // Filter contents by category for different sections
-  const nidiContents = transformedContents.filter(c => 
-    c.category.toLowerCase().includes('nido') || 
-    c.category.toLowerCase().includes('asilo')
+  // Filter contents by specific category IDs
+  const serviziEducativiContents = transformedContents.filter(c => 
+    contents.find(orig => orig.id === c.id)?.category_id === '1d46a6f7-5d27-48bb-979d-377d35ab29c6'
   ).slice(0, 4);
   
-  const summerContents = transformedContents.filter(c => 
-    c.category.toLowerCase().includes('campo') || 
-    c.category.toLowerCase().includes('estiv') ||
-    c.category.toLowerCase().includes('sport')
+  const corsiContents = transformedContents.filter(c => 
+    contents.find(orig => orig.id === c.id)?.category_id === 'a0bbb1bb-d132-4ba4-8c25-89809e077c58'
   ).slice(0, 4);
   
-  const featuredContents = transformedContents.filter(c => 
-    c.category.toLowerCase().includes('corso')
+  const eventiContents = transformedContents.filter(c => 
+    contents.find(orig => orig.id === c.id)?.category_id === 'b7d5d55e-f19a-46a5-b037-e08ea25b7aff'
   ).slice(0, 4);
-  
-  const cityContents = transformedContents.slice(0, 4);
 
   const handleSearch = () => {
     fetchContents({ 
@@ -108,9 +103,12 @@ const Index = () => {
     setCurrentLocation(null);
   };
 
-  const handleViewAll = (category?: string) => {
-    if (category) {
-      setSelectedCategory(category);
+  const handleViewAll = (categoryId?: string) => {
+    if (categoryId) {
+      const category = categories.find(cat => cat.id === categoryId);
+      if (category) {
+        setSelectedCategory(category.slug);
+      }
     }
     // Scroll to the categories section
     const categoriesSection = document.querySelector('[data-section="categories"]');
@@ -132,44 +130,34 @@ const Index = () => {
         />
       </section>
 
-      {/* Homepage Sections */}
-      {nidiContents.length > 0 && (
+      {/* Homepage Sections - Only the three specified categories */}
+      {serviziEducativiContents.length > 0 && (
         <HomeSection 
-          title={getText('homepage.nidi.title', 'Nidi più apprezzati')}
-          subtitle={getText('homepage.nidi.subtitle', 'I migliori asili nido scelti dalle famiglie')}
-          contents={nidiContents}
-          sectionType="nidi"
-          onViewAll={() => handleViewAll('asili-nido')}
-        />
-      )}
-
-      {summerContents.length > 0 && (
-        <HomeSection 
-          title={getText('homepage.summer.title', 'Le migliori attività per l\'estate')}
-          subtitle={getText('homepage.summer.subtitle', 'Campi estivi, sport e divertimento all\'aria aperta')}
-          contents={summerContents}
-          sectionType="summer"
-          onViewAll={() => handleViewAll('centri-estivi')}
-        />
-      )}
-
-      {featuredContents.length > 0 && (
-        <HomeSection 
-          title={getText('homepage.featured.title', 'Corsi per bambini 0-12')}
-          subtitle={getText('homepage.featured.subtitle', 'Attività educative e ricreative per tutte le età')}
-          contents={featuredContents}
+          title={getText('homepage.servizi_educativi.title', 'Servizi Educativi')}
+          subtitle={getText('homepage.servizi_educativi.subtitle', 'I migliori servizi educativi per i tuoi bambini')}
+          contents={serviziEducativiContents}
           sectionType="featured"
-          onViewAll={() => handleViewAll('corsi')}
+          onViewAll={() => handleViewAll('1d46a6f7-5d27-48bb-979d-377d35ab29c6')}
         />
       )}
 
-      {cityContents.length > 0 && (
+      {corsiContents.length > 0 && (
         <HomeSection 
-          title={getText('homepage.cities.title', 'Le città più attive')}
-          subtitle={getText('homepage.cities.subtitle', 'Scopri le migliori attività nelle principali città italiane')}
-          contents={cityContents}
+          title={getText('homepage.corsi.title', 'Corsi')}
+          subtitle={getText('homepage.corsi.subtitle', 'Corsi e attività formative per bambini')}
+          contents={corsiContents}
+          sectionType="featured"
+          onViewAll={() => handleViewAll('a0bbb1bb-d132-4ba4-8c25-89809e077c58')}
+        />
+      )}
+
+      {eventiContents.length > 0 && (
+        <HomeSection 
+          title={getText('homepage.eventi.title', 'Eventi per tutta la famiglia')}
+          subtitle={getText('homepage.eventi.subtitle', 'Eventi e attività per tutta la famiglia')}
+          contents={eventiContents}
           sectionType="cities"
-          onViewAll={() => handleViewAll()}
+          onViewAll={() => handleViewAll('b7d5d55e-f19a-46a5-b037-e08ea25b7aff')}
         />
       )}
 

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, EyeOff, Image } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
@@ -27,6 +27,8 @@ const ContentsManagement = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -79,16 +81,99 @@ const ContentsManagement = () => {
     }
   };
 
+  const uploadFeaturedImage = async (file: File): Promise<string | null> => {
+    try {
+      setUploading(true);
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `featured/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('content-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        setMessage('Errore nel caricamento del file');
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from('content-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error in uploadFeaturedImage:', error);
+      setMessage('Errore nel caricamento del file');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        setMessage('Per favore seleziona un file immagine');
+        return;
+      }
+      
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage('Il file deve essere più piccolo di 5MB');
+        return;
+      }
+      
+      setSelectedFile(file);
+      setMessage(null);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (formData.featured_image) {
+      try {
+        // Extract file path from URL
+        const url = new URL(formData.featured_image);
+        const filePath = url.pathname.split('/').slice(-2).join('/'); // Get last two segments
+        
+        await supabase.storage
+          .from('content-images')
+          .remove([filePath]);
+      } catch (error) {
+        console.error('Error removing old image:', error);
+      }
+    }
+    
+    setFormData(prev => ({ ...prev, featured_image: "" }));
+    setSelectedFile(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      let featuredImageUrl = formData.featured_image;
+      
+      // Upload new image if selected
+      if (selectedFile) {
+        const uploadedUrl = await uploadFeaturedImage(selectedFile);
+        if (uploadedUrl) {
+          featuredImageUrl = uploadedUrl;
+        } else {
+          return; // Stop if upload failed
+        }
+      }
+
       const contentData = {
         ...formData,
         price_from: formData.price_from ? parseFloat(formData.price_from) : null,
         price_to: formData.price_to ? parseFloat(formData.price_to) : null,
         category_id: formData.category_id || null,
-        featured_image: formData.featured_image || null,
+        featured_image: featuredImageUrl || null,
       };
 
       if (editingContent) {
@@ -167,6 +252,7 @@ const ContentsManagement = () => {
       featured_image: ""
     });
     setEditingContent(null);
+    setSelectedFile(null);
   };
 
   const startEdit = (content: Content) => {
@@ -238,14 +324,49 @@ const ContentsManagement = () => {
 
               <div>
                 <Label htmlFor="featured_image">Immagine in Evidenza</Label>
-                <Input
-                  id="featured_image"
-                  type="url"
-                  placeholder="https://esempio.com/immagine.jpg"
-                  value={formData.featured_image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, featured_image: e.target.value }))}
-                />
-                <p className="text-xs text-gray-500 mt-1">URL dell'immagine in evidenza per questo contenuto</p>
+                
+                {/* Show current image if exists */}
+                {formData.featured_image && (
+                  <div className="mt-2 mb-4">
+                    <div className="relative inline-block">
+                      <img 
+                        src={formData.featured_image} 
+                        alt="Immagine in evidenza" 
+                        className="w-32 h-24 object-cover rounded-lg border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                        onClick={handleRemoveImage}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* File upload */}
+                <div className="space-y-2">
+                  <Input
+                    id="featured_image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Formati supportati: JPG, PNG, GIF. Dimensione massima: 5MB
+                  </p>
+                  
+                  {selectedFile && (
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <Upload className="h-4 w-4" />
+                      File selezionato: {selectedFile.name}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -383,8 +504,8 @@ const ContentsManagement = () => {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Annulla
                 </Button>
-                <Button type="submit">
-                  {editingContent ? "Aggiorna" : "Crea"}
+                <Button type="submit" disabled={uploading}>
+                  {uploading ? "Caricamento..." : editingContent ? "Aggiorna" : "Crea"}
                 </Button>
               </div>
             </form>

@@ -8,6 +8,9 @@ import CategoriesManagement from "@/components/admin/CategoriesManagement";
 import ReviewsManagement from "@/components/admin/ReviewsManagement";
 import TextsManagement from "@/components/admin/TextsManagement";
 import BrandingManagement from "@/components/admin/BrandingManagement";
+import SocialMetaManagement from "@/components/admin/SocialMetaManagement";
+import AppIconsManagement from "@/components/admin/AppIconsManagement";
+import ContentsManagement from "@/components/admin/ContentsManagement";
 import PagesManagement from "@/components/admin/PagesManagement";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -47,17 +50,24 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="users">Utenti</TabsTrigger>
+            <TabsTrigger value="contents">Contenuti</TabsTrigger>
             <TabsTrigger value="categories">Categorie</TabsTrigger>
             <TabsTrigger value="reviews">Recensioni</TabsTrigger>
             <TabsTrigger value="texts">Testi</TabsTrigger>
             <TabsTrigger value="branding">Branding</TabsTrigger>
+            <TabsTrigger value="social">Social</TabsTrigger>
+            <TabsTrigger value="icons">Icone</TabsTrigger>
             <TabsTrigger value="pages">Pagine</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-6">
             <UsersManagement />
+          </TabsContent>
+
+          <TabsContent value="contents" className="space-y-6">
+            <ContentsManagement />
           </TabsContent>
 
           <TabsContent value="categories" className="space-y-6">
@@ -74,6 +84,14 @@ const AdminDashboard = () => {
 
           <TabsContent value="branding" className="space-y-6">
             <BrandingManagement />
+          </TabsContent>
+
+          <TabsContent value="social" className="space-y-6">
+            <SocialMetaManagement />
+          </TabsContent>
+
+          <TabsContent value="icons" className="space-y-6">
+            <AppIconsManagement />
           </TabsContent>
 
           <TabsContent value="pages" className="space-y-6">

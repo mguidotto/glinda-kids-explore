@@ -1,122 +1,102 @@
 
-import { useState } from "react";
-import { Heart, Clock, Star, Calendar, Settings, User, Bell, CreditCard } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, Heart, User, Mail, Clock } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 const UserDashboard = () => {
-  const [activeTab, setActiveTab] = useState("bookings");
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock user data
-  const user = {
-    name: "Maria Rossi",
-    email: "maria.rossi@email.com",
-    avatar: "/placeholder.svg",
-    memberSince: "2023-03-15",
-    totalBookings: 12,
-    totalReviews: 8,
-    averageRating: 4.6
-  };
-
-  const bookings = [
-    {
-      id: 1,
-      title: "Corso Preparto Completo",
-      provider: "Centro Nascita Serena",
-      date: "2024-02-06",
-      time: "18:00-20:00",
-      status: "upcoming",
-      price: 180,
-      location: "Milano Centro"
-    },
-    {
-      id: 2,
-      title: "Spettacolo Il Piccolo Principe",
-      provider: "Teatro dell'Opera dei Burattini",
-      date: "2024-01-20",
-      time: "15:00-16:30",
-      status: "completed",
-      price: 15,
-      location: "Roma"
-    },
-    {
-      id: 3,
-      title: "Campus Estivo Natura",
-      provider: "Avventura Verde",
-      date: "2024-06-15",
-      time: "08:00-17:00",
-      status: "upcoming",
-      price: 280,
-      location: "Parco delle Madonie"
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
     }
-  ];
+  }, [user]);
 
-  const favorites = [
-    {
-      id: 1,
-      title: "Corso di Nuoto per Bambini",
-      provider: "Piscina Comunale",
-      category: "Sport",
-      rating: 4.7,
-      price: 120
-    },
-    {
-      id: 2,
-      title: "Laboratorio Creativo",
-      provider: "Atelier dei Piccoli",
-      category: "Arte",
-      rating: 4.9,
-      price: 45
-    },
-    {
-      id: 3,
-      title: "Corso di Inglese Giocoso",
-      provider: "English for Kids",
-      category: "Lingue",
-      rating: 4.8,
-      price: 80
-    }
-  ];
+  const fetchUserData = async () => {
+    try {
+      // Fetch user profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
 
-  const reviews = [
-    {
-      id: 1,
-      contentTitle: "Spettacolo Il Piccolo Principe",
-      rating: 5,
-      comment: "Spettacolo meraviglioso, mia figlia di 4 anni è rimasta incantata per tutto il tempo!",
-      date: "2024-01-22",
-      helpful: 8
-    },
-    {
-      id: 2,
-      contentTitle: "Laboratorio di Cucina per Bambini",
-      rating: 4,
-      comment: "Attività molto coinvolgente, i bambini si sono divertiti molto. Organizzazione ottima.",
-      date: "2024-01-10",
-      helpful: 12
-    }
-  ];
+      setProfile(profileData);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      // Fetch user bookings
+      const { data: bookingsData } = await supabase
+        .from('bookings')
+        .select(`
+          *,
+          contents (
+            id,
+            title,
+            description,
+            city,
+            featured_image,
+            images,
+            categories (name)
+          )
+        `)
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      setBookings(bookingsData || []);
+
+      // Fetch user favorites
+      const { data: favoritesData } = await supabase
+        .from('favorites')
+        .select(`
+          *,
+          contents (
+            id,
+            title,
+            description,
+            city,
+            featured_image,
+            images,
+            categories (name)
+          )
+        `)
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      setFavorites(favoritesData || []);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'Prossimo';
-      case 'completed': return 'Completato';
-      case 'cancelled': return 'Annullato';
-      default: return status;
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div>Caricamento...</div>
+        </div>
+      </div>
+    );
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('it-IT', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   return (
@@ -124,213 +104,168 @@ const UserDashboard = () => {
       <Navigation />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex items-center gap-6">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={user.avatar} />
-              <AvatarFallback className="text-lg">{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">{user.name}</h1>
-              <p className="text-gray-600 mb-2">{user.email}</p>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span>Membro dal {new Date(user.memberSince).toLocaleDateString('it-IT')}</span>
-                <span>•</span>
-                <span>{user.totalBookings} prenotazioni</span>
-                <span>•</span>
-                <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                  <span>{user.averageRating} media recensioni</span>
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Profile Sidebar */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] rounded-full flex items-center justify-center">
+                    <User className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">
+                      {profile?.first_name && profile?.last_name 
+                        ? `${profile.first_name} ${profile.last_name}`
+                        : user?.email?.split('@')[0] || 'Utente'
+                      }
+                    </h2>
+                    <p className="text-gray-600 text-sm">{profile?.role || 'Genitore'}</p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Mail className="h-4 w-4" />
+                  <span>{user?.email}</span>
+                </div>
+                {profile?.city && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <MapPin className="h-4 w-4" />
+                    <span>{profile.city}</span>
+                  </div>
+                )}
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Clock className="h-4 w-4" />
+                  <span>Iscritto dal {formatDate(profile?.created_at || user?.created_at || '')}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Le tue statistiche</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Prenotazioni</span>
+                  <Badge variant="secondary">{bookings.length}</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Preferiti</span>
+                  <Badge variant="secondary">{favorites.length}</Badge>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-8">
-            <TabsTrigger value="bookings" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Prenotazioni
-            </TabsTrigger>
-            <TabsTrigger value="favorites" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              Preferiti
-            </TabsTrigger>
-            <TabsTrigger value="reviews" className="flex items-center gap-2">
-              <Star className="h-4 w-4" />
-              Recensioni
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Impostazioni
-            </TabsTrigger>
-          </TabsList>
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Recent Bookings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Le tue prenotazioni
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {bookings.length > 0 ? (
+                  <div className="space-y-4">
+                    {bookings.map((booking) => (
+                      <div key={booking.id} className="flex items-center space-x-4 p-4 border rounded-lg hover:bg-gray-50">
+                        <img 
+                          src={booking.contents?.featured_image || booking.contents?.images?.[0] || "/placeholder.svg"} 
+                          alt={booking.contents?.title}
+                          className="w-16 h-16 rounded-lg object-cover"
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{booking.contents?.title}</h3>
+                          <p className="text-sm text-gray-600">{booking.contents?.city}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant={
+                              booking.status === 'confirmed' ? 'default' :
+                              booking.status === 'pending' ? 'secondary' : 'destructive'
+                            }>
+                              {booking.status === 'confirmed' ? 'Confermata' :
+                               booking.status === 'pending' ? 'In attesa' : 'Cancellata'}
+                            </Badge>
+                            {booking.booking_date && (
+                              <span className="text-xs text-gray-500">
+                                {formatDate(booking.booking_date)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <Link to={`/content/${booking.contents?.id}`}>
+                          <Button variant="outline" size="sm">
+                            Dettagli
+                          </Button>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">Non hai ancora prenotazioni</p>
+                    <Link to="/search">
+                      <Button className="mt-4">Esplora attività</Button>
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* Bookings Tab */}
-          <TabsContent value="bookings">
-            <div className="space-y-4">
-              {bookings.map((booking) => (
-                <Card key={booking.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-semibold text-lg">{booking.title}</h3>
-                          <Badge className={getStatusColor(booking.status)}>
-                            {getStatusText(booking.status)}
-                          </Badge>
-                        </div>
-                        <p className="text-gray-600 mb-2">{booking.provider}</p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(booking.date).toLocaleDateString('it-IT')}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {booking.time}
-                          </span>
-                          <span>{booking.location}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-green-600">€{booking.price}</span>
-                          <div className="flex gap-2">
-                            {booking.status === 'upcoming' && (
+            {/* Favorites */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="h-5 w-5" />
+                  I tuoi preferiti
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {favorites.length > 0 ? (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {favorites.map((favorite) => (
+                      <div key={favorite.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex space-x-4">
+                          <img 
+                            src={favorite.contents?.featured_image || favorite.contents?.images?.[0] || "/placeholder.svg"} 
+                            alt={favorite.contents?.title}
+                            className="w-16 h-16 rounded-lg object-cover"
+                          />
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-sm">{favorite.contents?.title}</h3>
+                            <p className="text-xs text-gray-600 mb-2">{favorite.contents?.city}</p>
+                            <Link to={`/content/${favorite.contents?.id}`}>
                               <Button variant="outline" size="sm">
-                                Modifica
+                                Vedi
                               </Button>
-                            )}
-                            {booking.status === 'completed' && (
-                              <Button variant="outline" size="sm">
-                                Lascia Recensione
-                              </Button>
-                            )}
-                            <Button variant="outline" size="sm">
-                              Dettagli
-                            </Button>
+                            </Link>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Favorites Tab */}
-          <TabsContent value="favorites">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {favorites.map((favorite) => (
-                <Card key={favorite.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{favorite.title}</CardTitle>
-                    <p className="text-gray-600">{favorite.provider}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline">{favorite.category}</Badge>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="font-medium">{favorite.rating}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-green-600">€{favorite.price}</span>
-                      <Button size="sm">Prenota</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Reviews Tab */}
-          <TabsContent value="reviews">
-            <div className="space-y-6">
-              {reviews.map((review) => (
-                <Card key={review.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-semibold">{review.contentTitle}</h3>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-gray-700 mb-3">{review.comment}</p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>{new Date(review.date).toLocaleDateString('it-IT')}</span>
-                      <span>{review.helpful} persone hanno trovato utile questa recensione</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <div className="grid md:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Informazioni Personali
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Nome</label>
-                    <input 
-                      type="text" 
-                      defaultValue={user.name}
-                      className="w-full p-2 border rounded-md"
-                    />
+                    ))}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Email</label>
-                    <input 
-                      type="email" 
-                      defaultValue={user.email}
-                      className="w-full p-2 border rounded-md"
-                    />
+                ) : (
+                  <div className="text-center py-8">
+                    <Heart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">Non hai ancora preferiti</p>
+                    <Link to="/search">
+                      <Button className="mt-4">Scopri attività</Button>
+                    </Link>
                   </div>
-                  <Button>Salva Modifiche</Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="h-5 w-5" />
-                    Notifiche
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span>Email per nuove prenotazioni</span>
-                    <input type="checkbox" defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Promemoria eventi</span>
-                    <input type="checkbox" defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Newsletter settimanale</span>
-                    <input type="checkbox" />
-                  </div>
-                  <Button>Aggiorna Preferenze</Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

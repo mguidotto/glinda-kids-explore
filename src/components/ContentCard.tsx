@@ -19,7 +19,6 @@ interface Content {
   mode: string;
   provider: string;
   distance?: number;
-  // New payment fields
   purchasable?: boolean;
   payment_type?: string;
   price_from?: number;
@@ -42,7 +41,7 @@ const ContentCard = ({ content }: ContentCardProps) => {
       "centri-estivi": "bg-orange-100 text-orange-800",
       centri: "bg-pink-100 text-pink-800"
     };
-    return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    return colors[category.toLowerCase() as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
 
   return (
@@ -61,11 +60,7 @@ const ContentCard = ({ content }: ContentCardProps) => {
           <Heart className="h-4 w-4" />
         </Button>
         <Badge className={`absolute top-2 left-2 ${getCategoryColor(content.category)}`}>
-          {content.category === 'corsi' && 'Corso'}
-          {content.category === 'eventi' && 'Evento'}
-          {content.category === 'servizi' && 'Servizio'}
-          {content.category === 'centri-estivi' && 'Centro Estivo'}
-          {content.category === 'centri' && 'Centro'}
+          {content.category}
         </Badge>
         {content.distance && (
           <Badge className="absolute bottom-2 right-2 bg-green-500 text-white">
@@ -85,11 +80,13 @@ const ContentCard = ({ content }: ContentCardProps) => {
         </div>
 
         <div className="flex items-center gap-2 mb-3">
+          {content.ageGroup && (
+            <Badge variant="outline" className="text-xs">
+              {content.ageGroup}
+            </Badge>
+          )}
           <Badge variant="outline" className="text-xs">
-            {content.ageGroup}
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            {content.mode === 'presenza' ? 'In Presenza' : 'Online'}
+            {content.mode}
           </Badge>
         </div>
 
@@ -109,26 +106,34 @@ const ContentCard = ({ content }: ContentCardProps) => {
             <span className="truncate">{content.provider}</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="font-medium text-sm">{content.rating}</span>
-              <span className="text-xs text-gray-500">({content.reviews})</span>
+          {content.rating && content.reviews && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <span className="font-medium text-sm">{content.rating}</span>
+                <span className="text-xs text-gray-500">({content.reviews})</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Show purchase button if content is purchasable */}
         {content.purchasable ? (
           <PurchaseButton content={content as any} />
         ) : (
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <Euro className="h-4 w-4 text-green-600" />
-              <span className="font-bold text-lg text-green-600">
-                {content.price}€
-              </span>
-            </div>
+            {content.price_from && content.payment_type !== 'free' ? (
+              <div className="flex items-center gap-1">
+                <Euro className="h-4 w-4 text-green-600" />
+                <span className="font-bold text-lg text-green-600">
+                  {content.price_from}€
+                  {content.price_to && content.price_to !== content.price_from && (
+                    <span className="text-sm"> - {content.price_to}€</span>
+                  )}
+                </span>
+              </div>
+            ) : (
+              <div></div>
+            )}
             <Button size="sm" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
               Dettagli
             </Button>

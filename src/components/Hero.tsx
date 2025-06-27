@@ -1,95 +1,59 @@
 
+import { Search, MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowRight, Star, Users, MapPin, Search, Award } from "lucide-react";
-import { useState } from "react";
+import SearchBar from "@/components/SearchBar";
+import { useAppTexts } from "@/hooks/useAppTexts";
 
-const Hero = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+interface HeroProps {
+  onSearch: (query: string) => void;
+  onExploreActivities: () => void;
+}
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Implementare la ricerca
-    console.log("Searching for:", searchQuery);
-  };
+const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
+  const { getText } = useAppTexts();
 
   return (
-    <section className="relative py-16 px-4 overflow-hidden bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600">
-      {/* Overlay decorativo */}
-      <div className="absolute inset-0 bg-black/10" />
+    <section className="relative bg-gradient-to-br from-[#8B4A6B] via-[#7BB3BD] to-[#F4D03F] py-20 px-4 overflow-hidden">
+      <div className="absolute inset-0 bg-black/10"></div>
       
-      {/* Elementi decorativi flottanti */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-white/20 rounded-full blur-xl animate-pulse" />
-      <div className="absolute bottom-20 right-10 w-32 h-32 bg-yellow-300/30 rounded-full blur-2xl animate-pulse delay-1000" />
-      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-blue-300/20 rounded-full blur-lg animate-pulse delay-500" />
-      
-      {/* Content */}
-      <div className="relative max-w-6xl mx-auto text-center text-white">
+      <div className="relative max-w-4xl mx-auto text-center">
         <div className="mb-8">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Scopri il meglio per
-            <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-              i tuoi bambini
-            </span>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            {getText('hero.title', 'Trova le migliori attività per i tuoi bambini')}
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Il marketplace #1 in Italia per attività educative e ricreative. 
-            Trova corsi, eventi e servizi di qualità vicino a te.
+          <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+            {getText('hero.subtitle', 'Scopri esperienze uniche, corsi educativi e momenti di gioia per tutta la famiglia')}
           </p>
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-12">
-          <div className="flex gap-2 bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl">
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cerca corsi, attività, città..."
-              className="border-0 bg-transparent text-gray-900 text-lg placeholder:text-gray-500 focus-visible:ring-0"
-            />
-            <Button 
-              type="submit" 
-              size="lg" 
-              className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-xl px-8"
-            >
-              <Search className="h-5 w-5 mr-2" />
-              Cerca
-            </Button>
-          </div>
-        </form>
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 mb-8 shadow-2xl">
+          <SearchBar onSearch={onSearch} placeholder="Cerca attività, corsi, eventi..." />
+        </div>
 
-        {/* CTA Button */}
-        <div className="flex justify-center mb-16">
-          <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-4 rounded-xl font-semibold shadow-lg">
-            Esplora Attività
-            <ArrowRight className="ml-2 h-5 w-5" />
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Button 
+            size="lg" 
+            className="bg-white text-[#8B4A6B] hover:bg-white/90 font-semibold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+            onClick={onExploreActivities}
+          >
+            <Sparkles className="mr-2 h-5 w-5" />
+            {getText('hero.explore', 'Esplora Attività')}
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="lg" 
+            className="text-white hover:bg-white/20 font-semibold px-8 py-3 rounded-full transition-all duration-300"
+          >
+            <MapPin className="mr-2 h-5 w-5" />
+            {getText('hero.near_me', 'Vicino a Me')}
           </Button>
         </div>
-
-        {/* Trust indicators con design più accattivante */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-white/90">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-            <Star className="h-8 w-8 text-yellow-300 mx-auto mb-3 fill-current" />
-            <div className="text-2xl font-bold">4.8★</div>
-            <div className="text-sm">da 12k+ genitori</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-            <Users className="h-8 w-8 text-blue-300 mx-auto mb-3" />
-            <div className="text-2xl font-bold">1,247</div>
-            <div className="text-sm">contenuti verificati</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-            <MapPin className="h-8 w-8 text-green-300 mx-auto mb-3" />
-            <div className="text-2xl font-bold">100+</div>
-            <div className="text-sm">città coperte</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-            <Award className="h-8 w-8 text-orange-300 mx-auto mb-3" />
-            <div className="text-2xl font-bold">500+</div>
-            <div className="text-sm">partner certificati</div>
-          </div>
-        </div>
       </div>
+
+      <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+      <div className="absolute bottom-20 right-10 w-48 h-48 bg-white/10 rounded-full blur-xl"></div>
+      <div className="absolute top-1/2 left-1/3 w-20 h-20 bg-white/5 rounded-full blur-lg"></div>
     </section>
   );
 };

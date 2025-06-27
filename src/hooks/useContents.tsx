@@ -3,7 +3,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
-type Content = Database["public"]["Tables"]["contents"]["Row"];
+type Content = Database["public"]["Tables"]["contents"]["Row"] & {
+  providers?: { business_name: string; verified: boolean };
+  categories?: { name: string; slug: string };
+  distance_km?: number;
+};
 type Category = Database["public"]["Tables"]["categories"]["Row"];
 
 export const useContents = () => {

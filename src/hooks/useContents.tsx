@@ -7,6 +7,7 @@ type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers?: { business_name: string; verified: boolean };
   categories?: { name: string; slug: string };
   distance_km?: number;
+  featured_image?: string;
 };
 type Category = Database["public"]["Tables"]["categories"]["Row"];
 

@@ -18,7 +18,6 @@ type ContentItem = {
   provider: string;
   duration?: number;
   participants?: number;
-  content_type?: string;
   price_from?: number;
   payment_type?: string;
 };
@@ -32,7 +31,7 @@ type HomeSectionProps = {
 };
 
 const ContentItemCard = ({ content }: { content: ContentItem }) => {
-  const shouldShowPrice = content.content_type !== 'centro' && content.price_from && content.payment_type !== 'free';
+  const shouldShowPrice = content.price_from && content.payment_type !== 'free';
   const shouldShowRating = content.rating && content.reviews;
 
   return (

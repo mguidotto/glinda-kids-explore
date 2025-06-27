@@ -80,10 +80,11 @@ const ContentDetail = () => {
     );
   }
 
-  const shouldShowBooking = content.content_type !== 'centro' && content.booking_required;
-  const shouldShowPrice = content.content_type !== 'centro' && content.price_from && content.payment_type !== 'free';
-  const isBookableService = content.content_type === 'corso' || content.content_type === 'evento';
+  const shouldShowBooking = content.booking_required;
+  const shouldShowPrice = content.price_from && content.payment_type !== 'free';
+  const isBookableService = content.booking_required;
   const hasImages = content.images && content.images.length > 0;
+  const featuredImage = content.featured_image || (content.images && content.images[0]) || "/placeholder.svg";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,23 +100,23 @@ const ContentDetail = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Image gallery - only show if images exist */}
-            {hasImages && (
+            {/* Image gallery - show featured image or regular images */}
+            {(featuredImage !== "/placeholder.svg" || hasImages) && (
               <div className="grid grid-cols-3 gap-2">
                 <img 
-                  src={content.images[0]} 
+                  src={featuredImage} 
                   alt={content.title}
                   className="col-span-2 w-full h-64 object-cover rounded-lg"
                 />
                 <div className="space-y-2">
-                  {content.images[1] && (
+                  {content.images && content.images[1] && (
                     <img 
                       src={content.images[1]} 
                       alt={content.title}
                       className="w-full h-31 object-cover rounded-lg"
                     />
                   )}
-                  {content.images[2] && (
+                  {content.images && content.images[2] && (
                     <img 
                       src={content.images[2]} 
                       alt={content.title}

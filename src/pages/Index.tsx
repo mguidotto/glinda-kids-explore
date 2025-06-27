@@ -1,3 +1,4 @@
+
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -89,7 +90,6 @@ const Index = () => {
     duration: content.duration_minutes,
     participants: content.max_participants,
     distance: content.distance_km,
-    content_type: content.content_type,
     price_from: content.price_from,
     payment_type: content.payment_type
   }));

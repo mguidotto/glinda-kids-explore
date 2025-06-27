@@ -16,7 +16,7 @@ import TagsManagement from "@/components/admin/TagsManagement";
 import { useAuth } from "@/hooks/useAuth";
 
 const AdminDashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -29,12 +29,15 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!user) {
+  if (!user || !profile || profile.role !== 'admin') {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <div className="flex items-center justify-center min-h-[50vh]">
-          <div>Accesso non autorizzato</div>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Accesso non autorizzato</h2>
+            <p className="text-gray-600">Solo gli amministratori possono accedere a questa sezione.</p>
+          </div>
         </div>
       </div>
     );

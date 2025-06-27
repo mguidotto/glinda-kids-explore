@@ -1,26 +1,14 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import UserMenu from "@/components/UserMenu";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
-  };
-
-  const getDashboardLink = () => {
-    if (!user) return '/auth';
-    
-    // Check user role from metadata or profile
-    return '/dashboard';
-  };
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -48,23 +36,7 @@ const Navigation = () => {
             
             {!loading && (
               user ? (
-                <div className="flex items-center space-x-4">
-                  <Link to={getDashboardLink()}>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      Dashboard
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Esci
-                  </Button>
-                </div>
+                <UserMenu />
               ) : (
                 <Link to="/auth">
                   <Button className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]">
@@ -112,23 +84,8 @@ const Navigation = () => {
             
             {!loading && (
               user ? (
-                <div className="space-y-2">
-                  <Link 
-                    to={getDashboardLink()}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsOpen(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    Esci
-                  </button>
+                <div className="px-4 py-2">
+                  <UserMenu />
                 </div>
               ) : (
                 <Link 

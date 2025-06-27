@@ -1,84 +1,16 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Heart, User, Mail, Clock } from "lucide-react";
+import { Heart, Calendar, User, MapPin } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
 
 const UserDashboard = () => {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [favorites, setFavorites] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      fetchUserData();
-    }
-  }, [user]);
-
-  const fetchUserData = async () => {
-    try {
-      // Fetch user profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user?.id)
-        .single();
-
-      setProfile(profileData);
-
-      // Fetch user bookings
-      const { data: bookingsData } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          contents (
-            id,
-            title,
-            description,
-            city,
-            featured_image,
-            images,
-            categories (name)
-          )
-        `)
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      setBookings(bookingsData || []);
-
-      // Fetch user favorites
-      const { data: favoritesData } = await supabase
-        .from('favorites')
-        .select(`
-          *,
-          contents (
-            id,
-            title,
-            description,
-            city,
-            featured_image,
-            images,
-            categories (name)
-          )
-        `)
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      setFavorites(favoritesData || []);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -91,178 +23,123 @@ const UserDashboard = () => {
     );
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('it-IT', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div>Accesso non autorizzato</div>
+        </div>
+      </div>
+    );
+  }
+
+  const { data: favorites } = useQuery({
+    queryKey: ["favorites", user.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("favorites")
+        .select(`
+          *,
+          contents (
+            id,
+            title,
+            description,
+            city,
+            featured_image
+          )
+        `)
+        .eq("user_id", user.id);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Profile Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] rounded-full flex items-center justify-center">
-                    <User className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold">
-                      {profile?.first_name && profile?.last_name 
-                        ? `${profile.first_name} ${profile.last_name}`
-                        : user?.email?.split('@')[0] || 'Utente'
-                      }
-                    </h2>
-                    <p className="text-gray-600 text-sm">{profile?.role || 'Genitore'}</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Mail className="h-4 w-4" />
-                  <span>{user?.email}</span>
-                </div>
-                {profile?.city && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span>{profile.city}</span>
-                  </div>
-                )}
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Clock className="h-4 w-4" />
-                  <span>Iscritto dal {formatDate(profile?.created_at || user?.created_at || '')}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Stats */}
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Le tue statistiche</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Prenotazioni</span>
-                  <Badge variant="secondary">{bookings.length}</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Preferiti</span>
-                  <Badge variant="secondary">{favorites.length}</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Recent Bookings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Le tue prenotazioni
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {bookings.length > 0 ? (
-                  <div className="space-y-4">
-                    {bookings.map((booking) => (
-                      <div key={booking.id} className="flex items-center space-x-4 p-4 border rounded-lg hover:bg-gray-50">
-                        <img 
-                          src={booking.contents?.featured_image || booking.contents?.images?.[0] || "/placeholder.svg"} 
-                          alt={booking.contents?.title}
-                          className="w-16 h-16 rounded-lg object-cover"
-                        />
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{booking.contents?.title}</h3>
-                          <p className="text-sm text-gray-600">{booking.contents?.city}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={
-                              booking.status === 'confirmed' ? 'default' :
-                              booking.status === 'pending' ? 'secondary' : 'destructive'
-                            }>
-                              {booking.status === 'confirmed' ? 'Confermata' :
-                               booking.status === 'pending' ? 'In attesa' : 'Cancellata'}
-                            </Badge>
-                            {booking.booking_date && (
-                              <span className="text-xs text-gray-500">
-                                {formatDate(booking.booking_date)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <Link to={`/content/${booking.contents?.id}`}>
-                          <Button variant="outline" size="sm">
-                            Dettagli
-                          </Button>
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Non hai ancora prenotazioni</p>
-                    <Link to="/search">
-                      <Button className="mt-4">Esplora attività</Button>
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Favorites */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5" />
-                  I tuoi preferiti
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {favorites.length > 0 ? (
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {favorites.map((favorite) => (
-                      <div key={favorite.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                        <div className="flex space-x-4">
-                          <img 
-                            src={favorite.contents?.featured_image || favorite.contents?.images?.[0] || "/placeholder.svg"} 
-                            alt={favorite.contents?.title}
-                            className="w-16 h-16 rounded-lg object-cover"
-                          />
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-sm">{favorite.contents?.title}</h3>
-                            <p className="text-xs text-gray-600 mb-2">{favorite.contents?.city}</p>
-                            <Link to={`/content/${favorite.contents?.id}`}>
-                              <Button variant="outline" size="sm">
-                                Vedi
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Heart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Non hai ancora preferiti</p>
-                    <Link to="/search">
-                      <Button className="mt-4">Scopri attività</Button>
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">La Mia Dashboard</h1>
+          <p className="text-gray-600 mt-2">Gestisci i tuoi contenuti preferiti e le tue attività</p>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Favorites Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Preferiti</CardTitle>
+              <Heart className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{favorites?.length || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Attività salvate
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Profile Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Profilo</CardTitle>
+              <User className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">Attivo</div>
+              <p className="text-xs text-muted-foreground">
+                Il tuo profilo è completo
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Location Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Posizione</CardTitle>
+              <MapPin className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">Italia</div>
+              <p className="text-xs text-muted-foreground">
+                La tua area di ricerca
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Favorites List */}
+        {favorites && favorites.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">I Tuoi Preferiti</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {favorites.map((favorite: any) => (
+                <Card key={favorite.id}>
+                  <CardContent className="p-4">
+                    {favorite.contents?.featured_image && (
+                      <img 
+                        src={favorite.contents.featured_image} 
+                        alt={favorite.contents.title}
+                        className="w-full h-48 object-cover rounded-lg mb-4"
+                      />
+                    )}
+                    <h3 className="font-semibold text-lg mb-2">{favorite.contents?.title}</h3>
+                    <p className="text-gray-600 text-sm mb-2">{favorite.contents?.description}</p>
+                    {favorite.contents?.city && (
+                      <p className="text-gray-500 text-sm flex items-center">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {favorite.contents.city}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <Footer />

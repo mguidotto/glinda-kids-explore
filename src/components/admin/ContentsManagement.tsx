@@ -38,8 +38,8 @@ const ContentsManagement = () => {
     price_to: "",
     published: false,
     featured: false,
-    content_type: "corso" as const,
-    modality: "presenza" as const,
+    content_type: "corso" as Database["public"]["Enums"]["content_type"],
+    modality: "presenza" as Database["public"]["Enums"]["modality"],
     website: "",
     phone: "",
     email: ""
@@ -259,7 +259,7 @@ const ContentsManagement = () => {
                   <Label htmlFor="content_type">Tipo</Label>
                   <Select
                     value={formData.content_type}
-                    onValueChange={(value: any) => setFormData(prev => ({ ...prev, content_type: value }))}
+                    onValueChange={(value: Database["public"]["Enums"]["content_type"]) => setFormData(prev => ({ ...prev, content_type: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -268,6 +268,8 @@ const ContentsManagement = () => {
                       <SelectItem value="corso">Corso</SelectItem>
                       <SelectItem value="evento">Evento</SelectItem>
                       <SelectItem value="servizio">Servizio</SelectItem>
+                      <SelectItem value="centro">Centro</SelectItem>
+                      <SelectItem value="campo_estivo">Campo Estivo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -276,7 +278,7 @@ const ContentsManagement = () => {
                   <Label htmlFor="modality">Modalità</Label>
                   <Select
                     value={formData.modality}
-                    onValueChange={(value: any) => setFormData(prev => ({ ...prev, modality: value }))}
+                    onValueChange={(value: Database["public"]["Enums"]["modality"]) => setFormData(prev => ({ ...prev, modality: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -284,7 +286,7 @@ const ContentsManagement = () => {
                     <SelectContent>
                       <SelectItem value="presenza">In Presenza</SelectItem>
                       <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="ibrida">Ibrida</SelectItem>
+                      <SelectItem value="ibrido">Ibrida</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

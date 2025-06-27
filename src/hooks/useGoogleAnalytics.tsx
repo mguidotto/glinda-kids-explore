@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void;
+    dataLayer?: any[];
   }
 }
 
@@ -13,7 +14,7 @@ export const useGoogleAnalytics = () => {
     const loadGoogleAnalytics = async () => {
       try {
         const { data: settings } = await supabase
-          .from('app_settings')
+          .from('app_texts')
           .select('value')
           .eq('key', 'google_analytics_id')
           .maybeSingle();
@@ -38,7 +39,8 @@ export const useGoogleAnalytics = () => {
 
         // Make gtag available globally
         window.gtag = function() {
-          window.dataLayer?.push(arguments);
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push(arguments);
         };
 
         console.log('Google Analytics loaded with ID:', analyticsId);

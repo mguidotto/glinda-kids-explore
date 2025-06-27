@@ -18,7 +18,7 @@ const GoogleAnalyticsManagement = () => {
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('app_settings')
+          .from('app_texts')
           .select('value')
           .eq('key', 'google_analytics_id')
           .maybeSingle();
@@ -41,10 +41,12 @@ const GoogleAnalyticsManagement = () => {
     setSaving(true);
     try {
       const { error } = await supabase
-        .from('app_settings')
+        .from('app_texts')
         .upsert({
           key: 'google_analytics_id',
-          value: analyticsId.trim()
+          value: analyticsId.trim(),
+          category: 'settings',
+          description: 'Google Analytics Measurement ID'
         }, {
           onConflict: 'key'
         });

@@ -12,6 +12,7 @@ import SocialMetaManagement from "@/components/admin/SocialMetaManagement";
 import AppIconsManagement from "@/components/admin/AppIconsManagement";
 import ContentsManagement from "@/components/admin/ContentsManagement";
 import PagesManagement from "@/components/admin/PagesManagement";
+import TagsManagement from "@/components/admin/TagsManagement";
 import { useAuth } from "@/hooks/useAuth";
 
 const AdminDashboard = () => {
@@ -50,10 +51,11 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="users">Utenti</TabsTrigger>
             <TabsTrigger value="contents">Contenuti</TabsTrigger>
             <TabsTrigger value="categories">Categorie</TabsTrigger>
+            <TabsTrigger value="tags">Tag</TabsTrigger>
             <TabsTrigger value="reviews">Recensioni</TabsTrigger>
             <TabsTrigger value="texts">Testi</TabsTrigger>
             <TabsTrigger value="branding">Branding</TabsTrigger>
@@ -72,6 +74,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="categories" className="space-y-6">
             <CategoriesManagement />
+          </TabsContent>
+
+          <TabsContent value="tags" className="space-y-6">
+            <TagsManagement />
           </TabsContent>
 
           <TabsContent value="reviews" className="space-y-6">

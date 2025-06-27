@@ -39,60 +39,6 @@ export type Database = {
         }
         Relationships: []
       }
-      bookings: {
-        Row: {
-          booking_date: string | null
-          content_id: string | null
-          created_at: string | null
-          id: string
-          notes: string | null
-          participants: number | null
-          status: string | null
-          total_price: number | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          booking_date?: string | null
-          content_id?: string | null
-          created_at?: string | null
-          id?: string
-          notes?: string | null
-          participants?: number | null
-          status?: string | null
-          total_price?: number | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          booking_date?: string | null
-          content_id?: string | null
-          created_at?: string | null
-          id?: string
-          notes?: string | null
-          participants?: number | null
-          status?: string | null
-          total_price?: number | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bookings_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: false
-            referencedRelation: "contents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       categories: {
         Row: {
           active: boolean | null
@@ -308,72 +254,6 @@ export type Database = {
           },
           {
             foreignKeyName: "favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      orders: {
-        Row: {
-          amount: number
-          booking_date: string | null
-          content_id: string | null
-          created_at: string | null
-          currency: string | null
-          id: string
-          notes: string | null
-          participants: number | null
-          payment_method: string | null
-          status: string | null
-          stripe_payment_intent_id: string | null
-          stripe_session_id: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          amount: number
-          booking_date?: string | null
-          content_id?: string | null
-          created_at?: string | null
-          currency?: string | null
-          id?: string
-          notes?: string | null
-          participants?: number | null
-          payment_method?: string | null
-          status?: string | null
-          stripe_payment_intent_id?: string | null
-          stripe_session_id?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          amount?: number
-          booking_date?: string | null
-          content_id?: string | null
-          created_at?: string | null
-          currency?: string | null
-          id?: string
-          notes?: string | null
-          participants?: number | null
-          payment_method?: string | null
-          status?: string | null
-          stripe_payment_intent_id?: string | null
-          stripe_session_id?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "orders_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: false
-            referencedRelation: "contents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "orders_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

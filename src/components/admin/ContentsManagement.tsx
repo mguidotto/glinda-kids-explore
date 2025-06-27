@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,24 +10,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers?: { business_name: string; verified: boolean };
   categories?: { name: string; slug: string };
+  content_tags?: Array<{
+    tags: { id: string; name: string; slug: string };
+  }>;
 };
 type Category = Database["public"]["Tables"]["categories"]["Row"];
+type TagType = Database["public"]["Tables"]["tags"]["Row"];
 
 const ContentsManagement = () => {
   const [contents, setContents] = useState<Content[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<TagType[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -50,6 +56,7 @@ const ContentsManagement = () => {
   useEffect(() => {
     fetchContents();
     fetchCategories();
+    fetchTags();
   }, []);
 
   const fetchContents = async () => {
@@ -59,7 +66,8 @@ const ContentsManagement = () => {
       .select(`
         *,
         providers(business_name, verified),
-        categories(name, slug)
+        categories(name, slug),
+        content_tags(tags(id, name, slug))
       `)
       .order("created_at", { ascending: false });
 
@@ -78,6 +86,17 @@ const ContentsManagement = () => {
     
     if (data) {
       setCategories(data);
+    }
+  };
+
+  const fetchTags = async () => {
+    const { data } = await supabase
+      .from("tags")
+      .select("*")
+      .order("name");
+    
+    if (data) {
+      setTags(data);
     }
   };
 
@@ -116,13 +135,11 @@ const ContentsManagement = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Check file type
       if (!file.type.startsWith('image/')) {
         setMessage('Per favore seleziona un file immagine');
         return;
       }
       
-      // Check file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
         setMessage('Il file deve essere più piccolo di 5MB');
         return;
@@ -136,9 +153,8 @@ const ContentsManagement = () => {
   const handleRemoveImage = async () => {
     if (formData.featured_image) {
       try {
-        // Extract file path from URL
         const url = new URL(formData.featured_image);
-        const filePath = url.pathname.split('/').slice(-2).join('/'); // Get last two segments
+        const filePath = url.pathname.split('/').slice(-2).join('/');
         
         await supabase.storage
           .from('content-images')
@@ -152,19 +168,50 @@ const ContentsManagement = () => {
     setSelectedFile(null);
   };
 
+  const handleTagToggle = (tagId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTags(prev => [...prev, tagId]);
+    } else {
+      setSelectedTags(prev => prev.filter(id => id !== tagId));
+    }
+  };
+
+  const saveContentTags = async (contentId: string, tagIds: string[]) => {
+    try {
+      // Remove existing tags
+      await supabase
+        .from("content_tags")
+        .delete()
+        .eq("content_id", contentId);
+
+      // Add new tags
+      if (tagIds.length > 0) {
+        const contentTags = tagIds.map(tagId => ({
+          content_id: contentId,
+          tag_id: tagId
+        }));
+
+        await supabase
+          .from("content_tags")
+          .insert(contentTags);
+      }
+    } catch (error) {
+      console.error("Error saving content tags:", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       let featuredImageUrl = formData.featured_image;
       
-      // Upload new image if selected
       if (selectedFile) {
         const uploadedUrl = await uploadFeaturedImage(selectedFile);
         if (uploadedUrl) {
           featuredImageUrl = uploadedUrl;
         } else {
-          return; // Stop if upload failed
+          return;
         }
       }
 
@@ -183,13 +230,25 @@ const ContentsManagement = () => {
           .eq("id", editingContent.id);
 
         if (error) throw error;
+        
+        // Save tags
+        await saveContentTags(editingContent.id, selectedTags);
+        
         setMessage("Contenuto aggiornato con successo!");
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("contents")
-          .insert([contentData]);
+          .insert([contentData])
+          .select()
+          .single();
 
         if (error) throw error;
+        
+        // Save tags for new content
+        if (data) {
+          await saveContentTags(data.id, selectedTags);
+        }
+        
         setMessage("Contenuto creato con successo!");
       }
 
@@ -253,6 +312,7 @@ const ContentsManagement = () => {
     });
     setEditingContent(null);
     setSelectedFile(null);
+    setSelectedTags([]);
   };
 
   const startEdit = (content: Content) => {
@@ -273,6 +333,11 @@ const ContentsManagement = () => {
       email: content.email || "",
       featured_image: content.featured_image || ""
     });
+    
+    // Set selected tags
+    const contentTagIds = content.content_tags?.map(ct => ct.tags.id) || [];
+    setSelectedTags(contentTagIds);
+    
     setIsDialogOpen(true);
   };
 
@@ -325,7 +390,6 @@ const ContentsManagement = () => {
               <div>
                 <Label htmlFor="featured_image">Immagine in Evidenza</Label>
                 
-                {/* Show current image if exists */}
                 {formData.featured_image && (
                   <div className="mt-2 mb-4">
                     <div className="relative inline-block">
@@ -347,7 +411,6 @@ const ContentsManagement = () => {
                   </div>
                 )}
 
-                {/* File upload */}
                 <div className="space-y-2">
                   <Input
                     id="featured_image"
@@ -366,6 +429,24 @@ const ContentsManagement = () => {
                       File selezionato: {selectedFile.name}
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div>
+                <Label>Tag</Label>
+                <div className="mt-2 max-h-32 overflow-y-auto border rounded-md p-3 space-y-2">
+                  {tags.map((tag) => (
+                    <div key={tag.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`tag-${tag.id}`}
+                        checked={selectedTags.includes(tag.id)}
+                        onCheckedChange={(checked) => handleTagToggle(tag.id, checked as boolean)}
+                      />
+                      <Label htmlFor={`tag-${tag.id}`} className="text-sm font-normal">
+                        {tag.name}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -542,6 +623,21 @@ const ContentsManagement = () => {
                 {content.description && (
                   <p className="text-gray-600 text-sm mb-2 line-clamp-2">{content.description}</p>
                 )}
+                
+                {/* Show tags */}
+                {content.content_tags && content.content_tags.length > 0 && (
+                  <div className="flex items-center gap-1 mb-2">
+                    <Tag className="h-3 w-3 text-gray-500" />
+                    <div className="flex flex-wrap gap-1">
+                      {content.content_tags.map((ct) => (
+                        <Badge key={ct.tags.id} variant="secondary" className="text-xs">
+                          {ct.tags.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span>Modalità: {content.modality}</span>
                   {content.categories && (

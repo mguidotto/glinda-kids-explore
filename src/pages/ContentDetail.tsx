@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, Share2, MapPin, Calendar, Clock, Users, Star, Euro, Check } from "lucide-react";
@@ -85,6 +84,7 @@ const ContentDetail = () => {
   const isBookableService = content.booking_required;
   const hasImages = content.images && content.images.length > 0;
   const featuredImage = content.featured_image || (content.images && content.images[0]) || "/placeholder.svg";
+  const hasValidAddress = content.address && content.address.trim().length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,7 +158,7 @@ const ContentDetail = () => {
                 
                 {/* Contact info */}
                 <div className="space-y-2 text-sm text-gray-600">
-                  {content.address && (
+                  {hasValidAddress && (
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       <span>{content.address}</span>
@@ -186,8 +186,8 @@ const ContentDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Map - only show if address exists */}
-            {content.address && (
+            {/* Map - only show if address exists and is valid */}
+            {hasValidAddress && (
               <Card>
                 <CardHeader>
                   <CardTitle>Posizione</CardTitle>

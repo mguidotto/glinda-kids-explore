@@ -12,6 +12,11 @@ interface HeroProps {
 const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
   const { getText } = useAppTexts();
 
+  const handleExploreClick = () => {
+    console.log('Explore activities clicked');
+    onExploreActivities();
+  };
+
   return (
     <section className="relative bg-gradient-to-br from-[#8B4A6B] via-[#7BB3BD] to-[#F4D03F] py-20 px-4 overflow-hidden">
       <div className="absolute inset-0 bg-black/10"></div>
@@ -34,7 +39,7 @@ const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
           <Button 
             size="lg" 
             className="bg-white text-[#8B4A6B] hover:bg-white/90 font-semibold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-            onClick={onExploreActivities}
+            onClick={handleExploreClick}
           >
             <Sparkles className="mr-2 h-5 w-5" />
             {getText('hero.explore', 'Esplora Attività')}

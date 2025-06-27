@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,14 +8,37 @@ import { toast } from "sonner";
 
 interface FavoriteButtonProps {
   contentId: string;
-  isFavorite?: boolean;
+  className?: string;
   onToggle?: (isFavorite: boolean) => void;
 }
 
-const FavoriteButton = ({ contentId, isFavorite = false, onToggle }: FavoriteButtonProps) => {
+const FavoriteButton = ({ contentId, className = "", onToggle }: FavoriteButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [favorite, setFavorite] = useState(isFavorite);
+  const [isFavorite, setIsFavorite] = useState(false);
   const { user } = useAuth();
+
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('favorites')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('content_id', contentId)
+          .maybeSingle();
+
+        if (!error && data) {
+          setIsFavorite(true);
+        }
+      } catch (error) {
+        console.error('Error checking favorite status:', error);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [user, contentId]);
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -29,7 +52,7 @@ const FavoriteButton = ({ contentId, isFavorite = false, onToggle }: FavoriteBut
     setIsLoading(true);
 
     try {
-      if (favorite) {
+      if (isFavorite) {
         // Remove from favorites
         const { error } = await supabase
           .from('favorites')
@@ -39,7 +62,7 @@ const FavoriteButton = ({ contentId, isFavorite = false, onToggle }: FavoriteBut
 
         if (error) throw error;
         
-        setFavorite(false);
+        setIsFavorite(false);
         onToggle?.(false);
         toast.success("Rimosso dai preferiti");
       } else {
@@ -53,7 +76,7 @@ const FavoriteButton = ({ contentId, isFavorite = false, onToggle }: FavoriteBut
 
         if (error) throw error;
         
-        setFavorite(true);
+        setIsFavorite(true);
         onToggle?.(true);
         toast.success("Aggiunto ai preferiti");
       }
@@ -71,9 +94,9 @@ const FavoriteButton = ({ contentId, isFavorite = false, onToggle }: FavoriteBut
       size="sm"
       onClick={handleToggleFavorite}
       disabled={isLoading}
-      className="bg-white/80 hover:bg-white p-2"
+      className={`hover:bg-white/90 p-2 ${className}`}
     >
-      <Heart className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : ''}`} />
+      <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
     </Button>
   );
 };

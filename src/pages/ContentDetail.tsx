@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, Share2, MapPin, Calendar, Clock, Users, Star, Euro, Check } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Clock, Users, Euro } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +10,13 @@ import Navigation from "@/components/Navigation";
 import ReviewsList from "@/components/ReviewsList";
 import ReviewForm from "@/components/ReviewForm";
 import MapComponent from "@/components/MapComponent";
+import FavoriteButton from "@/components/FavoriteButton";
+import ShareButton from "@/components/ShareButton";
+import AddToCalendarButton from "@/components/AddToCalendarButton";
+import OpenInMapsButton from "@/components/OpenInMapsButton";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers: { business_name: string; verified: boolean };
@@ -22,7 +28,7 @@ const ContentDetail = () => {
   const navigate = useNavigate();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState("");
+  const { trackPageView, trackEvent } = useGoogleAnalytics();
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -41,6 +47,12 @@ const ContentDetail = () => {
 
       if (!error && data) {
         setContent(data as Content);
+        trackPageView(`/content/${id}`);
+        trackEvent('view_content', {
+          content_id: id,
+          content_title: data.title,
+          content_category: (data as any).categories?.name
+        });
       }
       setLoading(false);
     };
@@ -49,7 +61,6 @@ const ContentDetail = () => {
   }, [id]);
 
   const handleReviewSubmitted = () => {
-    // This will trigger a re-fetch of reviews in the ReviewsList component
     window.location.reload();
   };
 
@@ -85,6 +96,8 @@ const ContentDetail = () => {
   const hasImages = content.images && content.images.length > 0;
   const featuredImage = content.featured_image || (content.images && content.images[0]) || "/placeholder.svg";
   const hasValidAddress = content.address && content.address.trim().length > 0;
+  const isEvent = (content as any).categories?.slug === 'eventi';
+  const currentUrl = window.location.href;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -100,7 +113,7 @@ const ContentDetail = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Image gallery - show featured image or regular images */}
+            {/* Image gallery */}
             {(featuredImage !== "/placeholder.svg" || hasImages) && (
               <div className="grid grid-cols-3 gap-2">
                 <img 
@@ -144,17 +157,31 @@ const ContentDetail = () => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Heart className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Share2 className="h-4 w-4" />
-                    </Button>
+                    <FavoriteButton contentId={content.id} />
+                    <ShareButton 
+                      url={currentUrl}
+                      title={content.title}
+                      description={content.description || ''}
+                    />
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700 mb-4">{content.description}</p>
+                
+                {/* Action buttons for events and locations */}
+                <div className="flex gap-2 mb-4">
+                  {isEvent && (
+                    <AddToCalendarButton
+                      title={content.title}
+                      description={content.description || ''}
+                      location={hasValidAddress ? content.address : content.city}
+                    />
+                  )}
+                  {hasValidAddress && (
+                    <OpenInMapsButton address={content.address} />
+                  )}
+                </div>
                 
                 {/* Contact info */}
                 <div className="space-y-2 text-sm text-gray-600">
@@ -186,7 +213,7 @@ const ContentDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Map - only show if address exists and is valid */}
+            {/* Map */}
             {hasValidAddress && (
               <Card>
                 <CardHeader>
@@ -198,17 +225,14 @@ const ContentDetail = () => {
               </Card>
             )}
 
-            {/* Reviews Section */}
             <ReviewsList contentId={id || ""} />
-            
-            {/* Review Form */}
             <ReviewForm 
               contentId={id || ""} 
               onReviewSubmitted={handleReviewSubmitted}
             />
           </div>
 
-          {/* Booking sidebar - only show for bookable content */}
+          {/* Booking sidebar */}
           {(shouldShowBooking || shouldShowPrice) && (
             <div className="lg:col-span-1">
               <Card className="sticky top-24">
@@ -253,6 +277,7 @@ const ContentDetail = () => {
                       <Button 
                         className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
                         disabled={!isBookableService}
+                        onClick={() => trackEvent('booking_click', { content_id: content.id })}
                       >
                         {isBookableService ? 'Prenota Ora' : 'Contatta per Info'}
                       </Button>

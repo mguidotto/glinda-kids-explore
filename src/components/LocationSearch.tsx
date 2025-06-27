@@ -2,16 +2,29 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Loader2, Target } from "lucide-react";
+import { MapPin, Loader2, Target, X } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface LocationSearchProps {
   onLocationSelect: (latitude: number, longitude: number, address?: string) => void;
   className?: string;
+  onClose?: () => void;
+  currentLocation?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  } | null;
+  onClearLocation?: () => void;
 }
 
-const LocationSearch = ({ onLocationSelect, className }: LocationSearchProps) => {
+const LocationSearch = ({ 
+  onLocationSelect, 
+  className,
+  onClose,
+  currentLocation,
+  onClearLocation
+}: LocationSearchProps) => {
   const [address, setAddress] = useState("");
   const [geocoding, setGeocoding] = useState(false);
   const { latitude, longitude, error, loading, getCurrentPosition } = useGeolocation();
@@ -50,16 +63,37 @@ const LocationSearch = ({ onLocationSelect, className }: LocationSearchProps) =>
   };
 
   // Auto-trigger location select when geolocation is successful
-  if (latitude && longitude) {
+  if (latitude && longitude && !currentLocation) {
     onLocationSelect(latitude, longitude, "Posizione attuale");
-    // Reset the location to allow re-triggering
-    setTimeout(() => {
-      setAddress("");
-    }, 100);
   }
 
   return (
-    <div className={className}>
+    <div className={`bg-white p-4 rounded-lg border shadow-sm ${className}`}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold">Seleziona Posizione</h3>
+        {onClose && (
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {currentLocation && (
+        <div className="mb-4 p-3 bg-green-50 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-green-800">Posizione selezionata</p>
+              <p className="text-sm text-green-600">{currentLocation.address}</p>
+            </div>
+            {onClearLocation && (
+              <Button variant="ghost" size="sm" onClick={onClearLocation}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+      
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="flex-1 relative">

@@ -9,12 +9,8 @@ interface MapComponentProps {
 const MapComponent: React.FC<MapComponentProps> = ({ address, className = "w-full h-64 rounded-lg" }) => {
   const mapRef = useRef<HTMLIFrameElement>(null);
 
-  if (!address) {
-    return null;
-  }
-
   const encodedAddress = encodeURIComponent(address);
-  const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=&layer=mapnik&zoom=15&q=${encodedAddress}`;
+  const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=&layer=mapnik&marker=&zoom=15&q=${encodedAddress}`;
 
   return (
     <div className={className}>
@@ -24,7 +20,6 @@ const MapComponent: React.FC<MapComponentProps> = ({ address, className = "w-ful
         className="w-full h-full border-0 rounded-lg"
         title={`Mappa di ${address}`}
         allowFullScreen
-        loading="lazy"
       />
     </div>
   );

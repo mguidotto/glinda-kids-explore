@@ -3,14 +3,12 @@ import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import CategoryFilter from "@/components/CategoryFilter";
 import Hero from "@/components/Hero";
 import HomeSection from "@/components/HomeSections";
 import LocationSearch from "@/components/LocationSearch";
-import SearchBar from "@/components/SearchBar";
-import Footer from "@/components/Footer";
 import { useContents } from "@/hooks/useContents";
 import { useAppTexts } from "@/hooks/useAppTexts";
 import { Database } from "@/integrations/supabase/types";
@@ -22,7 +20,9 @@ type Content = Database["public"]["Tables"]["contents"]["Row"] & {
 };
 
 const Index = () => {
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -30,16 +30,16 @@ const Index = () => {
   } | null>(null);
   const { contents, categories, loading, fetchContents } = useContents();
   const { getText } = useAppTexts();
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchContents({ 
       category: selectedCategory === "all" ? undefined : selectedCategory,
+      search: searchQuery || undefined,
       latitude: currentLocation?.latitude,
       longitude: currentLocation?.longitude,
       radius: 50
     });
-  }, [selectedCategory, currentLocation]);
+  }, [selectedCategory, searchQuery, currentLocation]);
 
   // Transform categories for CategoryFilter component
   const categoryOptions = [
@@ -60,8 +60,8 @@ const Index = () => {
     city: content.city || "",
     price: content.price_from || 0,
     image: content.images?.[0] || "/placeholder.svg",
-    rating: null,
-    reviews: null,
+    rating: null, // No fake ratings
+    reviews: null, // No fake reviews
     provider: (content as any).providers?.business_name || "Provider",
     duration: content.duration_minutes,
     participants: content.max_participants,
@@ -84,8 +84,19 @@ const Index = () => {
     contents.find(orig => orig.id === c.id)?.category_id === 'b7d5d55e-f19a-46a5-b037-e08ea25b7aff'
   ).slice(0, 4);
 
+  const handleSearch = () => {
+    fetchContents({ 
+      category: selectedCategory === "all" ? undefined : selectedCategory,
+      search: searchQuery || undefined,
+      latitude: currentLocation?.latitude,
+      longitude: currentLocation?.longitude,
+      radius: 50
+    });
+  };
+
   const handleLocationSelect = (latitude: number, longitude: number, address?: string) => {
     setCurrentLocation({ latitude, longitude, address });
+    setShowLocationSearch(false);
   };
 
   const clearLocation = () => {
@@ -93,67 +104,22 @@ const Index = () => {
   };
 
   const handleViewAll = (categoryId?: string) => {
-    const params = new URLSearchParams();
     if (categoryId) {
       const category = categories.find(cat => cat.id === categoryId);
       if (category) {
-        params.set("category", category.slug);
+        setSelectedCategory(category.slug);
       }
     }
-    navigate(`/search?${params.toString()}`);
+    // Scroll to the categories section
+    const categoriesSection = document.querySelector('[data-section="categories"]');
+    categoriesSection?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  const handleExploreActivities = () => {
-    navigate('/search');
-  };
-
-  const publishedContentsCount = contents.filter(c => c.published).length;
-  const verifiedProvidersCount = contents.filter(c => (c as any).providers?.verified).length;
 
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
       
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#8B4A6B] via-[#7BB3BD] to-[#F4D03F] py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center text-white">
-          <div className="flex justify-center mb-6">
-            <img 
-              src="/lovable-uploads/df33b161-f952-484f-9188-9e42eb514df1.png" 
-              alt="Glinda" 
-              className="h-16 w-auto"
-            />
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Scopri le migliori attività per i tuoi bambini
-          </h1>
-          <p className="text-xl mb-8 opacity-90">
-            Il marketplace che connette genitori consapevoli con i migliori servizi educativi
-          </p>
-          
-          <div className="max-w-2xl mx-auto mb-8">
-            <SearchBar className="bg-white rounded-lg p-1" />
-          </div>
-
-          <div className="flex justify-center gap-4">
-            <Button 
-              size="lg" 
-              className="bg-white text-[#8B4A6B] hover:bg-gray-100"
-              onClick={handleExploreActivities}
-            >
-              Esplora Attività
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-[#8B4A6B]"
-              asChild
-            >
-              <Link to="/auth">Diventa Partner</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       {/* Categories */}
       <section className="py-8 px-4 max-w-6xl mx-auto" data-section="categories">
@@ -164,7 +130,7 @@ const Index = () => {
         />
       </section>
 
-      {/* Homepage Sections */}
+      {/* Homepage Sections - Only the three specified categories */}
       {serviziEducativiContents.length > 0 && (
         <HomeSection 
           title={getText('homepage.servizi_educativi.title', 'Servizi Educativi')}
@@ -200,12 +166,12 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-[#8B4A6B] mb-2">{publishedContentsCount}</div>
+              <div className="text-3xl font-bold text-[#8B4A6B] mb-2">{contents.length}</div>
               <div className="text-gray-600">{getText('homepage.stats.contents', 'Contenuti Disponibili')}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-[#FF6B7A] mb-2">{verifiedProvidersCount}</div>
-              <div className="text-gray-600">{getText('homepage.stats.verified_providers', 'Provider Verificati')}</div>
+              <div className="text-3xl font-bold text-[#FF6B7A] mb-2">12,450</div>
+              <div className="text-gray-600">{getText('homepage.stats.parents', 'Genitori Registrati')}</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-[#7BB3BD] mb-2">8,340</div>
@@ -219,7 +185,48 @@ const Index = () => {
         </div>
       </section>
 
-      <Footer />
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-[#F4D03F]">Glinda</h3>
+              <p className="text-gray-300">{getText('footer.description', 'Il marketplace per genitori consapevoli.')}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">{getText('footer.categories', 'Categorie')}</h4>
+              <ul className="space-y-2 text-gray-300">
+                {categories.slice(0, 4).map(cat => (
+                  <li key={cat.id}>
+                    <Link to={`/?category=${cat.slug}`} className="hover:text-[#7BB3BD]">
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">{getText('footer.support', 'Supporto')}</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li><Link to="/support" className="hover:text-[#7BB3BD]">{getText('footer.help', 'Centro Assistenza')}</Link></li>
+                <li><Link to="/contact" className="hover:text-[#7BB3BD]">{getText('footer.contact', 'Contattaci')}</Link></li>
+                <li><Link to="/faq" className="hover:text-[#7BB3BD]">FAQ</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">{getText('footer.partner', 'Partner')}</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li><Link to="/auth" className="hover:text-[#7BB3BD]">{getText('footer.become_partner', 'Diventa Partner')}</Link></li>
+                <li><Link to="/provider-dashboard" className="hover:text-[#7BB3BD]">{getText('footer.partner_area', 'Area Partner')}</Link></li>
+                <li><Link to="/advertising" className="hover:text-[#7BB3BD]">{getText('footer.advertising', 'Pubblicità')}</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 Glinda. {getText('footer.rights', 'Tutti i diritti riservati.')}</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

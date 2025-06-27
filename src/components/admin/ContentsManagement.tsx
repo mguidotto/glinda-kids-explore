@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Image } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
@@ -38,11 +38,11 @@ const ContentsManagement = () => {
     price_to: "",
     published: false,
     featured: false,
-    content_type: "corso" as Database["public"]["Enums"]["content_type"],
     modality: "presenza" as Database["public"]["Enums"]["modality"],
     website: "",
     phone: "",
-    email: ""
+    email: "",
+    featured_image: ""
   });
 
   useEffect(() => {
@@ -88,6 +88,7 @@ const ContentsManagement = () => {
         price_from: formData.price_from ? parseFloat(formData.price_from) : null,
         price_to: formData.price_to ? parseFloat(formData.price_to) : null,
         category_id: formData.category_id || null,
+        featured_image: formData.featured_image || null,
       };
 
       if (editingContent) {
@@ -159,11 +160,11 @@ const ContentsManagement = () => {
       price_to: "",
       published: false,
       featured: false,
-      content_type: "corso",
       modality: "presenza",
       website: "",
       phone: "",
-      email: ""
+      email: "",
+      featured_image: ""
     });
     setEditingContent(null);
   };
@@ -180,11 +181,11 @@ const ContentsManagement = () => {
       price_to: content.price_to?.toString() || "",
       published: content.published ?? false,
       featured: content.featured ?? false,
-      content_type: content.content_type,
       modality: content.modality,
       website: content.website || "",
       phone: content.phone || "",
-      email: content.email || ""
+      email: content.email || "",
+      featured_image: content.featured_image || ""
     });
     setIsDialogOpen(true);
   };
@@ -236,6 +237,18 @@ const ContentsManagement = () => {
               </div>
 
               <div>
+                <Label htmlFor="featured_image">Immagine in Evidenza</Label>
+                <Input
+                  id="featured_image"
+                  type="url"
+                  placeholder="https://esempio.com/immagine.jpg"
+                  value={formData.featured_image}
+                  onChange={(e) => setFormData(prev => ({ ...prev, featured_image: e.target.value }))}
+                />
+                <p className="text-xs text-gray-500 mt-1">URL dell'immagine in evidenza per questo contenuto</p>
+              </div>
+
+              <div>
                 <Label htmlFor="category">Categoria</Label>
                 <Select
                   value={formData.category_id}
@@ -254,42 +267,21 @@ const ContentsManagement = () => {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="content_type">Tipo</Label>
-                  <Select
-                    value={formData.content_type}
-                    onValueChange={(value: Database["public"]["Enums"]["content_type"]) => setFormData(prev => ({ ...prev, content_type: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="corso">Corso</SelectItem>
-                      <SelectItem value="evento">Evento</SelectItem>
-                      <SelectItem value="servizio">Servizio</SelectItem>
-                      <SelectItem value="centro">Centro</SelectItem>
-                      <SelectItem value="campo_estivo">Campo Estivo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="modality">Modalità</Label>
-                  <Select
-                    value={formData.modality}
-                    onValueChange={(value: Database["public"]["Enums"]["modality"]) => setFormData(prev => ({ ...prev, modality: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="presenza">In Presenza</SelectItem>
-                      <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="ibrido">Ibrida</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="modality">Modalità</Label>
+                <Select
+                  value={formData.modality}
+                  onValueChange={(value: Database["public"]["Enums"]["modality"]) => setFormData(prev => ({ ...prev, modality: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="presenza">In Presenza</SelectItem>
+                    <SelectItem value="online">Online</SelectItem>
+                    <SelectItem value="ibrido">Ibrida</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -419,12 +411,17 @@ const ContentsManagement = () => {
                   {content.featured && (
                     <Badge variant="outline">In Evidenza</Badge>
                   )}
+                  {content.featured_image && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Image className="h-3 w-3" />
+                      Immagine
+                    </Badge>
+                  )}
                 </div>
                 {content.description && (
                   <p className="text-gray-600 text-sm mb-2 line-clamp-2">{content.description}</p>
                 )}
                 <div className="flex items-center gap-4 text-xs text-gray-500">
-                  <span>Tipo: {content.content_type}</span>
                   <span>Modalità: {content.modality}</span>
                   {content.categories && (
                     <span>Categoria: {content.categories.name}</span>

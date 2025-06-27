@@ -176,12 +176,12 @@ export type Database = {
           booking_required: boolean | null
           category_id: string | null
           city: string | null
-          content_type: Database["public"]["Enums"]["content_type"]
           created_at: string | null
           description: string | null
           duration_minutes: number | null
           email: string | null
           featured: boolean | null
+          featured_image: string | null
           id: string
           images: string[] | null
           latitude: number | null
@@ -207,12 +207,12 @@ export type Database = {
           booking_required?: boolean | null
           category_id?: string | null
           city?: string | null
-          content_type: Database["public"]["Enums"]["content_type"]
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
           email?: string | null
           featured?: boolean | null
+          featured_image?: string | null
           id?: string
           images?: string[] | null
           latitude?: number | null
@@ -238,12 +238,12 @@ export type Database = {
           booking_required?: boolean | null
           category_id?: string | null
           city?: string | null
-          content_type?: Database["public"]["Enums"]["content_type"]
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
           email?: string | null
           featured?: boolean | null
+          featured_image?: string | null
           id?: string
           images?: string[] | null
           latitude?: number | null

@@ -1,4 +1,3 @@
-
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers: { business_name: string; verified: boolean };
   categories: { name: string; slug: string };
   distance_km?: number;
+  featured_image?: string;
 };
 
 const Index = () => {

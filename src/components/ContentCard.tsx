@@ -1,9 +1,10 @@
 
-import { Heart, MapPin, Star, Users, Calendar, Euro } from "lucide-react";
+import { MapPin, Star, Users, Calendar, Euro, Monitor } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import PurchaseButton from "./PurchaseButton";
+import FavoriteButton from "./FavoriteButton";
 
 interface Content {
   id: string;
@@ -26,6 +27,7 @@ interface Content {
   booking_required?: boolean;
   stripe_price_id?: string;
   providers?: { business_name: string; verified: boolean };
+  modality?: string;
 }
 
 interface ContentCardProps {
@@ -44,6 +46,8 @@ const ContentCard = ({ content }: ContentCardProps) => {
     return colors[category.toLowerCase() as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
 
+  const isOnline = content.modality === 'online' || content.mode?.toLowerCase().includes('online');
+
   return (
     <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white border-0 shadow-sm">
       <div className="relative">
@@ -52,19 +56,21 @@ const ContentCard = ({ content }: ContentCardProps) => {
           alt={content.title}
           className="w-full h-48 object-cover rounded-t-lg"
         />
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white p-2"
-        >
-          <Heart className="h-4 w-4" />
-        </Button>
+        <div className="absolute top-2 right-2">
+          <FavoriteButton contentId={content.id} />
+        </div>
         <Badge className={`absolute top-2 left-2 ${getCategoryColor(content.category)}`}>
           {content.category}
         </Badge>
-        {content.distance && (
+        {content.distance && !isOnline && (
           <Badge className="absolute bottom-2 right-2 bg-green-500 text-white">
             {content.distance.toFixed(1)} km
+          </Badge>
+        )}
+        {isOnline && (
+          <Badge className="absolute bottom-2 right-2 bg-blue-500 text-white flex items-center gap-1">
+            <Monitor className="h-3 w-3" />
+            Online
           </Badge>
         )}
       </div>
@@ -91,22 +97,24 @@ const ContentCard = ({ content }: ContentCardProps) => {
         </div>
 
         <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-1 text-sm text-gray-600">
-            <MapPin className="h-3 w-3" />
-            <span className="truncate">{content.location}</span>
-            {content.distance && (
-              <span className="text-green-600 font-medium ml-auto">
-                {content.distance.toFixed(1)} km
-              </span>
-            )}
-          </div>
+          {!isOnline && (
+            <div className="flex items-center gap-1 text-sm text-gray-600">
+              <MapPin className="h-3 w-3" />
+              <span className="truncate">{content.location}</span>
+              {content.distance && (
+                <span className="text-green-600 font-medium ml-auto">
+                  {content.distance.toFixed(1)} km
+                </span>
+              )}
+            </div>
+          )}
           
           <div className="flex items-center gap-1 text-sm text-gray-600">
             <Users className="h-3 w-3" />
             <span className="truncate">{content.provider}</span>
           </div>
 
-          {content.rating && content.reviews && (
+          {content.rating && content.reviews && content.rating > 0 && content.reviews > 0 && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 text-yellow-400 fill-current" />

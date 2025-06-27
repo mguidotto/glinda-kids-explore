@@ -21,14 +21,6 @@ const Contact = () => {
         </div>
 
         <ContactForm />
-
-        <div className="mt-12 text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Altri modi per contattarci</h2>
-          <div className="space-y-2 text-gray-600">
-            <p>Puoi anche scriverci direttamente all'indirizzo email che preferisci</p>
-            <p>Ti risponderemo nel più breve tempo possibile!</p>
-          </div>
-        </div>
       </div>
       <Footer />
     </div>

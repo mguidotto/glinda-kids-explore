@@ -1,5 +1,5 @@
 
-import { Search, MapPin, Sparkles } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/SearchBar";
 import { useAppTexts } from "@/hooks/useAppTexts";
@@ -30,7 +30,7 @@ const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
           <SearchBar onSearch={onSearch} placeholder="Cerca attività, corsi, eventi..." />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex justify-center">
           <Button 
             size="lg" 
             className="bg-white text-[#8B4A6B] hover:bg-white/90 font-semibold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
@@ -38,15 +38,6 @@ const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
           >
             <Sparkles className="mr-2 h-5 w-5" />
             {getText('hero.explore', 'Esplora Attività')}
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="lg" 
-            className="text-white hover:bg-white/20 font-semibold px-8 py-3 rounded-full transition-all duration-300"
-          >
-            <MapPin className="mr-2 h-5 w-5" />
-            {getText('hero.near_me', 'Vicino a Me')}
           </Button>
         </div>
       </div>

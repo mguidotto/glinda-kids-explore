@@ -11,6 +11,8 @@ const UserMenu = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
+  console.log("UserMenu render - User:", user?.email, "Profile role:", profile?.role);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
@@ -18,6 +20,8 @@ const UserMenu = () => {
 
   const getDashboardLink = () => {
     if (!profile) return '/dashboard';
+    
+    console.log("Getting dashboard link for role:", profile.role);
     
     switch (profile.role) {
       case 'admin':
@@ -51,7 +55,7 @@ const UserMenu = () => {
         <DropdownMenuItem asChild>
           <Link to={getDashboardLink()} className="flex items-center w-full">
             <User className="h-4 w-4 mr-2" />
-            Dashboard
+            Dashboard {profile?.role === 'admin' && '(Admin)'}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleLogout} className="flex items-center w-full">

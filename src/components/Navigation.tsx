@@ -36,17 +36,26 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {/* Semplifichiamo la logica di rendering */}
-            {user ? (
-              <UserMenu />
-            ) : loading ? (
-              <div className="w-20 h-10 bg-gray-200 animate-pulse rounded"></div>
+            {/* Debug della logica di rendering */}
+            {loading ? (
+              <>
+                {console.log("Rendering loading state (desktop)")}
+                <div className="w-20 h-10 bg-gray-200 animate-pulse rounded"></div>
+              </>
+            ) : user ? (
+              <>
+                {console.log("Rendering UserMenu (desktop)")}
+                <UserMenu />
+              </>
             ) : (
-              <Link to="/auth">
-                <Button className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]">
-                  Accedi
-                </Button>
-              </Link>
+              <>
+                {console.log("Rendering Accedi button (desktop)")}
+                <Link to="/auth">
+                  <Button className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]">
+                    Accedi
+                  </Button>
+                </Link>
+              </>
             )}
           </div>
 
@@ -85,23 +94,32 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {/* Stessa logica semplificata per mobile */}
-            {user ? (
-              <div className="px-4 py-2">
-                <UserMenu />
-              </div>
-            ) : loading ? (
-              <div className="px-4 py-2">
-                <div className="w-full h-10 bg-gray-200 animate-pulse rounded"></div>
-              </div>
+            {/* Debug della logica di rendering mobile */}
+            {loading ? (
+              <>
+                {console.log("Rendering loading state (mobile)")}
+                <div className="px-4 py-2">
+                  <div className="w-full h-10 bg-gray-200 animate-pulse rounded"></div>
+                </div>
+              </>
+            ) : user ? (
+              <>
+                {console.log("Rendering UserMenu (mobile)")}
+                <div className="px-4 py-2">
+                  <UserMenu />
+                </div>
+              </>
             ) : (
-              <Link 
-                to="/auth"
-                className="block px-4 py-2 text-white bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] rounded-lg transition-colors text-center"
-                onClick={() => setIsOpen(false)}
-              >
-                Accedi
-              </Link>
+              <>
+                {console.log("Rendering Accedi button (mobile)")}
+                <Link 
+                  to="/auth"
+                  className="block px-4 py-2 text-white bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] rounded-lg transition-colors text-center"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Accedi
+                </Link>
+              </>
             )}
           </div>
         )}

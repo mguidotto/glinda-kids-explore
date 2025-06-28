@@ -37,22 +37,27 @@ export const useAuth = () => {
   useEffect(() => {
     console.log("Setting up auth state listener");
     
+    let isInitialized = false;
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.email);
+        console.log("Auth state changed:", event, session?.user?.email, "isInitialized:", isInitialized);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch profile but don't block loading state
+          // Fetch profile but don't await it to avoid blocking
           fetchUserProfile(session.user.id);
         } else {
           setProfile(null);
         }
         
-        // Always set loading to false after processing auth state
-        setLoading(false);
+        // Only set loading to false if this is not the initial setup
+        if (isInitialized) {
+          console.log("Setting loading to false from auth state change");
+          setLoading(false);
+        }
       }
     );
 
@@ -68,7 +73,9 @@ export const useAuth = () => {
         setProfile(null);
       }
       
-      // Set loading to false after initial check
+      // Mark as initialized and set loading to false
+      isInitialized = true;
+      console.log("Setting loading to false from initial session check");
       setLoading(false);
     });
 
@@ -102,6 +109,8 @@ export const useAuth = () => {
     console.log("Signing out");
     await supabase.auth.signOut();
   };
+
+  console.log("useAuth render - Loading:", loading, "User:", !!user, "Session:", !!session);
 
   return {
     user,

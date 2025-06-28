@@ -145,4 +145,25 @@
   .bg-brand-pink {
     background-color: var(--pink-color);
   }
+
+  /* Admin Design System - Consistent button styles */
+  .admin-primary-button {
+    @apply bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-200;
+  }
+
+  .admin-secondary-button {
+    @apply bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-2 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  .admin-card-header {
+    @apply flex flex-row items-center justify-between mb-6;
+  }
+
+  .admin-card-title {
+    @apply text-2xl font-bold text-gray-900;
+  }
+
+  .admin-card-description {
+    @apply text-gray-600 text-sm mt-1;
+  }
 }

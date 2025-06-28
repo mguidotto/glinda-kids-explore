@@ -19,8 +19,11 @@ const Navigation = () => {
           <Link to="/" className="flex items-center space-x-3">
             <img 
               src="/lovable-uploads/df33b161-f952-484f-9188-9e42eb514df1.png" 
-              alt="Glinda" 
+              alt="Glinda - Logo dell'app per attività bambini" 
               className="h-8 w-auto"
+              width="32"
+              height="32"
+              loading="eager"
             />
             <span className="text-xl font-bold text-[#8B4A6B]">Glinda</span>
           </Link>
@@ -36,11 +39,10 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {/* Debug della logica di rendering */}
             {loading ? (
               <>
                 {console.log("Rendering loading state (desktop)")}
-                <div className="w-20 h-10 bg-gray-200 animate-pulse rounded"></div>
+                <div className="w-20 h-10 bg-gray-200 animate-pulse rounded" aria-label="Caricamento menu utente"></div>
               </>
             ) : user ? (
               <>
@@ -51,7 +53,10 @@ const Navigation = () => {
               <>
                 {console.log("Rendering Accedi button (desktop)")}
                 <Link to="/auth">
-                  <Button className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]">
+                  <Button 
+                    className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]"
+                    aria-label="Accedi al tuo account"
+                  >
                     Accedi
                   </Button>
                 </Link>
@@ -64,14 +69,17 @@ const Navigation = () => {
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? "Chiudi menu di navigazione" : "Apri menu di navigazione"}
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? <X className="h-6 w-6" aria-hidden="true" /> : <Menu className="h-6 w-6" aria-hidden="true" />}
             </Button>
           </div>
         </div>
 
         {isOpen && (
-          <div className="md:hidden py-4 space-y-2">
+          <div className="md:hidden py-4 space-y-2" id="mobile-menu">
             <Link 
               to="/search" 
               className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
@@ -94,12 +102,11 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {/* Debug della logica di rendering mobile */}
             {loading ? (
               <>
                 {console.log("Rendering loading state (mobile)")}
                 <div className="px-4 py-2">
-                  <div className="w-full h-10 bg-gray-200 animate-pulse rounded"></div>
+                  <div className="w-full h-10 bg-gray-200 animate-pulse rounded" aria-label="Caricamento menu utente"></div>
                 </div>
               </>
             ) : user ? (
@@ -116,6 +123,7 @@ const Navigation = () => {
                   to="/auth"
                   className="block px-4 py-2 text-white bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] rounded-lg transition-colors text-center"
                   onClick={() => setIsOpen(false)}
+                  aria-label="Accedi al tuo account"
                 >
                   Accedi
                 </Link>

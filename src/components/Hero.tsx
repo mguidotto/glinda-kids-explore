@@ -23,10 +23,14 @@ const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
       
       <div className="relative max-w-4xl mx-auto text-center">
         <div className="mb-8">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          {/* Ottimizzazione LCP: ridotto font-size iniziale e ottimizzato rendering */}
+          <h1 
+            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight will-change-transform"
+            style={{ fontDisplay: 'swap' }}
+          >
             {getText('hero.title', 'Trova le migliori attività per i tuoi bambini')}
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+          <p className="text-lg md:text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
             {getText('hero.subtitle', 'Scopri esperienze uniche, corsi educativi e momenti di gioia per tutta la famiglia')}
           </p>
         </div>
@@ -40,16 +44,18 @@ const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
             size="lg" 
             className="bg-white text-[#8B4A6B] hover:bg-white/90 font-semibold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             onClick={handleExploreClick}
+            aria-label="Esplora le attività disponibili per bambini"
           >
-            <Sparkles className="mr-2 h-5 w-5" />
+            <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
             {getText('hero.explore', 'Esplora Attività')}
           </Button>
         </div>
       </div>
 
-      <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-      <div className="absolute bottom-20 right-10 w-48 h-48 bg-white/10 rounded-full blur-xl"></div>
-      <div className="absolute top-1/2 left-1/3 w-20 h-20 bg-white/5 rounded-full blur-lg"></div>
+      {/* Elementi decorativi con aria-hidden */}
+      <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl" aria-hidden="true"></div>
+      <div className="absolute bottom-20 right-10 w-48 h-48 bg-white/10 rounded-full blur-xl" aria-hidden="true"></div>
+      <div className="absolute top-1/2 left-1/3 w-20 h-20 bg-white/5 rounded-full blur-lg" aria-hidden="true"></div>
     </section>
   );
 };

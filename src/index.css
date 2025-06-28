@@ -111,6 +111,16 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    font-display: swap; /* Ottimizzazione font loading */
+  }
+
+  /* Ottimizzazioni performance */
+  img {
+    content-visibility: auto;
+  }
+
+  .will-change-transform {
+    will-change: transform;
   }
 
   /* Custom utility classes for branding */

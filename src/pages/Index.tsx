@@ -105,16 +105,19 @@ const Index = () => {
     categories: (content as any).categories
   }));
 
+  // Fix: Corretto l'ID della categoria "Servizi Educativi" da '1d46a6f7-5d27-48bb-979d-377d35ab29c6' a 'dbc5448f-0d00-4ec1-aafd-d91c4e967f39'
   const serviziEducativiContents = transformedContents.filter(c => 
-    contents.find(orig => orig.id === c.id)?.category_id === '1d46a6f7-5d27-48bb-979d-377d35ab29c6'
+    contents.find(orig => orig.id === c.id)?.category_id === 'dbc5448f-0d00-4ec1-aafd-d91c4e967f39'
   ).slice(0, 4);
   
+  // Fix: Corretto l'ID della categoria "Corsi" da 'a0bbb1bb-d132-4ba4-8c25-89809e077c58' a '35449c9a-2a44-4b97-9d2e-8ce85b69c4cc'
   const corsiContents = transformedContents.filter(c => 
-    contents.find(orig => orig.id === c.id)?.category_id === 'a0bbb1bb-d132-4ba4-8c25-89809e077c58'
+    contents.find(orig => orig.id === c.id)?.category_id === '35449c9a-2a44-4b97-9d2e-8ce85b69c4cc'
   ).slice(0, 4);
   
+  // Fix: Corretto l'ID della categoria "Eventi" da 'b7d5d55e-f19a-46a5-b037-e08ea25b7aff' a 'e378ba01-8790-4e60-8eb8-b94a27800fc1'
   const eventiContents = transformedContents.filter(c => 
-    contents.find(orig => orig.id === c.id)?.category_id === 'b7d5d55e-f19a-46a5-b037-e08ea25b7aff'
+    contents.find(orig => orig.id === c.id)?.category_id === 'e378ba01-8790-4e60-8eb8-b94a27800fc1'
   ).slice(0, 4);
 
   const handleSearch = (query: string) => {
@@ -165,7 +168,7 @@ const Index = () => {
               subtitle={getText('homepage.servizi_educativi.subtitle', 'I migliori servizi educativi per i tuoi bambini')}
               contents={serviziEducativiContents}
               sectionType="featured"
-              onViewAll={() => handleViewAll('1d46a6f7-5d27-48bb-979d-377d35ab29c6')}
+              onViewAll={() => handleViewAll('dbc5448f-0d00-4ec1-aafd-d91c4e967f39')}
             />
           </section>
         )}
@@ -178,7 +181,7 @@ const Index = () => {
               subtitle={getText('homepage.corsi.subtitle', 'Corsi e attività formative per bambini')}
               contents={corsiContents}
               sectionType="featured"
-              onViewAll={() => handleViewAll('a0bbb1bb-d132-4ba4-8c25-89809e077c58')}
+              onViewAll={() => handleViewAll('35449c9a-2a44-4b97-9d2e-8ce85b69c4cc')}
             />
           </section>
         )}
@@ -191,7 +194,7 @@ const Index = () => {
               subtitle={getText('homepage.eventi.subtitle', 'Eventi e attività per tutta la famiglia')}
               contents={eventiContents}
               sectionType="cities"
-              onViewAll={() => handleViewAll('b7d5d55e-f19a-46a5-b037-e08ea25b7aff')}
+              onViewAll={() => handleViewAll('e378ba01-8790-4e60-8eb8-b94a27800fc1')}
             />
           </section>
         )}

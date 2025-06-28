@@ -10,6 +10,8 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading } = useAuth();
 
+  console.log("Navigation render - Loading:", loading, "User:", !!user);
+
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
@@ -34,16 +36,16 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {!loading && (
-              user ? (
-                <UserMenu />
-              ) : (
-                <Link to="/auth">
-                  <Button className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]">
-                    Accedi
-                  </Button>
-                </Link>
-              )
+            {loading ? (
+              <div className="w-20 h-10 bg-gray-200 animate-pulse rounded"></div>
+            ) : user ? (
+              <UserMenu />
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]">
+                  Accedi
+                </Button>
+              </Link>
             )}
           </div>
 
@@ -82,20 +84,22 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {!loading && (
-              user ? (
-                <div className="px-4 py-2">
-                  <UserMenu />
-                </div>
-              ) : (
-                <Link 
-                  to="/auth"
-                  className="block px-4 py-2 text-white bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] rounded-lg transition-colors text-center"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Accedi
-                </Link>
-              )
+            {loading ? (
+              <div className="px-4 py-2">
+                <div className="w-full h-10 bg-gray-200 animate-pulse rounded"></div>
+              </div>
+            ) : user ? (
+              <div className="px-4 py-2">
+                <UserMenu />
+              </div>
+            ) : (
+              <Link 
+                to="/auth"
+                className="block px-4 py-2 text-white bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] rounded-lg transition-colors text-center"
+                onClick={() => setIsOpen(false)}
+              >
+                Accedi
+              </Link>
             )}
           </div>
         )}

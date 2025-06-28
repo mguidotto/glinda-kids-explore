@@ -9,12 +9,12 @@ type Content = {
 
 export const useContentUrl = () => {
   const getContentUrl = (content: Content): string => {
-    // Se il contenuto ha uno slug e una categoria, usa il formato categoria/slug
-    if (content.slug && content.categories?.slug) {
+    // Always check if we have both slug and category slug
+    if (content.slug && content.slug.trim() && content.categories?.slug && content.categories.slug.trim()) {
       return `/${content.categories.slug}/${content.slug}`;
     }
     
-    // Altrimenti usa il formato tradizionale con ID
+    // Fallback to ID-based URL for any content without proper slug structure
     return `/content/${content.id}`;
   };
 

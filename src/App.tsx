@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useBranding } from "@/hooks/useBranding";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
+import { useErrorTracking } from "@/hooks/useErrorTracking";
 import Index from "./pages/Index";
 import ContentDetail from "./pages/ContentDetail";
 import UserDashboard from "./pages/UserDashboard";
@@ -22,6 +23,7 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   useBranding();
   useGoogleAnalytics();
+  useErrorTracking();
   
   return (
     <BrowserRouter>

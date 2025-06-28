@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -32,6 +31,7 @@ const ContentDetail = () => {
   const navigate = useNavigate();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasRedirected, setHasRedirected] = useState(false);
   const { trackPageView, trackEvent } = useGoogleAnalytics();
 
   // Determine the identifier to use
@@ -50,58 +50,84 @@ const ContentDetail = () => {
 
   useEffect(() => {
     const fetchContent = async () => {
-      if (!identifier) return;
+      if (!identifier) {
+        console.error('ContentDetail: No identifier provided');
+        setLoading(false);
+        return;
+      }
       
-      console.log('Fetching content with identifier:', identifier);
-      console.log('Category slug:', categorySlug);
+      console.log('ContentDetail: Fetching content with identifier:', identifier);
+      console.log('ContentDetail: Category slug:', categorySlug);
+      console.log('ContentDetail: Current URL:', window.location.pathname);
       
-      // First try to find by slug
-      let { data, error } = await supabase
-        .from("contents")
-        .select(`
-          *,
-          providers!inner(business_name, verified),
-          categories!inner(name, slug)
-        `)
-        .eq("slug", identifier)
-        .eq("published", true)
-        .maybeSingle();
-
-      // If not found by slug, try by ID
-      if (!data && !error) {
-        console.log('Content not found by slug, trying by ID');
-        const result = await supabase
+      try {
+        // First try to find by slug
+        let { data, error } = await supabase
           .from("contents")
           .select(`
             *,
             providers!inner(business_name, verified),
             categories!inner(name, slug)
           `)
-          .eq("id", identifier)
+          .eq("slug", identifier)
           .eq("published", true)
           .maybeSingle();
-        
-        data = result.data;
-        error = result.error;
-      }
 
-      if (!error && data) {
-        // If we have a category slug in the URL, verify it matches
-        if (categorySlug && (data as any).categories?.slug !== categorySlug) {
-          console.log('Category slug mismatch, redirecting to correct URL');
-          if (data.slug) {
-            navigate(`/${(data as any).categories.slug}/${data.slug}`, { replace: true });
-          } else {
-            navigate(`/content/${data.id}`, { replace: true });
-          }
+        // If not found by slug, try by ID
+        if (!data && !error) {
+          console.log('ContentDetail: Content not found by slug, trying by ID');
+          const result = await supabase
+            .from("contents")
+            .select(`
+              *,
+              providers!inner(business_name, verified),
+              categories!inner(name, slug)
+            `)
+            .eq("id", identifier)
+            .eq("published", true)
+            .maybeSingle();
+          
+          data = result.data;
+          error = result.error;
+        }
+
+        if (error) {
+          console.error('ContentDetail: Database error:', error);
+          setLoading(false);
           return;
         }
 
-        // If we accessed by ID but content has a slug, redirect to pretty URL
-        if (slugOrId === data.id && data.slug && (data as any).categories?.slug) {
-          console.log('Redirecting to pretty URL');
-          navigate(`/${(data as any).categories.slug}/${data.slug}`, { replace: true });
+        if (!data) {
+          console.error('ContentDetail: Content not found for identifier:', identifier);
+          setLoading(false);
           return;
+        }
+
+        console.log('ContentDetail: Content found:', data.title);
+        
+        // Only redirect if we haven't already redirected and conditions are met
+        if (!hasRedirected) {
+          // Check if we need to redirect to correct URL format
+          const shouldRedirectToSlug = slugOrId === data.id && data.slug && (data as any).categories?.slug;
+          const shouldRedirectForCategoryMismatch = categorySlug && (data as any).categories?.slug !== categorySlug;
+          
+          if (shouldRedirectToSlug) {
+            console.log('ContentDetail: Redirecting to pretty URL');
+            setHasRedirected(true);
+            navigate(`/${(data as any).categories.slug}/${data.slug}`, { replace: true });
+            return;
+          }
+          
+          if (shouldRedirectForCategoryMismatch) {
+            console.log('ContentDetail: Category slug mismatch, redirecting to correct URL');
+            setHasRedirected(true);
+            if (data.slug) {
+              navigate(`/${(data as any).categories.slug}/${data.slug}`, { replace: true });
+            } else {
+              navigate(`/content/${data.id}`, { replace: true });
+            }
+            return;
+          }
         }
 
         setContent(data as Content);
@@ -111,12 +137,16 @@ const ContentDetail = () => {
           content_title: data.title,
           content_category: (data as any).categories?.name
         });
+        
+      } catch (error) {
+        console.error('ContentDetail: Unexpected error:', error);
       }
+      
       setLoading(false);
     };
 
     fetchContent();
-  }, [identifier, categorySlug, navigate, trackPageView, trackEvent, slugOrId]);
+  }, [identifier, categorySlug, navigate, trackPageView, trackEvent, slugOrId, hasRedirected]);
 
   const handleReviewSubmitted = () => {
     window.location.reload();
@@ -148,7 +178,13 @@ const ContentDetail = () => {
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <div className="flex items-center justify-center min-h-[50vh]">
-          <div>Contenuto non trovato</div>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Contenuto non trovato</h1>
+            <p className="text-gray-600 mb-4">Il contenuto che stai cercando non esiste o è stato rimosso.</p>
+            <Button onClick={handleBackClick}>
+              Torna alla homepage
+            </Button>
+          </div>
         </div>
       </div>
     );

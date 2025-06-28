@@ -16,22 +16,26 @@ import { useSEO } from "@/hooks/useSEO";
 import { useEffect } from "react";
 
 const ContentDetail = () => {
-  const { slug } = useParams();
+  const { slugOrId, contentSlug } = useParams();
   const { trackError } = useErrorTracking();
   
-  console.log("[ContentDetail] Rendering with slug:", slug);
+  // Determine which parameter to use based on the route
+  const searchParam = contentSlug || slugOrId;
+  
+  console.log("[ContentDetail] Rendering with params:", { slugOrId, contentSlug, searchParam });
 
   const { data: content, isLoading, error } = useQuery({
-    queryKey: ["content", slug],
+    queryKey: ["content", searchParam],
     queryFn: async () => {
-      console.log("[ContentDetail] Fetching content for slug:", slug);
+      console.log("[ContentDetail] Fetching content for param:", searchParam);
       
-      if (!slug) {
-        console.error("[ContentDetail] No slug provided");
-        throw new Error("No slug provided");
+      if (!searchParam) {
+        console.error("[ContentDetail] No search parameter provided");
+        throw new Error("No search parameter provided");
       }
 
-      const { data, error } = await supabase
+      // First try to find by slug
+      let { data, error } = await supabase
         .from("contents")
         .select(`
           *,
@@ -56,20 +60,57 @@ const ContentDetail = () => {
             )
           )
         `)
-        .eq("slug", slug)
+        .eq("slug", searchParam)
         .eq("published", true)
-        .single();
+        .maybeSingle();
+
+      // If not found by slug and it looks like a UUID, try by ID
+      if (!data && searchParam.length === 36 && searchParam.includes('-')) {
+        console.log("[ContentDetail] Not found by slug, trying by ID:", searchParam);
+        
+        const result = await supabase
+          .from("contents")
+          .select(`
+            *,
+            categories (
+              id,
+              name,
+              slug,
+              color
+            ),
+            providers (
+              business_name,
+              verified,
+              phone,
+              email,
+              website
+            ),
+            content_tags (
+              tags (
+                id,
+                name,
+                slug
+              )
+            )
+          `)
+          .eq("id", searchParam)
+          .eq("published", true)
+          .maybeSingle();
+          
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) {
         console.error("[ContentDetail] Database error:", error);
-        trackError(error, { context: "content_fetch", slug });
+        trackError(error, { context: "content_fetch", searchParam });
         throw error;
       }
 
       if (!data) {
-        console.error("[ContentDetail] Content not found for slug:", slug);
+        console.error("[ContentDetail] Content not found for param:", searchParam);
         const notFoundError = new Error("Content not found");
-        trackError(notFoundError, { context: "content_not_found", slug });
+        trackError(notFoundError, { context: "content_not_found", searchParam });
         throw notFoundError;
       }
 
@@ -80,7 +121,7 @@ const ContentDetail = () => {
     meta: {
       onError: (error: any) => {
         console.error("[ContentDetail] Query error:", error);
-        trackError(error, { context: "query_error", slug });
+        trackError(error, { context: "query_error", searchParam });
       }
     }
   });

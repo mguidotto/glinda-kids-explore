@@ -23,7 +23,7 @@ export const generateDynamicSitemap = async () => {
   // Fetch categories for category pages
   const { data: categories } = await supabase
     .from('categories')
-    .select('slug, updated_at')
+    .select('slug')
     .eq('active', true);
 
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -54,11 +54,10 @@ export const generateDynamicSitemap = async () => {
 
   // Add category search pages
   categories?.forEach(category => {
-    const lastmod = category.updated_at ? new Date(category.updated_at).toISOString().split('T')[0] : currentDate;
     sitemap += `
   <url>
     <loc>${baseUrl}/search?category=${category.slug}</loc>
-    <lastmod>${lastmod}</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`;

@@ -1,4 +1,3 @@
-
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,12 +125,17 @@ const ContentDetail = () => {
     }
   });
 
-  // Set up SEO
+  // Set up SEO with proper Open Graph tags
   useSEO({
     title: content?.meta_title || content?.title,
     description: content?.meta_description || content?.description,
-    ogImage: content?.meta_image || content?.featured_image,
-    type: "article"
+    ogTitle: content?.meta_title || content?.title,
+    ogDescription: content?.meta_description || content?.description,
+    ogImage: content?.meta_image || content?.featured_image || 'https://glinda.lovable.app/icon-512x512.png',
+    ogType: "article",
+    twitterTitle: content?.meta_title || content?.title,
+    twitterDescription: content?.meta_description || content?.description,
+    twitterImage: content?.meta_image || content?.featured_image || 'https://glinda.lovable.app/icon-512x512.png'
   });
 
   useEffect(() => {

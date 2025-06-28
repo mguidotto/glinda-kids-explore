@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
@@ -14,6 +13,7 @@ import ContentsManagement from "@/components/admin/ContentsManagement";
 import PagesManagement from "@/components/admin/PagesManagement";
 import TagsManagement from "@/components/admin/TagsManagement";
 import GoogleAnalyticsManagement from "@/components/admin/GoogleAnalyticsManagement";
+import ContentSEOManagement from "@/components/admin/ContentSEOManagement";
 import { useAuth } from "@/hooks/useAuth";
 
 const AdminDashboard = () => {
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
         <Tabs defaultValue="users" className="space-y-6">
           {/* Responsive TabsList */}
           <div className="w-full overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-5 md:grid-cols-11 min-w-max md:min-w-0">
+            <TabsList className="grid w-full grid-cols-5 md:grid-cols-12 min-w-max md:min-w-0">
               <TabsTrigger value="users" className="text-xs md:text-sm">Utenti</TabsTrigger>
               <TabsTrigger value="contents" className="text-xs md:text-sm">Contenuti</TabsTrigger>
               <TabsTrigger value="categories" className="text-xs md:text-sm">Categorie</TabsTrigger>
@@ -74,6 +74,7 @@ const AdminDashboard = () => {
               <TabsTrigger value="texts" className="text-xs md:text-sm hidden md:inline-flex">Testi</TabsTrigger>
               <TabsTrigger value="branding" className="text-xs md:text-sm hidden md:inline-flex">Branding</TabsTrigger>
               <TabsTrigger value="social" className="text-xs md:text-sm hidden md:inline-flex">Social</TabsTrigger>
+              <TabsTrigger value="content-seo" className="text-xs md:text-sm hidden md:inline-flex">SEO</TabsTrigger>
               <TabsTrigger value="analytics" className="text-xs md:text-sm hidden md:inline-flex">Analytics</TabsTrigger>
               <TabsTrigger value="icons" className="text-xs md:text-sm hidden md:inline-flex">Icone</TabsTrigger>
               <TabsTrigger value="pages" className="text-xs md:text-sm hidden md:inline-flex">Pagine</TabsTrigger>
@@ -93,6 +94,7 @@ const AdminDashboard = () => {
               <option value="texts">Testi</option>
               <option value="branding">Branding</option>
               <option value="social">Social</option>
+              <option value="content-seo">SEO Contenuti</option>
               <option value="analytics">Analytics</option>
               <option value="icons">Icone</option>
               <option value="pages">Pagine</option>
@@ -129,6 +131,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="social" className="space-y-6">
             <SocialMetaManagement />
+          </TabsContent>
+
+          <TabsContent value="content-seo" className="space-y-6">
+            <ContentSEOManagement />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

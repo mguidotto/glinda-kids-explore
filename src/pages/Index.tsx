@@ -1,4 +1,3 @@
-
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import SearchBar from "@/components/SearchBar";
 import Footer from "@/components/Footer";
 import { useContents } from "@/hooks/useContents";
 import { useAppTexts } from "@/hooks/useAppTexts";
+import { useSEO } from "@/hooks/useSEO";
 import { Database } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,6 +27,15 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { contents, categories, loading, fetchContents } = useContents();
   const { getText } = useAppTexts();
+
+  // SEO ottimizzato per homepage
+  useSEO({
+    title: 'Glinda - Trova le Migliori Attività per Bambini 0-10 anni | Corsi, Eventi, Servizi Educativi',
+    description: 'Marketplace #1 per genitori: scopri corsi, eventi e servizi educativi verificati per bambini da 0 a 10 anni. Prenota online le migliori attività vicino a te!',
+    keywords: 'attività bambini, corsi bambini infanzia, eventi famiglia, servizi educativi, laboratori creativi, sport bambini, musica bambini, arte bambini',
+    canonical: 'https://glinda.lovable.app/'
+  });
+
   const [stats, setStats] = useState({
     totalContents: 0,
     verifiedProviders: 0,
@@ -129,68 +138,86 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <Navigation />
       
+      {/* Struttura SEO ottimizzata con H1 principale */}
+      <header>
+        <h1 className="sr-only">Glinda - Marketplace Attività Educative per Bambini da 0 a 10 anni</h1>
+      </header>
+      
       <Hero onSearch={handleSearch} onExploreActivities={handleExploreActivities} />
 
-      <section className="py-8 px-4 max-w-6xl mx-auto" data-section="categories">
-        <CategoryFilter 
-          categories={categoryOptions}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
-      </section>
+      <main>
+        <section className="py-8 px-4 max-w-6xl mx-auto" data-section="categories" aria-labelledby="categories-heading">
+          <h2 id="categories-heading" className="sr-only">Categorie di Attività</h2>
+          <CategoryFilter 
+            categories={categoryOptions}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </section>
 
-      {serviziEducativiContents.length > 0 && (
-        <HomeSection 
-          title={getText('homepage.servizi_educativi.title', 'Servizi Educativi')}
-          subtitle={getText('homepage.servizi_educativi.subtitle', 'I migliori servizi educativi per i tuoi bambini')}
-          contents={serviziEducativiContents}
-          sectionType="featured"
-          onViewAll={() => handleViewAll('1d46a6f7-5d27-48bb-979d-377d35ab29c6')}
-        />
-      )}
+        {serviziEducativiContents.length > 0 && (
+          <section aria-labelledby="servizi-educativi-heading">
+            <h2 id="servizi-educativi-heading" className="sr-only">Servizi Educativi per Bambini</h2>
+            <HomeSection 
+              title={getText('homepage.servizi_educativi.title', 'Servizi Educativi')}
+              subtitle={getText('homepage.servizi_educativi.subtitle', 'I migliori servizi educativi per i tuoi bambini')}
+              contents={serviziEducativiContents}
+              sectionType="featured"
+              onViewAll={() => handleViewAll('1d46a6f7-5d27-48bb-979d-377d35ab29c6')}
+            />
+          </section>
+        )}
 
-      {corsiContents.length > 0 && (
-        <HomeSection 
-          title={getText('homepage.corsi.title', 'Corsi')}
-          subtitle={getText('homepage.corsi.subtitle', 'Corsi e attività formative per bambini')}
-          contents={corsiContents}
-          sectionType="featured"
-          onViewAll={() => handleViewAll('a0bbb1bb-d132-4ba4-8c25-89809e077c58')}
-        />
-      )}
+        {corsiContents.length > 0 && (
+          <section aria-labelledby="corsi-heading">
+            <h2 id="corsi-heading" className="sr-only">Corsi per Bambini</h2>
+            <HomeSection 
+              title={getText('homepage.corsi.title', 'Corsi')}
+              subtitle={getText('homepage.corsi.subtitle', 'Corsi e attività formative per bambini')}
+              contents={corsiContents}
+              sectionType="featured"
+              onViewAll={() => handleViewAll('a0bbb1bb-d132-4ba4-8c25-89809e077c58')}
+            />
+          </section>
+        )}
 
-      {eventiContents.length > 0 && (
-        <HomeSection 
-          title={getText('homepage.eventi.title', 'Eventi per tutta la famiglia')}
-          subtitle={getText('homepage.eventi.subtitle', 'Eventi e attività per tutta la famiglia')}
-          contents={eventiContents}
-          sectionType="cities"
-          onViewAll={() => handleViewAll('b7d5d55e-f19a-46a5-b037-e08ea25b7aff')}
-        />
-      )}
+        {eventiContents.length > 0 && (
+          <section aria-labelledby="eventi-heading">
+            <h2 id="eventi-heading" className="sr-only">Eventi per Famiglie</h2>
+            <HomeSection 
+              title={getText('homepage.eventi.title', 'Eventi per tutta la famiglia')}
+              subtitle={getText('homepage.eventi.subtitle', 'Eventi e attività per tutta la famiglia')}
+              contents={eventiContents}
+              sectionType="cities"
+              onViewAll={() => handleViewAll('b7d5d55e-f19a-46a5-b037-e08ea25b7aff')}
+            />
+          </section>
+        )}
 
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-[#8B4A6B] mb-2">{stats.totalContents}</div>
-              <div className="text-gray-600">{getText('homepage.stats.contents', 'Contenuti Verificati')}</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-[#FF6B7A] mb-2">{stats.verifiedProviders}</div>
-              <div className="text-gray-600">{getText('homepage.stats.providers', 'Provider Certificati')}</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-[#7BB3BD] mb-2">{stats.totalBookings}</div>
-              <div className="text-gray-600">{getText('homepage.stats.bookings', 'Prenotazioni Completate')}</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-[#F4D03F] mb-2">{stats.avgRating}</div>
-              <div className="text-gray-600">{getText('homepage.stats.rating', 'Valutazione Media')}</div>
+        <section className="py-16 bg-gray-50" aria-labelledby="stats-heading">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 id="stats-heading" className="sr-only">Le Nostre Statistiche</h2>
+            <div className="grid md:grid-cols-4 gap-8 text-center">
+              <div>
+                <div className="text-3xl font-bold text-[#8B4A6B] mb-2">{stats.totalContents}</div>
+                <div className="text-gray-600">{getText('homepage.stats.contents', 'Contenuti Verificati')}</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#FF6B7A] mb-2">{stats.verifiedProviders}</div>
+                <div className="text-gray-600">{getText('homepage.stats.providers', 'Provider Certificati')}</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#7BB3BD] mb-2">{stats.totalBookings}</div>
+                <div className="text-gray-600">{getText('homepage.stats.bookings', 'Prenotazioni Completate')}</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#F4D03F] mb-2">{stats.avgRating}</div>
+                <div className="text-gray-600">{getText('homepage.stats.rating', 'Valutazione Media')}</div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
     </div>

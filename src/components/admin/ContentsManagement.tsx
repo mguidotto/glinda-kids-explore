@@ -379,335 +379,350 @@ const ContentsManagement = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Gestione Contenuti</CardTitle>
-          <p className="text-gray-600 text-sm">Modifica tutti i contenuti della piattaforma</p>
-        </div>
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuovo Contenuto
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingContent ? "Modifica Contenuto" : "Nuovo Contenuto"}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Informazioni Base</h3>
-                
-                <div>
-                  <Label htmlFor="title">Titolo *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => {
-                      const title = e.target.value;
-                      setFormData(prev => ({ 
-                        ...prev, 
-                        title,
-                        slug: prev.slug || generateSlug(title)
-                      }));
-                    }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Descrizione</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="featured_image">Immagine in Evidenza</Label>
+      <CardHeader>
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div>
+            <CardTitle className="text-2xl font-bold">Gestione Contenuti</CardTitle>
+            <p className="text-gray-600 text-sm mt-1">Modifica tutti i contenuti della piattaforma</p>
+          </div>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                onClick={resetForm}
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Nuovo Contenuto
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-semibold">
+                  {editingContent ? "Modifica Contenuto" : "Nuovo Contenuto"}
+                </DialogTitle>
+              </DialogHeader>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Basic Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Informazioni Base</h3>
                   
-                  {formData.featured_image && (
-                    <div className="mt-2 mb-4">
-                      <div className="relative inline-block">
-                        <img 
-                          src={formData.featured_image} 
-                          alt="Immagine in evidenza" 
-                          className="w-32 h-24 object-cover rounded-lg border"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
-                          onClick={handleRemoveImage}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
+                  <div>
+                    <Label htmlFor="title">Titolo *</Label>
                     <Input
-                      id="featured_image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="cursor-pointer"
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => {
+                        const title = e.target.value;
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          title,
+                          slug: prev.slug || generateSlug(title)
+                        }));
+                      }}
+                      required
                     />
-                    <p className="text-xs text-gray-500">
-                      Formati supportati: JPG, PNG, GIF. Dimensione massima: 5MB
-                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description">Descrizione</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="featured_image">Immagine in Evidenza</Label>
                     
-                    {selectedFile && (
-                      <div className="flex items-center gap-2 text-sm text-green-600">
-                        <Upload className="h-4 w-4" />
-                        File selezionato: {selectedFile.name}
+                    {formData.featured_image && (
+                      <div className="mt-2 mb-4">
+                        <div className="relative inline-block">
+                          <img 
+                            src={formData.featured_image} 
+                            alt="Immagine in evidenza" 
+                            className="w-32 h-24 object-cover rounded-lg border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                            onClick={handleRemoveImage}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     )}
+
+                    <div className="space-y-2">
+                      <Input
+                        id="featured_image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="cursor-pointer"
+                      />
+                      <p className="text-xs text-gray-500">
+                        Formati supportati: JPG, PNG, GIF. Dimensione massima: 5MB
+                      </p>
+                      
+                      {selectedFile && (
+                        <div className="flex items-center gap-2 text-sm text-green-600">
+                          <Upload className="h-4 w-4" />
+                          File selezionato: {selectedFile.name}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <Label>Tag</Label>
-                  <div className="mt-2 max-h-32 overflow-y-auto border rounded-md p-3 space-y-2">
-                    {tags.map((tag) => (
-                      <div key={tag.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`tag-${tag.id}`}
-                          checked={selectedTags.includes(tag.id)}
-                          onCheckedChange={(checked) => handleTagToggle(tag.id, checked as boolean)}
-                        />
-                        <Label htmlFor={`tag-${tag.id}`} className="text-sm font-normal">
-                          {tag.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* SEO Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Search className="h-5 w-5" />
-                  <h3 className="text-lg font-semibold">SEO e Meta Tag</h3>
-                </div>
-                
-                <div>
-                  <Label htmlFor="slug">URL Slug</Label>
-                  <Input
-                    id="slug"
-                    placeholder="url-del-contenuto"
-                    value={formData.slug}
-                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    L'URL sarà: /content/{formData.slug || "url-del-contenuto"}
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="meta_title">Meta Title</Label>
-                  <Input
-                    id="meta_title"
-                    placeholder="Titolo SEO personalizzato (max 60 caratteri)"
-                    value={formData.meta_title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
-                    maxLength={60}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formData.meta_title.length}/60 caratteri
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="meta_description">Meta Description</Label>
-                  <Textarea
-                    id="meta_description"
-                    placeholder="Descrizione SEO personalizzata (max 160 caratteri)"
-                    value={formData.meta_description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
-                    maxLength={160}
-                    rows={3}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formData.meta_description.length}/160 caratteri
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="meta_image">Immagine Social (URL)</Label>
-                  <Input
-                    id="meta_image"
-                    placeholder="URL immagine per condivisioni social"
-                    value={formData.meta_image}
-                    onChange={(e) => setFormData(prev => ({ ...prev, meta_image: e.target.value }))}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Se vuoto, verrà usata l'immagine in evidenza
-                  </p>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Category and Details */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Categoria e Dettagli</h3>
-                
-                <div>
-                  <Label htmlFor="category">Categoria</Label>
-                  <Select
-                    value={formData.category_id}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
+                  <div>
+                    <Label>Tag</Label>
+                    <div className="mt-2 max-h-32 overflow-y-auto border rounded-md p-3 space-y-2">
+                      {tags.map((tag) => (
+                        <div key={tag.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`tag-${tag.id}`}
+                            checked={selectedTags.includes(tag.id)}
+                            onCheckedChange={(checked) => handleTagToggle(tag.id, checked as boolean)}
+                          />
+                          <Label htmlFor={`tag-${tag.id}`} className="text-sm font-normal">
+                            {tag.name}
+                          </Label>
+                        </div>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="modality">Modalità</Label>
-                  <Select
-                    value={formData.modality}
-                    onValueChange={(value: Database["public"]["Enums"]["modality"]) => setFormData(prev => ({ ...prev, modality: value }))}
+                <Separator />
+
+                {/* SEO Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Search className="h-5 w-5" />
+                    <h3 className="text-lg font-semibold">SEO e Meta Tag</h3>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="slug">URL Slug</Label>
+                    <Input
+                      id="slug"
+                      placeholder="url-del-contenuto"
+                      value={formData.slug}
+                      onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      L'URL sarà: /content/{formData.slug || "url-del-contenuto"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meta_title">Meta Title</Label>
+                    <Input
+                      id="meta_title"
+                      placeholder="Titolo SEO personalizzato (max 60 caratteri)"
+                      value={formData.meta_title}
+                      onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
+                      maxLength={60}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.meta_title.length}/60 caratteri
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meta_description">Meta Description</Label>
+                    <Textarea
+                      id="meta_description"
+                      placeholder="Descrizione SEO personalizzata (max 160 caratteri)"
+                      value={formData.meta_description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
+                      maxLength={160}
+                      rows={3}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.meta_description.length}/160 caratteri
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="meta_image">Immagine Social (URL)</Label>
+                    <Input
+                      id="meta_image"
+                      placeholder="URL immagine per condivisioni social"
+                      value={formData.meta_image}
+                      onChange={(e) => setFormData(prev => ({ ...prev, meta_image: e.target.value }))}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Se vuoto, verrà usata l'immagine in evidenza
+                    </p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Category and Details */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Categoria e Dettagli</h3>
+                  
+                  <div>
+                    <Label htmlFor="category">Categoria</Label>
+                    <Select
+                      value={formData.category_id}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleziona categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="modality">Modalità</Label>
+                    <Select
+                      value={formData.modality}
+                      onValueChange={(value: Database["public"]["Enums"]["modality"]) => setFormData(prev => ({ ...prev, modality: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="presenza">In Presenza</SelectItem>
+                        <SelectItem value="online">Online</SelectItem>
+                        <SelectItem value="ibrido">Ibrida</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="city">Città</Label>
+                      <Input
+                        id="city"
+                        value={formData.city}
+                        onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="address">Indirizzo</Label>
+                      <Input
+                        id="address"
+                        value={formData.address}
+                        onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="price_from">Prezzo Da (€)</Label>
+                      <Input
+                        id="price_from"
+                        type="number"
+                        step="0.01"
+                        value={formData.price_from}
+                        onChange={(e) => setFormData(prev => ({ ...prev, price_from: e.target.value }))}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="price_to">Prezzo A (€)</Label>
+                      <Input
+                        id="price_to"
+                        type="number"
+                        step="0.01"
+                        value={formData.price_to}
+                        onChange={(e) => setFormData(prev => ({ ...prev, price_to: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="website">Sito Web</Label>
+                      <Input
+                        id="website"
+                        type="url"
+                        value={formData.website}
+                        onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="phone">Telefono</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="published"
+                        checked={formData.published}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, published: checked }))}
+                      />
+                      <Label htmlFor="published">Pubblicato</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="featured"
+                        checked={formData.featured}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
+                      />
+                      <Label htmlFor="featured">In Evidenza</Label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-6 border-t">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="px-6 py-2"
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="presenza">In Presenza</SelectItem>
-                      <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="ibrido">Ibrida</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    Annulla
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={uploading}
+                    className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-2"
+                  >
+                    {uploading ? "Caricamento..." : editingContent ? "Aggiorna Contenuto" : "Crea Contenuto"}
+                  </Button>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="city">Città</Label>
-                    <Input
-                      id="city"
-                      value={formData.city}
-                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="address">Indirizzo</Label>
-                    <Input
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="price_from">Prezzo Da (€)</Label>
-                    <Input
-                      id="price_from"
-                      type="number"
-                      step="0.01"
-                      value={formData.price_from}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price_from: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="price_to">Prezzo A (€)</Label>
-                    <Input
-                      id="price_to"
-                      type="number"
-                      step="0.01"
-                      value={formData.price_to}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price_to: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="website">Sito Web</Label>
-                    <Input
-                      id="website"
-                      type="url"
-                      value={formData.website}
-                      onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="phone">Telefono</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="published"
-                      checked={formData.published}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, published: checked }))}
-                    />
-                    <Label htmlFor="published">Pubblicato</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="featured"
-                      checked={formData.featured}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
-                    />
-                    <Label htmlFor="featured">In Evidenza</Label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Annulla
-                </Button>
-                <Button type="submit" disabled={uploading}>
-                  {uploading ? "Caricamento..." : editingContent ? "Aggiorna" : "Crea"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
 
       <CardContent>

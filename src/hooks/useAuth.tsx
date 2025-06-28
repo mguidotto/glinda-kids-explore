@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,13 +45,13 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Keep loading true while fetching profile
-          await fetchUserProfile(session.user.id);
+          // Fetch profile but don't block loading state
+          fetchUserProfile(session.user.id);
         } else {
           setProfile(null);
         }
         
-        // Only set loading to false after everything is processed
+        // Always set loading to false after processing auth state
         setLoading(false);
       }
     );
@@ -62,11 +63,12 @@ export const useAuth = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await fetchUserProfile(session.user.id);
+        fetchUserProfile(session.user.id);
       } else {
         setProfile(null);
       }
       
+      // Set loading to false after initial check
       setLoading(false);
     });
 

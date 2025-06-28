@@ -36,10 +36,11 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {loading ? (
-              <div className="w-20 h-10 bg-gray-200 animate-pulse rounded"></div>
-            ) : user ? (
+            {/* Semplifichiamo la logica di rendering */}
+            {user ? (
               <UserMenu />
+            ) : loading ? (
+              <div className="w-20 h-10 bg-gray-200 animate-pulse rounded"></div>
             ) : (
               <Link to="/auth">
                 <Button className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]">
@@ -84,13 +85,14 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {loading ? (
-              <div className="px-4 py-2">
-                <div className="w-full h-10 bg-gray-200 animate-pulse rounded"></div>
-              </div>
-            ) : user ? (
+            {/* Stessa logica semplificata per mobile */}
+            {user ? (
               <div className="px-4 py-2">
                 <UserMenu />
+              </div>
+            ) : loading ? (
+              <div className="px-4 py-2">
+                <div className="w-full h-10 bg-gray-200 animate-pulse rounded"></div>
               </div>
             ) : (
               <Link 

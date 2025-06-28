@@ -1,287 +1,214 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import Navigation from "@/components/Navigation";
-import ReviewsList from "@/components/ReviewsList";
-import ReviewForm from "@/components/ReviewForm";
-import ContentImageGallery from "@/components/content/ContentImageGallery";
+
+import { useParams, Navigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import ContentHeader from "@/components/content/ContentHeader";
-import ContentActionButtons from "@/components/content/ContentActionButtons";
+import ContentImageGallery from "@/components/content/ContentImageGallery";
 import ContentContactInfo from "@/components/content/ContentContactInfo";
+import ContentActionButtons from "@/components/content/ContentActionButtons";
 import ContentBookingSidebar from "@/components/content/ContentBookingSidebar";
 import ContentMapSection from "@/components/content/ContentMapSection";
-import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
-import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
+import ReviewsList from "@/components/ReviewsList";
+import ReviewForm from "@/components/ReviewForm";
+import { useContentUrl } from "@/hooks/useContentUrl";
+import { useErrorTracking } from "@/hooks/useErrorTracking";
 import { useSEO } from "@/hooks/useSEO";
-
-type Content = Database["public"]["Tables"]["contents"]["Row"] & {
-  providers: { business_name: string; verified: boolean };
-  categories: { name: string; slug: string };
-};
+import { useEffect } from "react";
 
 const ContentDetail = () => {
-  const { slugOrId, categorySlug, contentSlug } = useParams<{ 
-    slugOrId?: string; 
-    categorySlug?: string; 
-    contentSlug?: string; 
-  }>();
-  const navigate = useNavigate();
-  const [content, setContent] = useState<Content | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [hasRedirected, setHasRedirected] = useState(false);
-  const { trackPageView, trackEvent } = useGoogleAnalytics();
+  const { slug } = useParams();
+  const { trackError } = useErrorTracking();
+  
+  console.log("[ContentDetail] Rendering with slug:", slug);
 
-  // Determine the identifier to use
-  const identifier = contentSlug || slugOrId;
+  const { data: content, isLoading, error } = useQuery({
+    queryKey: ["content", slug],
+    queryFn: async () => {
+      console.log("[ContentDetail] Fetching content for slug:", slug);
+      
+      if (!slug) {
+        console.error("[ContentDetail] No slug provided");
+        throw new Error("No slug provided");
+      }
 
-  // SEO optimization for content detail page
+      const { data, error } = await supabase
+        .from("contents")
+        .select(`
+          *,
+          categories (
+            id,
+            name,
+            slug,
+            color
+          ),
+          providers (
+            business_name,
+            verified,
+            phone,
+            email,
+            website
+          ),
+          content_tags (
+            tags (
+              id,
+              name,
+              slug
+            )
+          )
+        `)
+        .eq("slug", slug)
+        .eq("published", true)
+        .single();
+
+      if (error) {
+        console.error("[ContentDetail] Database error:", error);
+        trackError(error, { context: "content_fetch", slug });
+        throw error;
+      }
+
+      if (!data) {
+        console.error("[ContentDetail] Content not found for slug:", slug);
+        const notFoundError = new Error("Content not found");
+        trackError(notFoundError, { context: "content_not_found", slug });
+        throw notFoundError;
+      }
+
+      console.log("[ContentDetail] Content fetched successfully:", data);
+      return data;
+    },
+    retry: 1,
+    meta: {
+      onError: (error: any) => {
+        console.error("[ContentDetail] Query error:", error);
+        trackError(error, { context: "query_error", slug });
+      }
+    }
+  });
+
+  const { generateUrl } = useContentUrl();
+
+  // Set up SEO
   useSEO({
-    title: content ? `${content.title} - Glinda | Attività per Bambini` : 'Caricamento...',
-    description: content?.description || 'Scopri questa fantastica attività per bambini su Glinda',
-    keywords: content ? `${content.title}, attività bambini, ${(content as any).categories?.name}, ${content.city}` : 'attività bambini',
-    canonical: content?.slug 
-      ? `https://glinda.lovable.app/${(content as any).categories?.slug}/${content.slug}`
-      : `https://glinda.lovable.app/content/${content?.id}`,
-    ogImage: content?.featured_image || 'https://glinda.lovable.app/icon-512x512.png'
+    title: content?.meta_title || content?.title,
+    description: content?.meta_description || content?.description,
+    image: content?.meta_image || content?.featured_image,
+    type: "article"
   });
 
   useEffect(() => {
-    const fetchContent = async () => {
-      if (!identifier) {
-        console.error('ContentDetail: No identifier provided');
-        setLoading(false);
-        return;
-      }
-      
-      console.log('ContentDetail: Fetching content with identifier:', identifier);
-      console.log('ContentDetail: Category slug:', categorySlug);
-      console.log('ContentDetail: Current URL:', window.location.pathname);
-      
-      try {
-        // First try to find by slug
-        let { data, error } = await supabase
-          .from("contents")
-          .select(`
-            *,
-            providers!inner(business_name, verified),
-            categories!inner(name, slug)
-          `)
-          .eq("slug", identifier)
-          .eq("published", true)
-          .maybeSingle();
-
-        // If not found by slug, try by ID
-        if (!data && !error) {
-          console.log('ContentDetail: Content not found by slug, trying by ID');
-          const result = await supabase
-            .from("contents")
-            .select(`
-              *,
-              providers!inner(business_name, verified),
-              categories!inner(name, slug)
-            `)
-            .eq("id", identifier)
-            .eq("published", true)
-            .maybeSingle();
-          
-          data = result.data;
-          error = result.error;
-        }
-
-        if (error) {
-          console.error('ContentDetail: Database error:', error);
-          setLoading(false);
-          return;
-        }
-
-        if (!data) {
-          console.error('ContentDetail: Content not found for identifier:', identifier);
-          setLoading(false);
-          return;
-        }
-
-        console.log('ContentDetail: Content found:', data.title);
-        
-        // Only redirect if we haven't already redirected and conditions are met
-        if (!hasRedirected) {
-          // Check if we need to redirect to correct URL format
-          const shouldRedirectToSlug = slugOrId === data.id && data.slug && (data as any).categories?.slug;
-          const shouldRedirectForCategoryMismatch = categorySlug && (data as any).categories?.slug !== categorySlug;
-          
-          if (shouldRedirectToSlug) {
-            console.log('ContentDetail: Redirecting to pretty URL');
-            setHasRedirected(true);
-            navigate(`/${(data as any).categories.slug}/${data.slug}`, { replace: true });
-            return;
-          }
-          
-          if (shouldRedirectForCategoryMismatch) {
-            console.log('ContentDetail: Category slug mismatch, redirecting to correct URL');
-            setHasRedirected(true);
-            if (data.slug) {
-              navigate(`/${(data as any).categories.slug}/${data.slug}`, { replace: true });
-            } else {
-              navigate(`/content/${data.id}`, { replace: true });
-            }
-            return;
-          }
-        }
-
-        setContent(data as Content);
-        trackPageView(window.location.pathname);
-        trackEvent('view_content', {
-          content_id: data.id,
-          content_title: data.title,
-          content_category: (data as any).categories?.name
-        });
-        
-      } catch (error) {
-        console.error('ContentDetail: Unexpected error:', error);
-      }
-      
-      setLoading(false);
-    };
-
-    fetchContent();
-  }, [identifier, categorySlug, navigate, trackPageView, trackEvent, slugOrId, hasRedirected]);
-
-  const handleReviewSubmitted = () => {
-    window.location.reload();
-  };
-
-  const handleBackClick = () => {
-    navigate("/");
-  };
-
-  const handleBookingClick = () => {
     if (content) {
-      trackEvent('booking_click', { content_id: content.id });
+      console.log("[ContentDetail] Content loaded:", {
+        id: content.id,
+        title: content.title,
+        slug: content.slug
+      });
     }
-  };
+  }, [content]);
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div>Caricamento...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Caricamento contenuto...</p>
         </div>
       </div>
     );
   }
 
-  if (!content) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Contenuto non trovato</h1>
-            <p className="text-gray-600 mb-4">Il contenuto che stai cercando non esiste o è stato rimosso.</p>
-            <Button onClick={handleBackClick}>
-              Torna alla homepage
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+  if (error || !content) {
+    console.error("[ContentDetail] Rendering error state:", error);
+    return <Navigate to="/404" replace />;
   }
 
-  const shouldShowBooking = content.booking_required;
-  const shouldShowPrice = content.price_from && content.payment_type !== 'free';
-  const isBookableService = content.booking_required;
-  const hasImages = content.images && content.images.length > 0;
-  const featuredImage = content.featured_image || (content.images && content.images[0]) || "/placeholder.svg";
-  const hasValidAddress = content.address && content.address.trim().length > 0;
-  const isEvent = (content as any).categories?.slug === 'eventi';
-  const currentUrl = window.location.href;
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Back button */}
-        <Button variant="ghost" className="mb-6" onClick={handleBackClick}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Torna alla homepage
-        </Button>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Image gallery */}
-            <ContentImageGallery
-              featuredImage={featuredImage}
-              images={content.images}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Header */}
+            <ContentHeader
               title={content.title}
+              description={content.description}
+              city={content.city}
+              address={content.address}
+              modality={content.modality}
+              price_from={content.price_from}
+              price_to={content.price_to}
+              category={content.categories}
+              tags={content.content_tags?.map(ct => ct.tags)}
+              eventDate={content.event_date}
+              eventTime={content.event_time}
+              eventEndDate={content.event_end_date}
+              eventEndTime={content.event_end_time}
             />
 
-            {/* Content info */}
-            <Card>
-              <CardHeader>
-                <ContentHeader
-                  title={content.title}
-                  city={content.city}
-                  categoryName={(content as any).categories?.name}
-                  contentId={content.id}
-                  currentUrl={currentUrl}
-                  description={content.description || ''}
-                />
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 mb-4">{content.description}</p>
-                
-                {/* Action buttons for events and locations */}
-                <ContentActionButtons
-                  isEvent={isEvent}
-                  hasValidAddress={hasValidAddress}
-                  title={content.title}
-                  description={content.description || ''}
-                  address={content.address || ''}
-                  city={content.city}
-                />
-                
-                {/* Contact info */}
-                <ContentContactInfo
-                  address={content.address}
-                  phone={content.phone}
-                  email={content.email}
-                  website={content.website}
-                  hasValidAddress={hasValidAddress}
-                />
-              </CardContent>
-            </Card>
+            {/* Image Gallery */}
+            {content.featured_image && (
+              <ContentImageGallery
+                featuredImage={content.featured_image}
+                images={content.images}
+                title={content.title}
+              />
+            )}
 
-            {/* Map */}
-            <ContentMapSection
-              hasValidAddress={hasValidAddress}
-              address={content.address || ''}
+            {/* Contact Info */}
+            <ContentContactInfo
+              phone={content.phone}
+              email={content.email}
+              website={content.website}
+              provider={content.providers}
             />
 
-            <ReviewsList contentId={content.id} />
-            <ReviewForm 
-              contentId={content.id} 
-              onReviewSubmitted={handleReviewSubmitted}
+            {/* Action Buttons */}
+            <ContentActionButtons
+              contentId={content.id}
+              title={content.title}
+              currentUrl={currentUrl}
+              eventDate={content.event_date}
+              eventTime={content.event_time}
+              eventEndDate={content.event_end_date}
+              eventEndTime={content.event_end_time}
+              address={content.address}
+              city={content.city}
             />
+
+            {/* Map Section */}
+            {content.latitude && content.longitude && (
+              <ContentMapSection
+                latitude={content.latitude}
+                longitude={content.longitude}
+                title={content.title}
+                address={content.address}
+              />
+            )}
+
+            {/* Reviews Section */}
+            <div className="space-y-6">
+              <ReviewsList contentId={content.id} />
+              <ReviewForm contentId={content.id} />
+            </div>
           </div>
 
-          {/* Booking sidebar */}
-          <ContentBookingSidebar
-            shouldShowBooking={shouldShowBooking}
-            shouldShowPrice={shouldShowPrice}
-            priceFrom={content.price_from}
-            priceTo={content.price_to}
-            durationMinutes={content.duration_minutes}
-            maxParticipants={content.max_participants}
-            modality={content.modality}
-            isBookableService={isBookableService}
-            contentId={content.id}
-            onBookingClick={handleBookingClick}
-          />
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <ContentBookingSidebar
+              contentId={content.id}
+              title={content.title}
+              priceFrom={content.price_from}
+              priceTo={content.price_to}
+              purchasable={content.purchasable}
+              bookingRequired={content.booking_required}
+              stripePriceId={content.stripe_price_id}
+              paymentType={content.payment_type}
+              phone={content.phone}
+              email={content.email}
+              website={content.website}
+            />
+          </div>
         </div>
       </div>
     </div>

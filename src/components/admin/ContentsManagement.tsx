@@ -18,6 +18,8 @@ import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search, Calenda
 import { Database } from "@/integrations/supabase/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import ImageGalleryUpload from "./ImageGalleryUpload";
+import AddressAutocomplete from "./AddressAutocomplete";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers?: { business_name: string; verified: boolean };
@@ -42,6 +44,7 @@ const ContentsManagement = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
   const [eventEndDate, setEventEndDate] = useState<Date | undefined>(undefined);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -58,14 +61,14 @@ const ContentsManagement = () => {
     phone: "",
     email: "",
     featured_image: "",
-    // SEO fields
     slug: "",
     meta_title: "",
     meta_description: "",
     meta_image: "",
-    // Event fields
     event_time: "",
-    event_end_time: ""
+    event_end_time: "",
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   useEffect(() => {
@@ -228,6 +231,15 @@ const ContentsManagement = () => {
     }
   };
 
+  const handleAddressChange = (address: string, coordinates?: { lat: number; lng: number }) => {
+    setFormData(prev => ({
+      ...prev,
+      address,
+      latitude: coordinates?.lat || null,
+      longitude: coordinates?.lng || null
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -249,12 +261,11 @@ const ContentsManagement = () => {
         price_to: formData.price_to ? parseFloat(formData.price_to) : null,
         category_id: formData.category_id || null,
         featured_image: featuredImageUrl || null,
-        // SEO fields
+        images: galleryImages,
         slug: formData.slug || null,
         meta_title: formData.meta_title || null,
         meta_description: formData.meta_description || null,
         meta_image: formData.meta_image || featuredImageUrl || null,
-        // Event fields
         event_date: eventDate ? eventDate.toISOString().split('T')[0] : null,
         event_time: formData.event_time || null,
         event_end_date: eventEndDate ? eventEndDate.toISOString().split('T')[0] : null,
@@ -269,7 +280,6 @@ const ContentsManagement = () => {
 
         if (error) throw error;
         
-        // Save tags
         await saveContentTags(editingContent.id, selectedTags);
         
         setMessage("Contenuto aggiornato con successo!");
@@ -352,13 +362,16 @@ const ContentsManagement = () => {
       meta_description: "",
       meta_image: "",
       event_time: "",
-      event_end_time: ""
+      event_end_time: "",
+      latitude: null,
+      longitude: null,
     });
     setEditingContent(null);
     setSelectedFile(null);
     setSelectedTags([]);
     setEventDate(undefined);
     setEventEndDate(undefined);
+    setGalleryImages([]);
   };
 
   const startEdit = (content: Content) => {
@@ -383,7 +396,9 @@ const ContentsManagement = () => {
       meta_description: content.meta_description || "",
       meta_image: content.meta_image || "",
       event_time: (content as any).event_time || "",
-      event_end_time: (content as any).event_end_time || ""
+      event_end_time: (content as any).event_end_time || "",
+      latitude: content.latitude || null,
+      longitude: content.longitude || null,
     });
     
     // Set event dates
@@ -397,6 +412,9 @@ const ContentsManagement = () => {
     // Set selected tags
     const contentTagIds = content.content_tags?.map(ct => ct.tags.id) || [];
     setSelectedTags(contentTagIds);
+    
+    // Set gallery images
+    setGalleryImages(content.images || []);
     
     setIsDialogOpen(true);
   };
@@ -463,6 +481,7 @@ const ContentsManagement = () => {
                     />
                   </div>
 
+                  {/* Featured Image */}
                   <div>
                     <Label htmlFor="featured_image">Immagine in Evidenza</Label>
                     
@@ -508,6 +527,13 @@ const ContentsManagement = () => {
                     </div>
                   </div>
 
+                  {/* Image Gallery */}
+                  <ImageGalleryUpload
+                    images={galleryImages}
+                    onImagesChange={setGalleryImages}
+                  />
+
+                  {/* Tags */}
                   <div>
                     <Label>Tag</Label>
                     <div className="mt-2 max-h-32 overflow-y-auto border rounded-md p-3 space-y-2">
@@ -728,24 +754,21 @@ const ContentsManagement = () => {
                     </Select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="city">Città</Label>
-                      <Input
-                        id="city"
-                        value={formData.city}
-                        onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                      />
-                    </div>
+                  {/* Address with Autocomplete */}
+                  <AddressAutocomplete
+                    value={formData.address}
+                    onChange={handleAddressChange}
+                    placeholder="Cerca e seleziona un indirizzo..."
+                    label="Indirizzo"
+                  />
 
-                    <div>
-                      <Label htmlFor="address">Indirizzo</Label>
-                      <Input
-                        id="address"
-                        value={formData.address}
-                        onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="city">Città</Label>
+                    <Input
+                      id="city"
+                      value={formData.city}
+                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -870,6 +893,12 @@ const ContentsManagement = () => {
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Image className="h-3 w-3" />
                       Immagine
+                    </Badge>
+                  )}
+                  {content.images && content.images.length > 0 && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Image className="h-3 w-3" />
+                      Galleria ({content.images.length})
                     </Badge>
                   )}
                   {content.slug && (

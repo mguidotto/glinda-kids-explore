@@ -1,9 +1,9 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useContentUrl } from "@/hooks/useContentUrl";
 
 type ContentItem = {
   id: string;
@@ -20,6 +20,8 @@ type ContentItem = {
   participants?: number;
   price_from?: number;
   payment_type?: string;
+  slug?: string | null;
+  categories?: { slug: string } | null;
 };
 
 type HomeSectionProps = {
@@ -31,6 +33,7 @@ type HomeSectionProps = {
 };
 
 const ContentItemCard = ({ content }: { content: ContentItem }) => {
+  const { getContentUrl } = useContentUrl();
   const shouldShowPrice = content.price_from && content.payment_type !== 'free';
   const shouldShowRating = content.rating && content.reviews;
 
@@ -94,7 +97,7 @@ const ContentItemCard = ({ content }: { content: ContentItem }) => {
               <div className="h-6"></div>
             )}
           </div>
-          <Link to={`/content/${content.id}`}>
+          <Link to={getContentUrl(content)}>
             <Button size="sm" className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]">
               Scopri di più
             </Button>

@@ -24,41 +24,90 @@ type Content = Database["public"]["Tables"]["contents"]["Row"] & {
 };
 
 const ContentDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slugOrId, categorySlug, contentSlug } = useParams<{ 
+    slugOrId?: string; 
+    categorySlug?: string; 
+    contentSlug?: string; 
+  }>();
   const navigate = useNavigate();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
   const { trackPageView, trackEvent } = useGoogleAnalytics();
+
+  // Determine the identifier to use
+  const identifier = contentSlug || slugOrId;
 
   // SEO optimization for content detail page
   useSEO({
     title: content ? `${content.title} - Glinda | Attività per Bambini` : 'Caricamento...',
     description: content?.description || 'Scopri questa fantastica attività per bambini su Glinda',
     keywords: content ? `${content.title}, attività bambini, ${(content as any).categories?.name}, ${content.city}` : 'attività bambini',
-    canonical: `https://glinda.lovable.app/content/${id}`,
+    canonical: content?.slug 
+      ? `https://glinda.lovable.app/${(content as any).categories?.slug}/${content.slug}`
+      : `https://glinda.lovable.app/content/${content?.id}`,
     ogImage: content?.featured_image || 'https://glinda.lovable.app/icon-512x512.png'
   });
 
   useEffect(() => {
     const fetchContent = async () => {
-      if (!id) return;
+      if (!identifier) return;
       
-      const { data, error } = await supabase
+      console.log('Fetching content with identifier:', identifier);
+      console.log('Category slug:', categorySlug);
+      
+      // First try to find by slug
+      let { data, error } = await supabase
         .from("contents")
         .select(`
           *,
           providers!inner(business_name, verified),
           categories!inner(name, slug)
         `)
-        .eq("id", id)
+        .eq("slug", identifier)
         .eq("published", true)
-        .single();
+        .maybeSingle();
+
+      // If not found by slug, try by ID
+      if (!data && !error) {
+        console.log('Content not found by slug, trying by ID');
+        const result = await supabase
+          .from("contents")
+          .select(`
+            *,
+            providers!inner(business_name, verified),
+            categories!inner(name, slug)
+          `)
+          .eq("id", identifier)
+          .eq("published", true)
+          .maybeSingle();
+        
+        data = result.data;
+        error = result.error;
+      }
 
       if (!error && data) {
+        // If we have a category slug in the URL, verify it matches
+        if (categorySlug && (data as any).categories?.slug !== categorySlug) {
+          console.log('Category slug mismatch, redirecting to correct URL');
+          if (data.slug) {
+            navigate(`/${(data as any).categories.slug}/${data.slug}`, { replace: true });
+          } else {
+            navigate(`/content/${data.id}`, { replace: true });
+          }
+          return;
+        }
+
+        // If we accessed by ID but content has a slug, redirect to pretty URL
+        if (slugOrId === data.id && data.slug && (data as any).categories?.slug) {
+          console.log('Redirecting to pretty URL');
+          navigate(`/${(data as any).categories.slug}/${data.slug}`, { replace: true });
+          return;
+        }
+
         setContent(data as Content);
-        trackPageView(`/content/${id}`);
+        trackPageView(window.location.pathname);
         trackEvent('view_content', {
-          content_id: id,
+          content_id: data.id,
           content_title: data.title,
           content_category: (data as any).categories?.name
         });
@@ -67,7 +116,7 @@ const ContentDetail = () => {
     };
 
     fetchContent();
-  }, [id]);
+  }, [identifier, categorySlug, navigate, trackPageView, trackEvent, slugOrId]);
 
   const handleReviewSubmitted = () => {
     window.location.reload();
@@ -177,9 +226,9 @@ const ContentDetail = () => {
               address={content.address || ''}
             />
 
-            <ReviewsList contentId={id || ""} />
+            <ReviewsList contentId={content.id} />
             <ReviewForm 
-              contentId={id || ""} 
+              contentId={content.id} 
               onReviewSubmitted={handleReviewSubmitted}
             />
           </div>

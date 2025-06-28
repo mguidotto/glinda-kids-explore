@@ -100,7 +100,9 @@ const Index = () => {
     participants: content.max_participants,
     distance: content.distance_km,
     price_from: content.price_from,
-    payment_type: content.payment_type
+    payment_type: content.payment_type,
+    slug: content.slug,
+    categories: (content as any).categories
   }));
 
   const serviziEducativiContents = transformedContents.filter(c => 

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -19,7 +19,12 @@ import { useAuth } from "@/hooks/useAuth";
 const AdminDashboard = () => {
   const { user, profile, loading } = useAuth();
 
+  useEffect(() => {
+    console.log("AdminDashboard render - Loading:", loading, "User:", user?.email, "Profile role:", profile?.role);
+  }, [loading, user, profile]);
+
   if (loading) {
+    console.log("Showing loading state");
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
@@ -31,6 +36,7 @@ const AdminDashboard = () => {
   }
 
   if (!user || !profile || profile.role !== 'admin') {
+    console.log("Access denied - User:", !!user, "Profile:", !!profile, "Role:", profile?.role);
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
@@ -43,6 +49,8 @@ const AdminDashboard = () => {
       </div>
     );
   }
+
+  console.log("Rendering admin dashboard for:", user.email);
 
   return (
     <div className="min-h-screen bg-gray-50">

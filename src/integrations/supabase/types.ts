@@ -133,6 +133,9 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           max_participants: number | null
+          meta_description: string | null
+          meta_image: string | null
+          meta_title: string | null
           modality: Database["public"]["Enums"]["modality"]
           payment_type: string | null
           phone: string | null
@@ -141,6 +144,7 @@ export type Database = {
           provider_id: string | null
           published: boolean | null
           purchasable: boolean | null
+          slug: string | null
           stripe_price_id: string | null
           title: string
           updated_at: string | null
@@ -164,6 +168,9 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           max_participants?: number | null
+          meta_description?: string | null
+          meta_image?: string | null
+          meta_title?: string | null
           modality?: Database["public"]["Enums"]["modality"]
           payment_type?: string | null
           phone?: string | null
@@ -172,6 +179,7 @@ export type Database = {
           provider_id?: string | null
           published?: boolean | null
           purchasable?: boolean | null
+          slug?: string | null
           stripe_price_id?: string | null
           title: string
           updated_at?: string | null
@@ -195,6 +203,9 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           max_participants?: number | null
+          meta_description?: string | null
+          meta_image?: string | null
+          meta_title?: string | null
           modality?: Database["public"]["Enums"]["modality"]
           payment_type?: string | null
           phone?: string | null
@@ -203,6 +214,7 @@ export type Database = {
           provider_id?: string | null
           published?: boolean | null
           purchasable?: boolean | null
+          slug?: string | null
           stripe_price_id?: string | null
           title?: string
           updated_at?: string | null

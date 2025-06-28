@@ -12,8 +12,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search, CalendarIcon, Clock } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers?: { business_name: string; verified: boolean };
@@ -36,6 +40,8 @@ const ContentsManagement = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
+  const [eventEndDate, setEventEndDate] = useState<Date | undefined>(undefined);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -56,7 +62,10 @@ const ContentsManagement = () => {
     slug: "",
     meta_title: "",
     meta_description: "",
-    meta_image: ""
+    meta_image: "",
+    // Event fields
+    event_time: "",
+    event_end_time: ""
   });
 
   useEffect(() => {
@@ -245,6 +254,11 @@ const ContentsManagement = () => {
         meta_title: formData.meta_title || null,
         meta_description: formData.meta_description || null,
         meta_image: formData.meta_image || featuredImageUrl || null,
+        // Event fields
+        event_date: eventDate ? eventDate.toISOString().split('T')[0] : null,
+        event_time: formData.event_time || null,
+        event_end_date: eventEndDate ? eventEndDate.toISOString().split('T')[0] : null,
+        event_end_time: formData.event_end_time || null,
       };
 
       if (editingContent) {
@@ -336,11 +350,15 @@ const ContentsManagement = () => {
       slug: "",
       meta_title: "",
       meta_description: "",
-      meta_image: ""
+      meta_image: "",
+      event_time: "",
+      event_end_time: ""
     });
     setEditingContent(null);
     setSelectedFile(null);
     setSelectedTags([]);
+    setEventDate(undefined);
+    setEventEndDate(undefined);
   };
 
   const startEdit = (content: Content) => {
@@ -363,8 +381,18 @@ const ContentsManagement = () => {
       slug: content.slug || "",
       meta_title: content.meta_title || "",
       meta_description: content.meta_description || "",
-      meta_image: content.meta_image || ""
+      meta_image: content.meta_image || "",
+      event_time: (content as any).event_time || "",
+      event_end_time: (content as any).event_end_time || ""
     });
+    
+    // Set event dates
+    if ((content as any).event_date) {
+      setEventDate(new Date((content as any).event_date));
+    }
+    if ((content as any).event_end_date) {
+      setEventEndDate(new Date((content as any).event_end_date));
+    }
     
     // Set selected tags
     const contentTagIds = content.content_tags?.map(ct => ct.tags.id) || [];
@@ -495,6 +523,100 @@ const ContentsManagement = () => {
                           </Label>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Event Date/Time Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-5 w-5" />
+                    <h3 className="text-lg font-semibold">Data e Ora Evento</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Data Inizio</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !eventDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {eventDate ? format(eventDate, "dd/MM/yyyy") : "Seleziona data"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={eventDate}
+                            onSelect={setEventDate}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="event_time">Ora Inizio</Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="event_time"
+                          type="time"
+                          value={formData.event_time}
+                          onChange={(e) => setFormData(prev => ({ ...prev, event_time: e.target.value }))}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Data Fine</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !eventEndDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {eventEndDate ? format(eventEndDate, "dd/MM/yyyy") : "Seleziona data"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={eventEndDate}
+                            onSelect={setEventEndDate}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="event_end_time">Ora Fine</Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="event_end_time"
+                          type="time"
+                          value={formData.event_end_time}
+                          onChange={(e) => setFormData(prev => ({ ...prev, event_end_time: e.target.value }))}
+                          className="pl-10"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -756,9 +878,28 @@ const ContentsManagement = () => {
                       SEO
                     </Badge>
                   )}
+                  {((content as any).event_date || (content as any).event_time) && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <CalendarIcon className="h-3 w-3" />
+                      Evento
+                    </Badge>
+                  )}
                 </div>
                 {content.description && (
                   <p className="text-gray-600 text-sm mb-2 line-clamp-2">{content.description}</p>
+                )}
+                
+                {/* Show event date/time */}
+                {((content as any).event_date || (content as any).event_time) && (
+                  <div className="flex items-center gap-2 mb-2 text-sm text-blue-600">
+                    <CalendarIcon className="h-3 w-3" />
+                    <span>
+                      {(content as any).event_date && format(new Date((content as any).event_date), "dd/MM/yyyy")}
+                      {(content as any).event_time && ` alle ${(content as any).event_time}`}
+                      {(content as any).event_end_date && ` - ${format(new Date((content as any).event_end_date), "dd/MM/yyyy")}`}
+                      {(content as any).event_end_time && ` alle ${(content as any).event_end_time}`}
+                    </span>
+                  </div>
                 )}
                 
                 {/* Show tags */}

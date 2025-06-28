@@ -1,153 +1,167 @@
 
-import { MapPin, Star, Users, Calendar, Euro, Monitor } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import PurchaseButton from "./PurchaseButton";
-import FavoriteButton from "./FavoriteButton";
-
-interface Content {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  ageGroup: string;
-  price: number;
-  location: string;
-  rating: number;
-  reviews: number;
-  image: string;
-  mode: string;
-  provider: string;
-  distance?: number;
-  purchasable?: boolean;
-  payment_type?: string;
-  price_from?: number;
-  price_to?: number;
-  booking_required?: boolean;
-  stripe_price_id?: string;
-  providers?: { business_name: string; verified: boolean };
-  modality?: string;
-}
+import { MapPin, Star, Eye, Heart } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useContentUrl } from "@/hooks/useContentUrl";
+import EventDateTime from "@/components/EventDateTime";
 
 interface ContentCardProps {
-  content: Content;
+  id: string;
+  title: string;
+  description?: string | null;
+  city?: string | null;
+  price_from?: number | null;
+  price_to?: number | null;
+  featured_image?: string | null;
+  category?: { name: string; slug: string; color?: string | null } | null;
+  slug?: string | null;
+  eventDate?: string | null;
+  eventTime?: string | null;
+  eventEndDate?: string | null;
+  eventEndTime?: string | null;
 }
 
-const ContentCard = ({ content }: ContentCardProps) => {
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      corsi: "bg-blue-100 text-blue-800",
-      eventi: "bg-green-100 text-green-800",
-      servizi: "bg-purple-100 text-purple-800",
-      "centri-estivi": "bg-orange-100 text-orange-800",
-      centri: "bg-pink-100 text-pink-800"
-    };
-    return colors[category.toLowerCase() as keyof typeof colors] || "bg-gray-100 text-gray-800";
+const ContentCard = ({
+  id,
+  title,
+  description,
+  city,
+  price_from,
+  price_to,
+  featured_image,
+  category,
+  slug,
+  eventDate,
+  eventTime,
+  eventEndDate,
+  eventEndTime
+}: ContentCardProps) => {
+  const [imageError, setImageError] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const { getContentUrl } = useContentUrl();
+
+  const contentUrl = getContentUrl({ id, slug, categories: category });
+
+  const formatPrice = () => {
+    if (!price_from && !price_to) return null;
+    
+    if (price_from && price_to && price_from !== price_to) {
+      return `€${price_from} - €${price_to}`;
+    }
+    
+    return `€${price_from || price_to}`;
   };
 
-  const isOnline = content.modality === 'online' || content.mode?.toLowerCase().includes('online');
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
+  };
 
   return (
-    <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white border-0 shadow-sm">
-      <div className="relative">
-        <img 
-          src={content.image} 
-          alt={content.title}
-          className="w-full h-48 object-cover rounded-t-lg"
-        />
-        <div className="absolute top-2 right-2">
-          <FavoriteButton contentId={content.id} />
-        </div>
-        <Badge className={`absolute top-2 left-2 ${getCategoryColor(content.category)}`}>
-          {content.category}
-        </Badge>
-        {content.distance && !isOnline && (
-          <Badge className="absolute bottom-2 right-2 bg-green-500 text-white">
-            {content.distance.toFixed(1)} km
-          </Badge>
-        )}
-        {isOnline && (
-          <Badge className="absolute bottom-2 right-2 bg-blue-500 text-white flex items-center gap-1">
-            <Monitor className="h-3 w-3" />
-            Online
-          </Badge>
-        )}
-      </div>
-      
-      <CardContent className="p-4">
-        <div className="mb-2">
-          <h3 className="font-semibold text-lg mb-1 group-hover:text-orange-600 transition-colors line-clamp-2">
-            {content.title}
-          </h3>
-          <p className="text-gray-600 text-sm line-clamp-2 mb-3">
-            {content.description}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 mb-3">
-          {content.ageGroup && (
-            <Badge variant="outline" className="text-xs">
-              {content.ageGroup}
-            </Badge>
-          )}
-          <Badge variant="outline" className="text-xs">
-            {content.mode}
-          </Badge>
-        </div>
-
-        <div className="space-y-2 mb-4">
-          {!isOnline && (
-            <div className="flex items-center gap-1 text-sm text-gray-600">
-              <MapPin className="h-3 w-3" />
-              <span className="truncate">{content.location}</span>
-              {content.distance && (
-                <span className="text-green-600 font-medium ml-auto">
-                  {content.distance.toFixed(1)} km
-                </span>
-              )}
-            </div>
-          )}
-          
-          <div className="flex items-center gap-1 text-sm text-gray-600">
-            <Users className="h-3 w-3" />
-            <span className="truncate">{content.provider}</span>
-          </div>
-
-          {content.rating && content.reviews && content.rating > 0 && content.reviews > 0 && (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                <span className="font-medium text-sm">{content.rating}</span>
-                <span className="text-xs text-gray-500">({content.reviews})</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {content.purchasable ? (
-          <PurchaseButton content={content as any} />
-        ) : (
-          <div className="flex items-center justify-between">
-            {content.price_from && content.payment_type !== 'free' ? (
-              <div className="flex items-center gap-1">
-                <Euro className="h-4 w-4 text-green-600" />
-                <span className="font-bold text-lg text-green-600">
-                  {content.price_from}€
-                  {content.price_to && content.price_to !== content.price_from && (
-                    <span className="text-sm"> - {content.price_to}€</span>
-                  )}
-                </span>
-              </div>
+    <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
+      <Link to={contentUrl} className="block h-full">
+        <div className="relative">
+          {/* Image */}
+          <div className="aspect-[4/3] overflow-hidden bg-gray-100">
+            {featured_image && !imageError ? (
+              <img
+                src={featured_image}
+                alt={title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={() => setImageError(true)}
+                loading="lazy"
+              />
             ) : (
-              <div></div>
+              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <Eye className="h-12 w-12 text-gray-400" />
+              </div>
             )}
-            <Button size="sm" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
-              Dettagli
-            </Button>
           </div>
-        )}
-      </CardContent>
+
+          {/* Favorite Button */}
+          <button
+            onClick={handleFavoriteClick}
+            className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-sm transition-colors z-10"
+            aria-label={isFavorite ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
+          >
+            <Heart
+              className={`h-4 w-4 transition-colors ${
+                isFavorite ? "text-red-500 fill-current" : "text-gray-600"
+              }`}
+            />
+          </button>
+
+          {/* Category Badge */}
+          {category && (
+            <div className="absolute top-3 left-3">
+              <Badge
+                variant="secondary"
+                className="text-xs font-medium shadow-sm"
+                style={{
+                  backgroundColor: category.color ? `${category.color}` : undefined,
+                  color: category.color ? 'white' : undefined,
+                }}
+              >
+                {category.name}
+              </Badge>
+            </div>
+          )}
+
+          {/* Price Badge */}
+          {formatPrice() && (
+            <div className="absolute bottom-3 left-3">
+              <Badge className="bg-white text-gray-900 font-semibold shadow-sm">
+                {formatPrice()}
+              </Badge>
+            </div>
+          )}
+        </div>
+
+        <CardContent className="p-4 flex-1 flex flex-col">
+          <div className="space-y-3 flex-1">
+            {/* Title */}
+            <h3 className="font-semibold text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
+              {title}
+            </h3>
+
+            {/* Event Date/Time */}
+            <EventDateTime
+              eventDate={eventDate}
+              eventTime={eventTime}
+              eventEndDate={eventEndDate}
+              eventEndTime={eventEndTime}
+            />
+
+            {/* Description */}
+            {description && (
+              <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+                {description}
+              </p>
+            )}
+
+            {/* Location */}
+            {city && (
+              <div className="flex items-center gap-1 text-gray-500">
+                <MapPin className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">{city}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Footer with Rating */}
+          <div className="flex items-center justify-between pt-3 mt-auto border-t border-gray-100">
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 text-yellow-400 fill-current" />
+              <span className="text-sm font-medium">4.5</span>
+              <span className="text-sm text-gray-500">(12)</span>
+            </div>
+            <span className="text-xs text-gray-400">Clicca per vedere</span>
+          </div>
+        </CardContent>
+      </Link>
     </Card>
   );
 };

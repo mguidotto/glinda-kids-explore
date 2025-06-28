@@ -63,19 +63,41 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11">
-            <TabsTrigger value="users">Utenti</TabsTrigger>
-            <TabsTrigger value="contents">Contenuti</TabsTrigger>
-            <TabsTrigger value="categories">Categorie</TabsTrigger>
-            <TabsTrigger value="tags">Tag</TabsTrigger>
-            <TabsTrigger value="reviews">Recensioni</TabsTrigger>
-            <TabsTrigger value="texts">Testi</TabsTrigger>
-            <TabsTrigger value="branding">Branding</TabsTrigger>
-            <TabsTrigger value="social">Social</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="icons">Icone</TabsTrigger>
-            <TabsTrigger value="pages">Pagine</TabsTrigger>
-          </TabsList>
+          {/* Responsive TabsList */}
+          <div className="w-full overflow-x-auto">
+            <TabsList className="grid w-full grid-cols-5 md:grid-cols-11 min-w-max md:min-w-0">
+              <TabsTrigger value="users" className="text-xs md:text-sm">Utenti</TabsTrigger>
+              <TabsTrigger value="contents" className="text-xs md:text-sm">Contenuti</TabsTrigger>
+              <TabsTrigger value="categories" className="text-xs md:text-sm">Categorie</TabsTrigger>
+              <TabsTrigger value="tags" className="text-xs md:text-sm">Tag</TabsTrigger>
+              <TabsTrigger value="reviews" className="text-xs md:text-sm">Recensioni</TabsTrigger>
+              <TabsTrigger value="texts" className="text-xs md:text-sm hidden md:inline-flex">Testi</TabsTrigger>
+              <TabsTrigger value="branding" className="text-xs md:text-sm hidden md:inline-flex">Branding</TabsTrigger>
+              <TabsTrigger value="social" className="text-xs md:text-sm hidden md:inline-flex">Social</TabsTrigger>
+              <TabsTrigger value="analytics" className="text-xs md:text-sm hidden md:inline-flex">Analytics</TabsTrigger>
+              <TabsTrigger value="icons" className="text-xs md:text-sm hidden md:inline-flex">Icone</TabsTrigger>
+              <TabsTrigger value="pages" className="text-xs md:text-sm hidden md:inline-flex">Pagine</TabsTrigger>
+            </TabsList>
+          </div>
+
+          {/* Mobile dropdown for hidden tabs */}
+          <div className="md:hidden">
+            <select 
+              className="w-full p-2 border rounded-lg bg-white"
+              onChange={(e) => {
+                const tab = document.querySelector(`[data-value="${e.target.value}"]`) as HTMLElement;
+                tab?.click();
+              }}
+            >
+              <option value="">Altri strumenti...</option>
+              <option value="texts">Testi</option>
+              <option value="branding">Branding</option>
+              <option value="social">Social</option>
+              <option value="analytics">Analytics</option>
+              <option value="icons">Icone</option>
+              <option value="pages">Pagine</option>
+            </select>
+          </div>
 
           <TabsContent value="users" className="space-y-6">
             <UsersManagement />

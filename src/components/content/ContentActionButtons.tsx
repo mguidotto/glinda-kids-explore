@@ -3,22 +3,32 @@ import AddToCalendarButton from "@/components/AddToCalendarButton";
 import OpenInMapsButton from "@/components/OpenInMapsButton";
 
 interface ContentActionButtonsProps {
-  isEvent: boolean;
-  hasValidAddress: boolean;
+  id: string;
   title: string;
-  description: string;
-  address: string;
-  city: string;
+  currentUrl: string;
+  eventDate?: string | null;
+  eventTime?: string | null;
+  eventEndDate?: string | null;
+  eventEndTime?: string | null;
+  address?: string;
+  city?: string;
 }
 
 const ContentActionButtons = ({ 
-  isEvent, 
-  hasValidAddress, 
-  title, 
-  description, 
-  address, 
-  city 
+  id,
+  title,
+  currentUrl,
+  eventDate,
+  eventTime,
+  eventEndDate,
+  eventEndTime,
+  address,
+  city
 }: ContentActionButtonsProps) => {
+  const isEvent = eventDate || eventTime;
+  const hasValidAddress = address && address.trim() !== '';
+  const description = `Dettagli disponibili su: ${currentUrl}`;
+
   if (!isEvent && !hasValidAddress) {
     return null;
   }
@@ -29,11 +39,11 @@ const ContentActionButtons = ({
         <AddToCalendarButton
           title={title}
           description={description}
-          location={hasValidAddress ? address : city}
+          location={hasValidAddress ? address! : city || ''}
         />
       )}
       {hasValidAddress && (
-        <OpenInMapsButton address={address} />
+        <OpenInMapsButton address={address!} />
       )}
     </div>
   );

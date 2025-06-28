@@ -6,33 +6,43 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 interface ContentBookingSidebarProps {
-  shouldShowBooking: boolean;
-  shouldShowPrice: boolean;
-  priceFrom?: number;
-  priceTo?: number;
-  durationMinutes?: number;
-  maxParticipants?: number;
-  modality?: string;
-  isBookableService: boolean;
-  contentId: string;
-  onBookingClick: () => void;
+  id: string;
+  title: string;
+  priceFrom?: number | null;
+  priceTo?: number | null;
+  purchasable?: boolean;
+  bookingRequired?: boolean;
+  stripePriceId?: string | null;
+  paymentType?: string;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
 }
 
 const ContentBookingSidebar = ({
-  shouldShowBooking,
-  shouldShowPrice,
+  id,
+  title,
   priceFrom,
   priceTo,
-  durationMinutes,
-  maxParticipants,
-  modality,
-  isBookableService,
-  contentId,
-  onBookingClick
+  purchasable = false,
+  bookingRequired = false,
+  stripePriceId,
+  paymentType,
+  phone,
+  email,
+  website
 }: ContentBookingSidebarProps) => {
+  const shouldShowPrice = priceFrom || priceTo;
+  const shouldShowBooking = bookingRequired || purchasable;
+  
   if (!shouldShowBooking && !shouldShowPrice) {
     return null;
   }
+
+  const handleBookingClick = () => {
+    console.log("Booking clicked for content:", id);
+    // Add booking logic here
+  };
 
   return (
     <div className="lg:col-span-1">
@@ -55,20 +65,8 @@ const ContentBookingSidebar = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
-            {durationMinutes && (
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-gray-400" />
-                <span>{durationMinutes} min</span>
-              </div>
-            )}
-            {maxParticipants && (
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-gray-400" />
-                <span>Max {maxParticipants}</span>
-              </div>
-            )}
-            <Badge className="bg-green-100 text-green-800 capitalize">
-              {modality === 'presenza' ? 'In Presenza' : modality}
+            <Badge className="bg-green-100 text-green-800">
+              In Presenza
             </Badge>
           </div>
 
@@ -77,10 +75,10 @@ const ContentBookingSidebar = ({
               <Separator />
               <Button 
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                disabled={!isBookableService}
-                onClick={onBookingClick}
+                disabled={!purchasable}
+                onClick={handleBookingClick}
               >
-                {isBookableService ? 'Prenota Ora' : 'Contatta per Info'}
+                {purchasable ? 'Prenota Ora' : 'Contatta per Info'}
               </Button>
             </>
           )}

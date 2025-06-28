@@ -9,6 +9,7 @@ interface SEOData {
   canonical?: string;
   ogImage?: string;
   noIndex?: boolean;
+  type?: string;
 }
 
 const DEFAULT_SEO = {
@@ -28,7 +29,8 @@ export const useSEO = (seoData: SEOData = {}) => {
       keywords = DEFAULT_SEO.keywords,
       canonical = `https://glinda.lovable.app${location.pathname}`,
       ogImage = 'https://glinda.lovable.app/icon-512x512.png',
-      noIndex = false
+      noIndex = false,
+      type = 'website'
     } = seoData;
 
     // Update title
@@ -70,6 +72,7 @@ export const useSEO = (seoData: SEOData = {}) => {
     updateMetaTag('og:description', description, true);
     updateMetaTag('og:url', canonical, true);
     updateMetaTag('og:image', ogImage, true);
+    updateMetaTag('og:type', type, true);
     
     // Twitter
     updateMetaTag('twitter:title', title);

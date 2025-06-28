@@ -85,8 +85,6 @@ const ContentDetail = () => {
     }
   });
 
-  const { getContentUrl } = useContentUrl();
-
   // Set up SEO
   useSEO({
     title: content?.meta_title || content?.title,
@@ -123,6 +121,12 @@ const ContentDetail = () => {
 
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
+  // Safely access event fields with fallback
+  const eventDate = (content as any).event_date || null;
+  const eventTime = (content as any).event_time || null;
+  const eventEndDate = (content as any).event_end_date || null;
+  const eventEndTime = (content as any).event_end_time || null;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -140,10 +144,10 @@ const ContentDetail = () => {
               price_to={content.price_to}
               category={content.categories}
               tags={content.content_tags?.map(ct => ct.tags)}
-              eventDate={content.event_date}
-              eventTime={content.event_time}
-              eventEndDate={content.event_end_date}
-              eventEndTime={content.event_end_time}
+              eventDate={eventDate}
+              eventTime={eventTime}
+              eventEndDate={eventEndDate}
+              eventEndTime={eventEndTime}
             />
 
             {/* Image Gallery */}
@@ -168,10 +172,10 @@ const ContentDetail = () => {
               id={content.id}
               title={content.title}
               currentUrl={currentUrl}
-              eventDate={content.event_date}
-              eventTime={content.event_time}
-              eventEndDate={content.event_end_date}
-              eventEndTime={content.event_end_time}
+              eventDate={eventDate}
+              eventTime={eventTime}
+              eventEndDate={eventEndDate}
+              eventEndTime={eventEndTime}
               address={content.address}
               city={content.city}
             />

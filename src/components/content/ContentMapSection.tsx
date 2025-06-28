@@ -3,15 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MapComponent from "@/components/MapComponent";
 
 interface ContentMapSectionProps {
-  hasValidAddress: boolean;
+  lat: number;
+  lng: number;
+  title: string;
   address: string;
 }
 
-const ContentMapSection = ({ hasValidAddress, address }: ContentMapSectionProps) => {
-  if (!hasValidAddress) {
-    return null;
-  }
-
+const ContentMapSection = ({ lat, lng, title, address }: ContentMapSectionProps) => {
   return (
     <Card>
       <CardHeader>

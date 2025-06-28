@@ -1,10 +1,10 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import UserMenu from "@/components/UserMenu";
-import AdminContentActions from "@/components/AdminContentActions";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,9 +36,7 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {/* Admin Content Actions - sempre visibili per admin */}
-            <AdminContentActions />
-            
+            {/* Debug della logica di rendering */}
             {loading ? (
               <>
                 {console.log("Rendering loading state (desktop)")}
@@ -96,11 +94,7 @@ const Navigation = () => {
               Contatti
             </Link>
             
-            {/* Admin Content Actions per mobile */}
-            <div className="px-4 py-2">
-              <AdminContentActions />
-            </div>
-            
+            {/* Debug della logica di rendering mobile */}
             {loading ? (
               <>
                 {console.log("Rendering loading state (mobile)")}

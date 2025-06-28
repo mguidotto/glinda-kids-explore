@@ -54,8 +54,8 @@ const ContentCard = ({
   eventEndDate,
   eventEndTime
 }: ContentCardProps) => {
-  const { generateUrl } = useContentUrl();
-  const contentUrl = generateUrl(id, slug, title);
+  const { getContentUrl } = useContentUrl();
+  const contentUrl = getContentUrl({ id, slug, categories: { slug: category?.name?.toLowerCase() || '' } });
 
   const getModalityIcon = () => {
     switch (modality) {

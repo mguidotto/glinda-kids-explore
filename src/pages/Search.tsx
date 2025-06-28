@@ -60,23 +60,25 @@ const Search = () => {
     id: content.id,
     title: content.title || "",
     description: content.description || "",
-    category: (content as any).categories?.name || "",
+    category: content.categories ? { name: content.categories.name, color: content.categories.color } : null,
     ageGroup: content.age_groups?.join(", ") || "",
     location: content.city || "",
-    price: content.price_from || 0,
+    price: { from: content.price_from, to: content.price_to },
     image: content.featured_image || content.images?.[0] || "/placeholder.svg",
     rating: 4.5,
     reviews: 24,
-    provider: (content as any).providers?.business_name || "Provider",
+    provider: content.providers ? { business_name: content.providers.business_name, verified: content.providers.verified } : null,
     mode: content.modality === 'presenza' ? 'In Presenza' : content.modality,
     distance: content.distance_km,
     purchasable: content.purchasable,
-    payment_type: content.payment_type,
-    price_from: content.price_from,
-    price_to: content.price_to,
-    booking_required: content.booking_required,
-    stripe_price_id: content.stripe_price_id,
-    providers: (content as any).providers
+    featured: content.featured,
+    slug: content.slug,
+    city: content.city,
+    modality: content.modality,
+    eventDate: content.event_date,
+    eventTime: content.event_time,
+    eventEndDate: content.event_end_date,
+    eventEndTime: content.event_end_time
   }));
 
   const handleSearch = (query: string) => {
@@ -188,9 +190,29 @@ const Search = () => {
               
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {transformedContents.map((content) => (
-                  <Link key={content.id} to={`/content/${content.id}`}>
-                    <ContentCard content={content} />
-                  </Link>
+                  <ContentCard 
+                    key={content.id}
+                    id={content.id}
+                    title={content.title}
+                    description={content.description}
+                    category={content.category}
+                    location={content.location}
+                    price={content.price}
+                    image={content.image}
+                    rating={content.rating}
+                    reviews={content.reviews}
+                    provider={content.provider}
+                    distance={content.distance}
+                    purchasable={content.purchasable}
+                    featured={content.featured}
+                    slug={content.slug}
+                    city={content.city}
+                    modality={content.modality}
+                    eventDate={content.eventDate}
+                    eventTime={content.eventTime}
+                    eventEndDate={content.eventEndDate}
+                    eventEndTime={content.eventEndTime}
+                  />
                 ))}
               </div>
             </>

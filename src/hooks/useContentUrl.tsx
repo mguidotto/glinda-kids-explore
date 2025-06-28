@@ -18,5 +18,10 @@ export const useContentUrl = () => {
     return `/content/${content.id}`;
   };
 
-  return { getContentUrl };
+  const generateUrl = (id: string, slug?: string | null, title?: string): string => {
+    // For backwards compatibility, provide generateUrl that uses ID-based routing
+    return `/content/${id}`;
+  };
+
+  return { getContentUrl, generateUrl };
 };

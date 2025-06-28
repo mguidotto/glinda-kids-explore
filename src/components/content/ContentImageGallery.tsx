@@ -69,6 +69,7 @@ const ContentImageGallery = ({ featuredImage, images, title }: ContentImageGalle
             onNext={nextImage}
             onPrev={prevImage}
             title={title}
+            setCurrentImageIndex={setCurrentImageIndex}
           />
         )}
       </div>
@@ -126,6 +127,7 @@ const ContentImageGallery = ({ featuredImage, images, title }: ContentImageGalle
           onNext={nextImage}
           onPrev={prevImage}
           title={title}
+          setCurrentImageIndex={setCurrentImageIndex}
         />
       )}
     </div>
@@ -140,9 +142,10 @@ interface ImageLightboxProps {
   onNext: () => void;
   onPrev: () => void;
   title: string;
+  setCurrentImageIndex: (index: number) => void;
 }
 
-const ImageLightbox = ({ images, currentIndex, onClose, onNext, onPrev, title }: ImageLightboxProps) => {
+const ImageLightbox = ({ images, currentIndex, onClose, onNext, onPrev, title, setCurrentImageIndex }: ImageLightboxProps) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
       {/* Close button */}
@@ -202,10 +205,7 @@ const ImageLightbox = ({ images, currentIndex, onClose, onNext, onPrev, title }:
               className={`flex-shrink-0 w-12 h-12 rounded border-2 overflow-hidden ${
                 index === currentIndex ? 'border-white' : 'border-transparent opacity-60 hover:opacity-80'
               }`}
-              onClick={() => {
-                const newIndex = index;
-                setCurrentImageIndex(newIndex);
-              }}
+              onClick={() => setCurrentImageIndex(index)}
             >
               <img
                 src={image}

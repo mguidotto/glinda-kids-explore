@@ -85,13 +85,13 @@ const ContentDetail = () => {
     }
   });
 
-  const { generateUrl } = useContentUrl();
+  const { getContentUrl } = useContentUrl();
 
   // Set up SEO
   useSEO({
     title: content?.meta_title || content?.title,
     description: content?.meta_description || content?.description,
-    image: content?.meta_image || content?.featured_image,
+    ogImage: content?.meta_image || content?.featured_image,
     type: "article"
   });
 
@@ -165,7 +165,7 @@ const ContentDetail = () => {
 
             {/* Action Buttons */}
             <ContentActionButtons
-              contentId={content.id}
+              id={content.id}
               title={content.title}
               currentUrl={currentUrl}
               eventDate={content.event_date}
@@ -179,8 +179,8 @@ const ContentDetail = () => {
             {/* Map Section */}
             {content.latitude && content.longitude && (
               <ContentMapSection
-                latitude={content.latitude}
-                longitude={content.longitude}
+                lat={content.latitude}
+                lng={content.longitude}
                 title={content.title}
                 address={content.address}
               />
@@ -196,7 +196,7 @@ const ContentDetail = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <ContentBookingSidebar
-              contentId={content.id}
+              id={content.id}
               title={content.title}
               priceFrom={content.price_from}
               priceTo={content.price_to}

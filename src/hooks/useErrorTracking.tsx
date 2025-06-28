@@ -45,6 +45,14 @@ export const useErrorTracking = () => {
     };
   }, [trackEvent]);
 
+  const trackError = (error: any, context?: Record<string, any>) => {
+    console.error('Tracked error:', error, context);
+    trackEvent('tracked_error', {
+      error_message: error?.message || error?.toString() || 'Unknown error',
+      error_context: JSON.stringify(context || {})
+    });
+  };
+
   const logNavigation = (from: string, to: string, success: boolean) => {
     console.log(`Navigation: ${from} -> ${to} (${success ? 'SUCCESS' : 'FAILED'})`);
     trackEvent('navigation', {
@@ -63,6 +71,7 @@ export const useErrorTracking = () => {
   };
 
   return {
+    trackError,
     logNavigation,
     log404Error
   };

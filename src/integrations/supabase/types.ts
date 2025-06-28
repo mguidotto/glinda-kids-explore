@@ -126,6 +126,10 @@ export type Database = {
           description: string | null
           duration_minutes: number | null
           email: string | null
+          event_date: string | null
+          event_end_date: string | null
+          event_end_time: string | null
+          event_time: string | null
           featured: boolean | null
           featured_image: string | null
           id: string
@@ -161,6 +165,10 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           email?: string | null
+          event_date?: string | null
+          event_end_date?: string | null
+          event_end_time?: string | null
+          event_time?: string | null
           featured?: boolean | null
           featured_image?: string | null
           id?: string
@@ -196,6 +204,10 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           email?: string | null
+          event_date?: string | null
+          event_end_date?: string | null
+          event_end_time?: string | null
+          event_time?: string | null
           featured?: boolean | null
           featured_image?: string | null
           id?: string

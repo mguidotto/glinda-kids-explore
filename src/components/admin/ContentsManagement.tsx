@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search, CalendarIcon, Clock } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search, CalendarIcon, Clock, AlertCircle } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -37,9 +37,11 @@ const ContentsManagement = () => {
   const [tags, setTags] = useState<TagType[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
@@ -145,7 +147,7 @@ const ContentsManagement = () => {
 
       if (uploadError) {
         console.error('Error uploading file:', uploadError);
-        setMessage('Errore nel caricamento del file');
+        setError('Errore nel caricamento del file: ' + uploadError.message);
         return null;
       }
 
@@ -156,7 +158,7 @@ const ContentsManagement = () => {
       return data.publicUrl;
     } catch (error) {
       console.error('Error in uploadFeaturedImage:', error);
-      setMessage('Errore nel caricamento del file');
+      setError('Errore nel caricamento del file');
       return null;
     } finally {
       setUploading(false);
@@ -167,17 +169,17 @@ const ContentsManagement = () => {
     const file = event.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        setMessage('Per favore seleziona un file immagine');
+        setError('Per favore seleziona un file immagine');
         return;
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        setMessage('Il file deve essere più piccolo di 5MB');
+        setError('Il file deve essere più piccolo di 5MB');
         return;
       }
       
       setSelectedFile(file);
-      setMessage(null);
+      setError(null);
     }
   };
 
@@ -210,10 +212,14 @@ const ContentsManagement = () => {
   const saveContentTags = async (contentId: string, tagIds: string[]) => {
     try {
       // Remove existing tags
-      await supabase
+      const { error: deleteError } = await supabase
         .from("content_tags")
         .delete()
         .eq("content_id", contentId);
+
+      if (deleteError) {
+        throw deleteError;
+      }
 
       // Add new tags
       if (tagIds.length > 0) {
@@ -222,12 +228,17 @@ const ContentsManagement = () => {
           tag_id: tagId
         }));
 
-        await supabase
+        const { error: insertError } = await supabase
           .from("content_tags")
           .insert(contentTags);
+
+        if (insertError) {
+          throw insertError;
+        }
       }
     } catch (error) {
       console.error("Error saving content tags:", error);
+      throw error;
     }
   };
 
@@ -244,6 +255,10 @@ const ContentsManagement = () => {
     e.preventDefault();
     
     try {
+      setSaving(true);
+      setError(null);
+      setMessage(null);
+      
       let featuredImageUrl = formData.featured_image;
       
       if (selectedFile) {
@@ -251,6 +266,7 @@ const ContentsManagement = () => {
         if (uploadedUrl) {
           featuredImageUrl = uploadedUrl;
         } else {
+          setSaving(false);
           return;
         }
       }
@@ -272,13 +288,18 @@ const ContentsManagement = () => {
         event_end_time: formData.event_end_time || null,
       };
 
+      console.log('Saving content data:', contentData);
+
       if (editingContent) {
         const { error } = await supabase
           .from("contents")
           .update(contentData)
           .eq("id", editingContent.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw new Error(`Errore nell'aggiornamento: ${error.message}`);
+        }
         
         await saveContentTags(editingContent.id, selectedTags);
         
@@ -290,7 +311,10 @@ const ContentsManagement = () => {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw new Error(`Errore nella creazione: ${error.message}`);
+        }
         
         // Save tags for new content
         if (data) {
@@ -305,7 +329,10 @@ const ContentsManagement = () => {
       fetchContents();
     } catch (error) {
       console.error("Error saving content:", error);
-      setMessage("Errore nel salvare il contenuto");
+      const errorMessage = error instanceof Error ? error.message : "Errore sconosciuto nel salvare il contenuto";
+      setError(errorMessage);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -323,7 +350,7 @@ const ContentsManagement = () => {
       fetchContents();
     } catch (error) {
       console.error("Error deleting content:", error);
-      setMessage("Errore nell'eliminare il contenuto");
+      setError("Errore nell'eliminare il contenuto");
     }
   };
 
@@ -372,6 +399,8 @@ const ContentsManagement = () => {
     setEventDate(undefined);
     setEventEndDate(undefined);
     setGalleryImages([]);
+    setError(null);
+    setMessage(null);
   };
 
   const startEdit = (content: Content) => {
@@ -416,6 +445,10 @@ const ContentsManagement = () => {
     // Set gallery images
     setGalleryImages(content.images || []);
     
+    // Clear any previous messages
+    setError(null);
+    setMessage(null);
+    
     setIsDialogOpen(true);
   };
 
@@ -449,6 +482,19 @@ const ContentsManagement = () => {
                   {editingContent ? "Modifica Contenuto" : "Nuovo Contenuto"}
                 </DialogTitle>
               </DialogHeader>
+              
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {message && (
+                <Alert className="mb-4">
+                  <AlertDescription>{message}</AlertDescription>
+                </Alert>
+              )}
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Information */}
@@ -853,15 +899,16 @@ const ContentsManagement = () => {
                     variant="outline" 
                     onClick={() => setIsDialogOpen(false)}
                     className="px-6 py-2"
+                    disabled={saving}
                   >
                     Annulla
                   </Button>
                   <Button 
                     type="submit" 
-                    disabled={uploading}
+                    disabled={uploading || saving}
                     className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-2"
                   >
-                    {uploading ? "Caricamento..." : editingContent ? "Aggiorna Contenuto" : "Crea Contenuto"}
+                    {uploading ? "Caricamento immagine..." : saving ? "Salvataggio..." : editingContent ? "Aggiorna Contenuto" : "Crea Contenuto"}
                   </Button>
                 </div>
               </form>
@@ -874,6 +921,13 @@ const ContentsManagement = () => {
         {message && (
           <Alert className="mb-4">
             <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        )}
+
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 

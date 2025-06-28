@@ -24,10 +24,7 @@ const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
       <div className="relative max-w-4xl mx-auto text-center">
         <div className="mb-8">
           {/* Ottimizzazione LCP: ridotto font-size iniziale e ottimizzato rendering */}
-          <h1 
-            className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight will-change-transform"
-            style={{ fontDisplay: 'swap' }}
-          >
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight will-change-transform">
             {getText('hero.title', 'Trova le migliori attività per i tuoi bambini')}
           </h1>
           <p className="text-lg md:text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">

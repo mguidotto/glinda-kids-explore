@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
@@ -14,6 +15,7 @@ import PagesManagement from "@/components/admin/PagesManagement";
 import TagsManagement from "@/components/admin/TagsManagement";
 import GoogleAnalyticsManagement from "@/components/admin/GoogleAnalyticsManagement";
 import ContentSEOManagement from "@/components/admin/ContentSEOManagement";
+import FaviconManagement from "@/components/admin/FaviconManagement";
 import { useAuth } from "@/hooks/useAuth";
 
 const AdminDashboard = () => {
@@ -77,6 +79,7 @@ const AdminDashboard = () => {
               <TabsTrigger value="content-seo" className="text-xs md:text-sm hidden md:inline-flex">SEO</TabsTrigger>
               <TabsTrigger value="analytics" className="text-xs md:text-sm hidden md:inline-flex">Analytics</TabsTrigger>
               <TabsTrigger value="icons" className="text-xs md:text-sm hidden md:inline-flex">Icone</TabsTrigger>
+              <TabsTrigger value="favicon" className="text-xs md:text-sm hidden md:inline-flex">Favicon</TabsTrigger>
               <TabsTrigger value="pages" className="text-xs md:text-sm hidden md:inline-flex">Pagine</TabsTrigger>
             </TabsList>
           </div>
@@ -97,6 +100,7 @@ const AdminDashboard = () => {
               <option value="content-seo">SEO Contenuti</option>
               <option value="analytics">Analytics</option>
               <option value="icons">Icone</option>
+              <option value="favicon">Favicon</option>
               <option value="pages">Pagine</option>
             </select>
           </div>
@@ -143,6 +147,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="icons" className="space-y-6">
             <AppIconsManagement />
+          </TabsContent>
+
+          <TabsContent value="favicon" className="space-y-6">
+            <FaviconManagement />
           </TabsContent>
 
           <TabsContent value="pages" className="space-y-6">

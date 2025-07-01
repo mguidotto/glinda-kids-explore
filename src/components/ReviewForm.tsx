@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useCapacitor } from "@/hooks/useCapacitor";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Star, MessageSquare } from "lucide-react";
+import { Star, MessageSquare, Camera, X } from "lucide-react";
 
 interface ReviewFormProps {
   contentId: string;
@@ -17,12 +18,29 @@ interface ReviewFormProps {
 
 const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
   const { user } = useAuth();
+  const { isNative, takePicture } = useCapacitor();
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [hoverRating, setHoverRating] = useState(0);
+
+  const handleTakePhoto = async () => {
+    if (!isNative) return;
+    
+    const result = await takePicture();
+    if (result.dataUrl && !result.error) {
+      setPhotos(prev => [...prev, result.dataUrl!]);
+    } else if (result.error) {
+      setMessage(`Errore nella foto: ${result.error}`);
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +65,7 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
         rating,
         title: title.trim() || null,
         comment: comment.trim() || null,
+        photos: photos.length > 0 ? photos : null,
         validated: false
       });
 
@@ -58,6 +77,7 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
       setRating(0);
       setTitle("");
       setComment("");
+      setPhotos([]);
       onReviewSubmitted?.();
     }
 
@@ -142,6 +162,46 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
               maxLength={500}
             />
           </div>
+
+          {isNative && (
+            <div>
+              <Label>Foto (opzionale)</Label>
+              <div className="mt-2 space-y-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleTakePhoto}
+                  className="flex items-center gap-2"
+                >
+                  <Camera className="h-4 w-4" />
+                  Aggiungi Foto
+                </Button>
+                
+                {photos.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {photos.map((photo, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={photo}
+                          alt={`Foto ${index + 1}`}
+                          className="w-full h-24 object-cover rounded"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-1 right-1 h-6 w-6 p-0"
+                          onClick={() => removePhoto(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <Button
             type="submit"

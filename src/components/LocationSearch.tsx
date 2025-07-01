@@ -17,10 +17,10 @@ interface LocationSearchProps {
 const LocationSearch = ({ onLocationSelect, onClose, currentLocation, onClearLocation, className }: LocationSearchProps) => {
   const [address, setAddress] = useState("");
   const [geocoding, setGeocoding] = useState(false);
-  const { latitude, longitude, error, loading, getCurrentPosition } = useGeolocation();
+  const { latitude, longitude, error, loading, getLocation } = useGeolocation();
 
   const handleCurrentLocation = () => {
-    getCurrentPosition();
+    getLocation();
   };
 
   const handleAddressSearch = async () => {

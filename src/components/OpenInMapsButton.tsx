@@ -1,9 +1,12 @@
 
 import { MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCapacitor } from "@/hooks/useCapacitor";
 
 interface OpenInMapsButtonProps {
   address: string;
+  latitude?: number;
+  longitude?: number;
   className?: string;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg";
@@ -11,14 +14,25 @@ interface OpenInMapsButtonProps {
 
 const OpenInMapsButton = ({ 
   address, 
+  latitude,
+  longitude,
   className = "", 
   variant = "outline",
   size = "sm"
 }: OpenInMapsButtonProps) => {
+  const { isNative } = useCapacitor();
+
   const handleOpenInMaps = () => {
-    const encodedAddress = encodeURIComponent(address);
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
-    window.open(googleMapsUrl, '_blank');
+    if (isNative && latitude && longitude) {
+      // Use native maps app
+      const nativeUrl = `geo:${latitude},${longitude}?q=${encodeURIComponent(address)}`;
+      window.open(nativeUrl, '_system');
+    } else {
+      // Fallback to Google Maps web
+      const encodedAddress = encodeURIComponent(address);
+      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+      window.open(googleMapsUrl, '_blank');
+    }
   };
 
   return (

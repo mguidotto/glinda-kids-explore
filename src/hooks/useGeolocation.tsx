@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useCapacitor } from "./useCapacitor";
 
 interface GeolocationState {
   latitude: number | null;
@@ -9,6 +10,7 @@ interface GeolocationState {
 }
 
 export const useGeolocation = () => {
+  const { isNative, getCurrentPosition } = useCapacitor();
   const [location, setLocation] = useState<GeolocationState>({
     latitude: null,
     longitude: null,
@@ -16,58 +18,78 @@ export const useGeolocation = () => {
     loading: false,
   });
 
-  const getCurrentPosition = () => {
-    if (!navigator.geolocation) {
-      setLocation(prev => ({
-        ...prev,
-        error: "La geolocalizzazione non è supportata da questo browser",
-        loading: false,
-      }));
-      return;
-    }
-
+  const getLocation = async () => {
     setLocation(prev => ({ ...prev, loading: true, error: null }));
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
+    if (isNative) {
+      // Use Capacitor's geolocation for native apps
+      const result = await getCurrentPosition();
+      if (result.error) {
+        setLocation(prev => ({
+          ...prev,
+          error: result.error,
+          loading: false,
+        }));
+      } else {
         setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude: result.latitude,
+          longitude: result.longitude,
           error: null,
           loading: false,
         });
-      },
-      (error) => {
-        let errorMessage = "Errore sconosciuto nella geolocalizzazione";
-        
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "Permesso di geolocalizzazione negato";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Posizione non disponibile";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Timeout nella richiesta di geolocalizzazione";
-            break;
-        }
-
+      }
+    } else {
+      // Fallback to web geolocation API
+      if (!navigator.geolocation) {
         setLocation(prev => ({
           ...prev,
-          error: errorMessage,
+          error: "La geolocalizzazione non è supportata da questo browser",
           loading: false,
         }));
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000, // 5 minutes
+        return;
       }
-    );
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            error: null,
+            loading: false,
+          });
+        },
+        (error) => {
+          let errorMessage = "Errore sconosciuto nella geolocalizzazione";
+          
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = "Permesso di geolocalizzazione negato";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "Posizione non disponibile";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "Timeout nella richiesta di geolocalizzazione";
+              break;
+          }
+
+          setLocation(prev => ({
+            ...prev,
+            error: errorMessage,
+            loading: false,
+          }));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000, // 5 minutes
+        }
+      );
+    }
   };
 
   return {
     ...location,
-    getCurrentPosition,
+    getLocation,
   };
 };

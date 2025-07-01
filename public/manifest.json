@@ -6,8 +6,8 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
-  "orientation": "portrait",
+  "theme_color": "#8B4A6B",
+  "orientation": "portrait-primary",
   "scope": "/",
   "icons": [
     {
@@ -23,5 +23,31 @@
       "purpose": "maskable any"
     }
   ],
-  "categories": ["education", "lifestyle", "family"]
+  "categories": ["education", "lifestyle", "family"],
+  "screenshots": [
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cerca Eventi",
+      "short_name": "Cerca",
+      "description": "Trova eventi e attività per bambini",
+      "url": "/search",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "lang": "it-IT",
+  "dir": "ltr"
 }

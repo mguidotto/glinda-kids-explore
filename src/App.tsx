@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useBranding } from "@/hooks/useBranding";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { useErrorTracking } from "@/hooks/useErrorTracking";
+import { useCapacitor } from "@/hooks/useCapacitor";
+import MobileLayout from "@/components/MobileLayout";
 import Index from "./pages/Index";
 import ContentDetail from "./pages/ContentDetail";
 import UserDashboard from "./pages/UserDashboard";
@@ -24,23 +26,26 @@ const AppContent = () => {
   useBranding();
   useGoogleAnalytics();
   useErrorTracking();
+  useCapacitor();
   
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/content/:slugOrId" element={<ContentDetail />} />
-        <Route path="/:categorySlug/:contentSlug" element={<ContentDetail />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/provider-dashboard" element={<ProviderDashboard />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <MobileLayout>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/content/:slugOrId" element={<ContentDetail />} />
+          <Route path="/:categorySlug/:contentSlug" element={<ContentDetail />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/provider-dashboard" element={<ProviderDashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </MobileLayout>
     </BrowserRouter>
   );
 };

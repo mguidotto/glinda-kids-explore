@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
@@ -70,8 +71,6 @@ const Search = () => {
     longitude: content.longitude,
     price: { from: content.price_from, to: content.price_to },
     image: content.featured_image || content.images?.[0] || "/placeholder.svg",
-    rating: 4.5,
-    reviews: 24,
     distance: content.distance_km,
     purchasable: content.purchasable,
     featured: content.featured,
@@ -228,10 +227,11 @@ const Search = () => {
                       description={content.description}
                       category={content.category}
                       location={content.location}
+                      address={content.address}
+                      latitude={content.latitude}
+                      longitude={content.longitude}
                       price={content.price}
                       image={content.image}
-                      rating={content.rating}
-                      reviews={content.reviews}
                       distance={content.distance}
                       purchasable={content.purchasable}
                       featured={content.featured}

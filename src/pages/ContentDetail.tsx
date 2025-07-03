@@ -22,7 +22,8 @@ const ContentDetail = () => {
   // Determine which parameter to use based on the route
   const searchParam = contentSlug || slugOrId;
   
-  console.log("[ContentDetail] Rendering with params:", { slugOrId, contentSlug, searchParam });
+  console.log("[ContentDetail] Route params:", { slugOrId, contentSlug, searchParam });
+  console.log("[ContentDetail] Current location:", window.location.href);
 
   const { data: content, isLoading, error } = useQuery({
     queryKey: ["content", searchParam],
@@ -64,8 +65,10 @@ const ContentDetail = () => {
         .eq("published", true)
         .maybeSingle();
 
-      // If not found by slug and it looks like a UUID, try by ID
-      if (!data && searchParam.length === 36 && searchParam.includes('-')) {
+      console.log("[ContentDetail] Slug search result:", { data, error });
+
+      // If not found by slug, try by ID (if it looks like a UUID)
+      if (!data && !error) {
         console.log("[ContentDetail] Not found by slug, trying by ID:", searchParam);
         
         const result = await supabase
@@ -99,6 +102,8 @@ const ContentDetail = () => {
           
         data = result.data;
         error = result.error;
+        
+        console.log("[ContentDetail] ID search result:", { data, error });
       }
 
       if (error) {
@@ -155,6 +160,7 @@ const ContentDetail = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Caricamento contenuto...</p>
+          <p className="text-xs text-gray-400 mt-2">Ricerca per: {searchParam}</p>
         </div>
       </div>
     );
@@ -162,6 +168,7 @@ const ContentDetail = () => {
 
   if (error || !content) {
     console.error("[ContentDetail] Rendering error state:", error);
+    console.log("[ContentDetail] Available route params:", { slugOrId, contentSlug });
     return <Navigate to="/404" replace />;
   }
 

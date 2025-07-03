@@ -471,10 +471,25 @@ const ContentsManagement = () => {
   };
 
   const generateContentUrl = (content: Content) => {
+    // Debug logs to understand the routing issue
+    console.log("[ContentsManagement] Generating URL for content:", {
+      id: content.id,
+      slug: content.slug,
+      title: content.title
+    });
+    
+    // Try multiple URL patterns to see which one works
     if (content.slug) {
-      return `/content/${content.slug}`;
+      // Test if the content has a slug, use it in the format expected by the router
+      const slugUrl = `/content/${content.slug}`;
+      console.log("[ContentsManagement] Generated slug URL:", slugUrl);
+      return slugUrl;
     }
-    return `/content/${content.id}`;
+    
+    // Fallback to ID-based URL
+    const idUrl = `/content/${content.id}`;
+    console.log("[ContentsManagement] Generated ID URL:", idUrl);
+    return idUrl;
   };
 
   if (loading) {
@@ -1025,7 +1040,11 @@ const ContentsManagement = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(generateContentUrl(content), '_blank')}
+                    onClick={() => {
+                      const url = generateContentUrl(content);
+                      console.log("[ContentsManagement] Opening URL:", url);
+                      window.open(url, '_blank');
+                    }}
                     className="px-3 py-2"
                     title="Visualizza contenuto"
                   >

@@ -30,11 +30,13 @@ type Content = Database["public"]["Tables"]["contents"]["Row"] & {
 };
 type Category = Database["public"]["Tables"]["categories"]["Row"];
 type TagType = Database["public"]["Tables"]["tags"]["Row"];
+type Provider = Database["public"]["Tables"]["providers"]["Row"];
 
 const ContentsManagement = () => {
   const [contents, setContents] = useState<Content[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<TagType[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,7 @@ const ContentsManagement = () => {
     title: "",
     description: "",
     category_id: "",
+    provider_id: "",
     city: "",
     address: "",
     price_from: "",
@@ -77,6 +80,7 @@ const ContentsManagement = () => {
     fetchContents();
     fetchCategories();
     fetchTags();
+    fetchProviders();
   }, []);
 
   const fetchContents = async () => {
@@ -117,6 +121,17 @@ const ContentsManagement = () => {
     
     if (data) {
       setTags(data);
+    }
+  };
+
+  const fetchProviders = async () => {
+    const { data } = await supabase
+      .from("providers")
+      .select("*")
+      .order("business_name");
+    
+    if (data) {
+      setProviders(data);
     }
   };
 
@@ -276,6 +291,7 @@ const ContentsManagement = () => {
         price_from: formData.price_from ? parseFloat(formData.price_from) : null,
         price_to: formData.price_to ? parseFloat(formData.price_to) : null,
         category_id: formData.category_id || null,
+        provider_id: formData.provider_id || null,
         featured_image: featuredImageUrl || null,
         images: galleryImages,
         slug: formData.slug || null,
@@ -373,6 +389,7 @@ const ContentsManagement = () => {
       title: "",
       description: "",
       category_id: "",
+      provider_id: "",
       city: "",
       address: "",
       price_from: "",
@@ -409,6 +426,7 @@ const ContentsManagement = () => {
       title: content.title,
       description: content.description || "",
       category_id: content.category_id || "",
+      provider_id: content.provider_id || "",
       city: content.city || "",
       address: content.address || "",
       price_from: content.price_from?.toString() || "",
@@ -784,6 +802,27 @@ const ContentsManagement = () => {
                   </div>
 
                   <div>
+                    <Label htmlFor="provider">Provider</Label>
+                    <Select
+                      value={formData.provider_id}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, provider_id: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleziona provider" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Nessun provider</SelectItem>
+                        {providers.map((provider) => (
+                          <SelectItem key={provider.id} value={provider.id}>
+                            {provider.business_name}
+                            {provider.verified && " ✓"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
                     <Label htmlFor="modality">Modalità</Label>
                     <Select
                       value={formData.modality}
@@ -1003,6 +1042,9 @@ const ContentsManagement = () => {
                   <span>Modalità: {content.modality}</span>
                   {content.categories && (
                     <span>Categoria: {content.categories.name}</span>
+                  )}
+                  {content.providers && (
+                    <span>Provider: {content.providers.business_name}</span>
                   )}
                   {content.city && <span>Città: {content.city}</span>}
                   {content.price_from && (

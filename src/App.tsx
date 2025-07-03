@@ -22,30 +22,33 @@ import { useAuth } from "./hooks/useAuth";
 import { useBranding } from "./hooks/useBranding";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 import { usePWA } from "./hooks/usePWA";
-import { useMobile } from "./hooks/use-mobile";
+import { useIsMobile } from "./hooks/use-mobile";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const { user, loading } = useAuth();
-  const { branding } = useBranding();
-  const isMobile = useMobile();
+  const { getSetting } = useBranding();
+  const isMobile = useIsMobile();
   
   useGoogleAnalytics();
   usePWA();
 
   useEffect(() => {
-    if (branding?.site_title) {
-      document.title = branding.site_title;
+    const siteTitle = getSetting('site_title');
+    if (siteTitle) {
+      document.title = siteTitle;
     }
-    if (branding?.favicon_url) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    
+    const faviconUrl = getSetting('favicon_url');
+    if (faviconUrl) {
+      const link = document.querySelector("link[rel*='icon']") as HTMLLinkElement || document.createElement('link');
       link.type = 'image/x-icon';
       link.rel = 'shortcut icon';
-      link.href = branding.favicon_url;
+      link.href = faviconUrl;
       document.getElementsByTagName('head')[0].appendChild(link);
     }
-  }, [branding]);
+  }, [getSetting]);
 
   if (loading) {
     return (

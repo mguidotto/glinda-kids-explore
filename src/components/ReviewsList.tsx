@@ -31,7 +31,7 @@ const ReviewsList = ({ contentId }: ReviewsListProps) => {
         profiles!reviews_user_id_fkey(first_name, last_name)
       `)
       .eq("content_id", contentId)
-      .eq("validated", true)
+      .eq("validated", true) // Only show validated reviews
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -63,56 +63,53 @@ const ReviewsList = ({ contentId }: ReviewsListProps) => {
     return <div>Caricamento recensioni...</div>;
   }
 
+  // Don't show reviews section if no reviews exist
+  if (reviews.length === 0) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
           Recensioni ({reviews.length})
-          {reviews.length > 0 && (
-            <div className="flex items-center gap-2 ml-4">
-              <div className="flex">{renderStars(Math.round(parseFloat(getAverageRating())))}</div>
-              <span className="text-lg font-bold">{getAverageRating()}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 ml-4">
+            <div className="flex">{renderStars(Math.round(parseFloat(getAverageRating())))}</div>
+            <span className="text-lg font-bold">{getAverageRating()}</span>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {reviews.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">
-              Nessuna recensione ancora. Sii il primo a lasciare una recensione!
-            </p>
-          ) : (
-            reviews.map((review) => (
-              <div key={review.id} className="border-b pb-4 last:border-b-0">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback>
-                      {review.profiles?.first_name?.[0]}{review.profiles?.last_name?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium">
-                        {review.profiles?.first_name} {review.profiles?.last_name}
-                      </span>
-                      <div className="flex">{renderStars(review.rating || 0)}</div>
-                      <span className="text-xs text-gray-500">
-                        {new Date(review.created_at || new Date()).toLocaleDateString('it-IT')}
-                      </span>
-                    </div>
-                    {review.title && (
-                      <h4 className="font-semibold mb-2">{review.title}</h4>
-                    )}
-                    {review.comment && (
-                      <p className="text-gray-700">{review.comment}</p>
-                    )}
+          {reviews.map((review) => (
+            <div key={review.id} className="border-b pb-4 last:border-b-0">
+              <div className="flex items-start gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback>
+                    {review.profiles?.first_name?.[0]}{review.profiles?.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium">
+                      {review.profiles?.first_name} {review.profiles?.last_name}
+                    </span>
+                    <div className="flex">{renderStars(review.rating || 0)}</div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(review.created_at || new Date()).toLocaleDateString('it-IT')}
+                    </span>
                   </div>
+                  {review.title && (
+                    <h4 className="font-semibold mb-2">{review.title}</h4>
+                  )}
+                  {review.comment && (
+                    <p className="text-gray-700">{review.comment}</p>
+                  )}
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

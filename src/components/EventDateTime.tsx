@@ -44,7 +44,9 @@ const EventDateTime = ({
     }
     
     if (eventTime) {
-      result += eventDate ? ` alle ${eventTime}` : `Ore ${eventTime}`;
+      // Format time without seconds - more human readable
+      const timeWithoutSeconds = eventTime.substring(0, 5);
+      result += eventDate ? ` alle ${timeWithoutSeconds}` : `Ore ${timeWithoutSeconds}`;
     }
     
     // Add end date/time if different from start
@@ -53,10 +55,12 @@ const EventDateTime = ({
       result += ` - ${format(endDate, "EEEE d MMMM yyyy", { locale: it })}`;
       
       if (eventEndTime) {
-        result += ` alle ${eventEndTime}`;
+        const endTimeWithoutSeconds = eventEndTime.substring(0, 5);
+        result += ` alle ${endTimeWithoutSeconds}`;
       }
     } else if (eventEndTime && eventEndTime !== eventTime) {
-      result += ` - ${eventEndTime}`;
+      const endTimeWithoutSeconds = eventEndTime.substring(0, 5);
+      result += ` - ${endTimeWithoutSeconds}`;
     }
     
     return result;

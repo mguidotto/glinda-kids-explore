@@ -1,3 +1,4 @@
+
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -135,7 +136,9 @@ const Index = () => {
     navigate('/search');
   };
 
+  // Fix: Corretta la funzione handleExploreActivities
   const handleExploreActivities = () => {
+    console.log('Navigating to search page...');
     navigate('/search');
   };
 

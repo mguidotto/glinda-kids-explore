@@ -4,8 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, Globe, Star, Calendar, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import FavoriteButton from "./FavoriteButton";
+import OpenInMapsButton from "./OpenInMapsButton";
 import { useContentUrl } from "@/hooks/useContentUrl";
 import EventDateTime from "./EventDateTime";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContentCardProps {
   id: string;
@@ -14,12 +17,11 @@ interface ContentCardProps {
   category?: { name: string; color?: string | null } | null;
   ageGroup?: string | null;
   location?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   price?: { from?: number | null; to?: number | null } | null;
   image?: string | null;
-  rating?: number;
-  reviews?: number;
-  provider?: { business_name: string; verified: boolean } | null;
-  mode?: string;
   distance?: number | null;
   purchasable?: boolean;
   featured?: boolean;
@@ -38,11 +40,11 @@ const ContentCard = ({
   description, 
   category, 
   location, 
+  address,
+  latitude,
+  longitude,
   price, 
   image, 
-  rating = 0, 
-  reviews = 0, 
-  provider,
   distance,
   purchasable = false,
   featured = false,
@@ -56,6 +58,29 @@ const ContentCard = ({
 }: ContentCardProps) => {
   const { getContentUrl } = useContentUrl();
   const contentUrl = getContentUrl({ id, slug, categories: { slug: category?.name?.toLowerCase() || '' } });
+  
+  const [reviewData, setReviewData] = useState<{ rating: number; count: number } | null>(null);
+
+  // Fetch real reviews for this content
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const { data: reviews } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('content_id', id)
+        .eq('validated', true);
+
+      if (reviews && reviews.length > 0) {
+        const avgRating = reviews.reduce((sum, review) => sum + (review.rating || 0), 0) / reviews.length;
+        setReviewData({
+          rating: avgRating,
+          count: reviews.length
+        });
+      }
+    };
+
+    fetchReviews();
+  }, [id]);
 
   const getModalityIcon = () => {
     switch (modality) {
@@ -147,7 +172,7 @@ const ContentCard = ({
             </h3>
           </Link>
 
-          {/* Event Date/Time */}
+          {/* Event Date/Time - Format human readable */}
           <EventDateTime
             eventDate={eventDate}
             eventTime={eventTime}
@@ -163,20 +188,6 @@ const ContentCard = ({
             </p>
           )}
 
-          {/* Provider */}
-          {provider && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">
-                {provider.business_name}
-              </span>
-              {provider.verified && (
-                <Badge variant="outline" className="text-xs">
-                  Verificato
-                </Badge>
-              )}
-            </div>
-          )}
-
           {/* Location and Distance */}
           <div className="flex items-center justify-between text-sm text-gray-500">
             <div className="flex items-center gap-1">
@@ -189,16 +200,33 @@ const ContentCard = ({
             )}
           </div>
 
+          {/* Google Maps Button */}
+          {address && (
+            <div className="flex justify-center">
+              <OpenInMapsButton
+                address={address}
+                latitude={latitude}
+                longitude={longitude}
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+              />
+            </div>
+          )}
+
           {/* Rating and Price */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="text-sm font-medium">{rating.toFixed(1)}</span>
-              <span className="text-sm text-gray-500">({reviews})</span>
-            </div>
+            {/* Show real reviews only if available */}
+            {reviewData && (
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                <span className="text-sm font-medium">{reviewData.rating.toFixed(1)}</span>
+                <span className="text-sm text-gray-500">({reviewData.count})</span>
+              </div>
+            )}
             
             {formatPrice() && (
-              <div className="text-right">
+              <div className="text-right ml-auto">
                 <span className="font-semibold text-green-600">
                   {formatPrice()}
                 </span>

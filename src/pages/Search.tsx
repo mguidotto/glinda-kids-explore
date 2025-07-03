@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
@@ -7,10 +6,11 @@ import SearchBar from "@/components/SearchBar";
 import LocationSearch from "@/components/LocationSearch";
 import CategoryFilter from "@/components/CategoryFilter";
 import ContentCard from "@/components/ContentCard";
+import SearchMapView from "@/components/SearchMapView";
 import { useContents } from "@/hooks/useContents";
 import { useSEO } from "@/hooks/useSEO";
 import { Button } from "@/components/ui/button";
-import { MapPin, X } from "lucide-react";
+import { MapPin, X, Grid, Map } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const Search = () => {
@@ -18,6 +18,7 @@ const Search = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [showLocationSearch, setShowLocationSearch] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [currentLocation, setCurrentLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -64,12 +65,13 @@ const Search = () => {
     category: content.categories ? { name: content.categories.name, color: content.categories.color } : null,
     ageGroup: content.age_groups?.join(", ") || "",
     location: content.city || "",
+    address: content.address,
+    latitude: content.latitude,
+    longitude: content.longitude,
     price: { from: content.price_from, to: content.price_to },
     image: content.featured_image || content.images?.[0] || "/placeholder.svg",
     rating: 4.5,
     reviews: 24,
-    provider: content.providers ? { business_name: content.providers.business_name, verified: content.providers.verified } : null,
-    mode: content.modality === 'presenza' ? 'In Presenza' : content.modality,
     distance: content.distance_km,
     purchasable: content.purchasable,
     featured: content.featured,
@@ -126,18 +128,18 @@ const Search = () => {
           <div className="space-y-4">
             <SearchBar onSearch={handleSearch} initialValue={searchQuery} />
             
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                onClick={() => setShowLocationSearch(!showLocationSearch)}
-                className="flex items-center gap-2"
-              >
-                <MapPin className="h-4 w-4" />
-                {currentLocation ? 'Modifica posizione' : 'Cerca vicino a me'}
-              </Button>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowLocationSearch(!showLocationSearch)}
+                  className="flex items-center gap-2"
+                >
+                  <MapPin className="h-4 w-4" />
+                  {currentLocation ? 'Modifica posizione' : 'Cerca vicino a me'}
+                </Button>
 
-              {currentLocation && (
-                <div className="flex items-center gap-2">
+                {currentLocation && (
                   <Badge variant="secondary" className="flex items-center gap-2">
                     <MapPin className="h-3 w-3" />
                     {currentLocation.address || 'Posizione selezionata'}
@@ -150,8 +152,30 @@ const Search = () => {
                       <X className="h-3 w-3" />
                     </Button>
                   </Badge>
-                </div>
-              )}
+                )}
+              </div>
+
+              {/* View mode toggle */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="flex items-center gap-2"
+                >
+                  <Grid className="h-4 w-4" />
+                  Griglia
+                </Button>
+                <Button
+                  variant={viewMode === 'map' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('map')}
+                  className="flex items-center gap-2"
+                >
+                  <Map className="h-4 w-4" />
+                  Mappa
+                </Button>
+              </div>
             </div>
 
             {showLocationSearch && (
@@ -189,33 +213,39 @@ const Search = () => {
                 </h2>
               </div>
               
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {transformedContents.map((content) => (
-                  <ContentCard 
-                    key={content.id}
-                    id={content.id}
-                    title={content.title}
-                    description={content.description}
-                    category={content.category}
-                    location={content.location}
-                    price={content.price}
-                    image={content.image}
-                    rating={content.rating}
-                    reviews={content.reviews}
-                    provider={content.provider}
-                    distance={content.distance}
-                    purchasable={content.purchasable}
-                    featured={content.featured}
-                    slug={content.slug}
-                    city={content.city}
-                    modality={content.modality}
-                    eventDate={content.eventDate}
-                    eventTime={content.eventTime}
-                    eventEndDate={content.eventEndDate}
-                    eventEndTime={content.eventEndTime}
-                  />
-                ))}
-              </div>
+              {viewMode === 'map' ? (
+                <SearchMapView 
+                  contents={transformedContents}
+                  className="w-full h-96 mb-6"
+                />
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {transformedContents.map((content) => (
+                    <ContentCard 
+                      key={content.id}
+                      id={content.id}
+                      title={content.title}
+                      description={content.description}
+                      category={content.category}
+                      location={content.location}
+                      price={content.price}
+                      image={content.image}
+                      rating={content.rating}
+                      reviews={content.reviews}
+                      distance={content.distance}
+                      purchasable={content.purchasable}
+                      featured={content.featured}
+                      slug={content.slug}
+                      city={content.city}
+                      modality={content.modality}
+                      eventDate={content.eventDate}
+                      eventTime={content.eventTime}
+                      eventEndDate={content.eventEndDate}
+                      eventEndTime={content.eventEndTime}
+                    />
+                  ))}
+                </div>
+              )}
             </>
           ) : (
             <div className="text-center py-12">

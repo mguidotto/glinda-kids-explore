@@ -22,14 +22,14 @@ import { useAuth } from "./hooks/useAuth";
 import { useBranding } from "./hooks/useBranding";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 import { usePWA } from "./hooks/usePWA";
-import { useIsMobile } from "./hooks/use-mobile";
+import { useCapacitor } from "./hooks/useCapacitor";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const { user, loading } = useAuth();
   const { getSetting } = useBranding();
-  const isMobile = useIsMobile();
+  const { isNative } = useCapacitor();
   
   useGoogleAnalytics();
   usePWA();
@@ -89,7 +89,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen bg-gray-50 flex flex-col">
-            {isMobile ? (
+            {isNative ? (
               <MobileLayout>
                 <AppContent />
               </MobileLayout>

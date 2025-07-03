@@ -16,7 +16,7 @@ const MobileBottomNav = () => {
     { path: "/search", icon: Search, label: "Cerca" },
     { path: "/favorites", icon: Heart, label: "Preferiti", requireAuth: true },
     { 
-      path: user ? (profile?.role === 'admin' ? '/admin-dashboard' : profile?.role === 'provider' ? '/provider-dashboard' : '/dashboard') : '/auth', 
+      path: user ? (profile?.role === 'admin' ? '/admin' : profile?.role === 'provider' ? '/provider' : '/dashboard') : '/auth', 
       icon: user ? User : User, 
       label: user ? "Profilo" : "Accedi" 
     },

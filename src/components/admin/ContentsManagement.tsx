@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search, CalendarIcon, Clock, AlertCircle } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search, CalendarIcon, Clock, AlertCircle, ExternalLink } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -468,6 +468,13 @@ const ContentsManagement = () => {
     setMessage(null);
     
     setIsDialogOpen(true);
+  };
+
+  const generateContentUrl = (content: Content) => {
+    if (content.slug) {
+      return `/content/${content.slug}`;
+    }
+    return `/content/${content.id}`;
   };
 
   if (loading) {
@@ -1015,6 +1022,15 @@ const ContentsManagement = () => {
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(generateContentUrl(content), '_blank')}
+                    className="px-3 py-2"
+                    title="Visualizza contenuto"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

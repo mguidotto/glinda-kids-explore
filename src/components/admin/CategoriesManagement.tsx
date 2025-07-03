@@ -1,14 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Tag } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 
 type Category = Database["public"]["Tables"]["categories"]["Row"];
@@ -17,8 +20,10 @@ const CategoriesManagement = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,7 +31,8 @@ const CategoriesManagement = () => {
     description: "",
     icon: "",
     color: "",
-    active: true
+    active: true,
+    display_order: 0,
   });
 
   useEffect(() => {
@@ -38,8 +44,7 @@ const CategoriesManagement = () => {
     const { data, error } = await supabase
       .from("categories")
       .select("*")
-      .order("display_order", { ascending: true })
-      .order("name", { ascending: true });
+      .order("display_order", { ascending: true });
 
     if (!error && data) {
       setCategories(data);
@@ -47,33 +52,44 @@ const CategoriesManagement = () => {
     setLoading(false);
   };
 
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[àáâãäå]/g, 'a')
+      .replace(/[èéêë]/g, 'e')
+      .replace(/[ìíîï]/g, 'i')
+      .replace(/[òóôõö]/g, 'o')
+      .replace(/[ùúûü]/g, 'u')
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      setSaving(true);
+      setError(null);
+      setMessage(null);
+
+      const categoryData = {
+        ...formData,
+        slug: formData.slug || generateSlug(formData.name),
+      };
+
       if (editingCategory) {
-        // Update existing category
-        const { error } = await supabase.rpc('update_category', {
-          category_id: editingCategory.id,
-          category_name: formData.name,
-          category_slug: formData.slug,
-          category_description: formData.description || null,
-          category_icon: formData.icon || null,
-          category_color: formData.color || null,
-          category_active: formData.active
-        });
+        const { error } = await supabase
+          .from("categories")
+          .update(categoryData)
+          .eq("id", editingCategory.id);
 
         if (error) throw error;
         setMessage("Categoria aggiornata con successo!");
       } else {
-        // Create new category
-        const { error } = await supabase.rpc('create_category', {
-          category_name: formData.name,
-          category_slug: formData.slug,
-          category_description: formData.description || null,
-          category_icon: formData.icon || null,
-          category_color: formData.color || null
-        });
+        const { error } = await supabase
+          .from("categories")
+          .insert([categoryData]);
 
         if (error) throw error;
         setMessage("Categoria creata con successo!");
@@ -84,7 +100,9 @@ const CategoriesManagement = () => {
       fetchCategories();
     } catch (error) {
       console.error("Error saving category:", error);
-      setMessage("Errore nel salvare la categoria");
+      setError("Errore nel salvare la categoria");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -95,15 +113,28 @@ const CategoriesManagement = () => {
       const { error } = await supabase
         .from("categories")
         .delete()
-        .eq("id", categoryId)
-        .eq("editable", true);
+        .eq("id", categoryId);
 
       if (error) throw error;
       setMessage("Categoria eliminata con successo!");
       fetchCategories();
     } catch (error) {
       console.error("Error deleting category:", error);
-      setMessage("Errore nell'eliminare la categoria");
+      setError("Errore nell'eliminare la categoria");
+    }
+  };
+
+  const toggleActive = async (categoryId: string, active: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("categories")
+        .update({ active: !active })
+        .eq("id", categoryId);
+
+      if (error) throw error;
+      fetchCategories();
+    } catch (error) {
+      console.error("Error updating category:", error);
     }
   };
 
@@ -114,9 +145,12 @@ const CategoriesManagement = () => {
       description: "",
       icon: "",
       color: "",
-      active: true
+      active: true,
+      display_order: 0,
     });
     setEditingCategory(null);
+    setError(null);
+    setMessage(null);
   };
 
   const startEdit = (category: Category) => {
@@ -127,31 +161,32 @@ const CategoriesManagement = () => {
       description: category.description || "",
       icon: category.icon || "",
       color: category.color || "",
-      active: category.active ?? true
+      active: category.active ?? true,
+      display_order: category.display_order ?? 0,
     });
+    setError(null);
+    setMessage(null);
     setIsDialogOpen(true);
   };
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  };
-
   if (loading) {
-    return <div>Caricamento categorie...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Caricamento categorie...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div>
-            <CardTitle>Gestione Categorie</CardTitle>
-            <p className="text-gray-600 text-sm">Modifica le categorie di ricerca disponibili</p>
+            <CardTitle className="text-xl sm:text-2xl font-bold">Gestione Categorie</CardTitle>
+            <p className="text-gray-600 text-sm mt-1">Organizza i contenuti per categoria</p>
           </div>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -159,91 +194,132 @@ const CategoriesManagement = () => {
               <Button 
                 onClick={resetForm}
                 size="lg"
-                className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Nuova Categoria
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className="text-lg sm:text-xl font-semibold">
                   {editingCategory ? "Modifica Categoria" : "Nuova Categoria"}
                 </DialogTitle>
               </DialogHeader>
               
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nome *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => {
-                      const name = e.target.value;
-                      setFormData(prev => ({
-                        ...prev,
-                        name,
-                        slug: generateSlug(name)
-                      }));
-                    }}
-                    required
-                  />
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {message && (
+                <Alert className="mb-4">
+                  <AlertDescription>{message}</AlertDescription>
+                </Alert>
+              )}
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Nome *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          name,
+                          slug: prev.slug || generateSlug(name)
+                        }));
+                      }}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="slug">Slug URL</Label>
+                    <Input
+                      id="slug"
+                      placeholder="categoria-esempio"
+                      value={formData.slug}
+                      onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      L'URL sarà: /categoria/{formData.slug || "categoria-esempio"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description">Descrizione</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="icon">Icona</Label>
+                      <Input
+                        id="icon"
+                        placeholder="lucide-react icon name"
+                        value={formData.icon}
+                        onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="color">Colore</Label>
+                      <Input
+                        id="color"
+                        type="color"
+                        value={formData.color}
+                        onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="display_order">Ordine di visualizzazione</Label>
+                    <Input
+                      id="display_order"
+                      type="number"
+                      value={formData.display_order}
+                      onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="active"
+                      checked={formData.active}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
+                    />
+                    <Label htmlFor="active">Categoria attiva</Label>
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="slug">Slug *</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Descrizione</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="icon">Icona (classe Lucide)</Label>
-                  <Input
-                    id="icon"
-                    value={formData.icon}
-                    onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
-                    placeholder="es. BookOpen, Calendar, Users"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="color">Colore</Label>
-                  <Input
-                    id="color"
-                    type="color"
-                    value={formData.color}
-                    onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="active"
-                    checked={formData.active}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
-                  />
-                  <Label htmlFor="active">Attiva</Label>
-                </div>
-
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 border-t">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="w-full sm:w-auto px-6 py-2"
+                    disabled={saving}
+                  >
                     Annulla
                   </Button>
-                  <Button type="submit">
-                    {editingCategory ? "Aggiorna" : "Crea"}
+                  <Button 
+                    type="submit" 
+                    disabled={saving}
+                    className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-2"
+                  >
+                    {saving ? "Salvataggio..." : editingCategory ? "Aggiorna Categoria" : "Crea Categoria"}
                   </Button>
                 </div>
               </form>
@@ -259,55 +335,66 @@ const CategoriesManagement = () => {
           </Alert>
         )}
 
-        <div className="space-y-4">
-          {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{category.name}</h3>
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded">{category.slug}</span>
-                  {!category.active && (
-                    <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded">
-                      Disattivata
-                    </span>
-                  )}
-                </div>
-                {category.description && (
-                  <p className="text-gray-600 text-sm mt-1">{category.description}</p>
-                )}
-                {category.color && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <div 
-                      className="w-4 h-4 rounded"
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <span className="text-xs text-gray-500">{category.color}</span>
-                  </div>
-                )}
-              </div>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-              <div className="flex items-center gap-2">
-                {category.editable && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => startEdit(category)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => deleteCategory(category.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
-                {!category.editable && (
-                  <span className="text-xs text-gray-500">Sistema</span>
-                )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categories.map((category) => (
+            <div key={category.id} className="bg-white p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  {category.icon && (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" 
+                         style={{ backgroundColor: category.color || '#e5e7eb' }}>
+                      <Tag className="h-4 w-4" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-base">{category.name}</h3>
+                    <p className="text-xs text-gray-500">/{category.slug}</p>
+                  </div>
+                </div>
+                <Badge variant={category.active ? "default" : "secondary"}>
+                  {category.active ? "Attiva" : "Inattiva"}
+                </Badge>
+              </div>
+              
+              {category.description && (
+                <p className="text-gray-600 text-sm mb-3 line-clamp-2">{category.description}</p>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">Ordine: {category.display_order}</span>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleActive(category.id, category.active ?? false)}
+                    className="px-2 py-1 h-8"
+                  >
+                    {category.active ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => startEdit(category)}
+                    className="px-2 py-1 h-8"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => deleteCategory(category.id)}
+                    className="px-2 py-1 h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

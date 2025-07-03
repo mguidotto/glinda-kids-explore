@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import UsersManagement from "@/components/admin/UsersManagement";
@@ -20,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const AdminDashboard = () => {
   const { user, profile, loading } = useAuth();
+  const [activeTab, setActiveTab] = useState("users");
 
   useEffect(() => {
     console.log("AdminDashboard render - Loading:", loading, "User:", user?.email, "Profile role:", profile?.role);
@@ -31,7 +33,10 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <div className="flex items-center justify-center min-h-[50vh]">
-          <div>Caricamento...</div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Caricamento...</p>
+          </div>
         </div>
       </div>
     );
@@ -54,108 +59,89 @@ const AdminDashboard = () => {
 
   console.log("Rendering admin dashboard for:", user.email);
 
+  const allTabs = [
+    { id: "users", label: "Utenti", component: <UsersManagement /> },
+    { id: "contents", label: "Contenuti", component: <ContentsManagement /> },
+    { id: "categories", label: "Categorie", component: <CategoriesManagement /> },
+    { id: "tags", label: "Tag", component: <TagsManagement /> },
+    { id: "reviews", label: "Recensioni", component: <ReviewsManagement /> },
+    { id: "texts", label: "Testi", component: <TextsManagement /> },
+    { id: "branding", label: "Branding", component: <BrandingManagement /> },
+    { id: "social", label: "Social", component: <SocialMetaManagement /> },
+    { id: "content-seo", label: "SEO", component: <ContentSEOManagement /> },
+    { id: "analytics", label: "Analytics", component: <GoogleAnalyticsManagement /> },
+    { id: "icons", label: "Icone", component: <AppIconsManagement /> },
+    { id: "favicon", label: "Favicon", component: <FaviconManagement /> },
+    { id: "pages", label: "Pagine", component: <PagesManagement /> },
+  ];
+
+  const primaryTabs = allTabs.slice(0, 5);
+  const secondaryTabs = allTabs.slice(5);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Amministratore</h1>
-          <p className="text-gray-600 mt-2">Gestisci tutti gli aspetti della piattaforma</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard Amministratore</h1>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">Gestisci tutti gli aspetti della piattaforma</p>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
-          {/* Responsive TabsList */}
-          <div className="w-full overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-5 md:grid-cols-12 min-w-max md:min-w-0">
-              <TabsTrigger value="users" className="text-xs md:text-sm">Utenti</TabsTrigger>
-              <TabsTrigger value="contents" className="text-xs md:text-sm">Contenuti</TabsTrigger>
-              <TabsTrigger value="categories" className="text-xs md:text-sm">Categorie</TabsTrigger>
-              <TabsTrigger value="tags" className="text-xs md:text-sm">Tag</TabsTrigger>
-              <TabsTrigger value="reviews" className="text-xs md:text-sm">Recensioni</TabsTrigger>
-              <TabsTrigger value="texts" className="text-xs md:text-sm hidden md:inline-flex">Testi</TabsTrigger>
-              <TabsTrigger value="branding" className="text-xs md:text-sm hidden md:inline-flex">Branding</TabsTrigger>
-              <TabsTrigger value="social" className="text-xs md:text-sm hidden md:inline-flex">Social</TabsTrigger>
-              <TabsTrigger value="content-seo" className="text-xs md:text-sm hidden md:inline-flex">SEO</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs md:text-sm hidden md:inline-flex">Analytics</TabsTrigger>
-              <TabsTrigger value="icons" className="text-xs md:text-sm hidden md:inline-flex">Icone</TabsTrigger>
-              <TabsTrigger value="favicon" className="text-xs md:text-sm hidden md:inline-flex">Favicon</TabsTrigger>
-              <TabsTrigger value="pages" className="text-xs md:text-sm hidden md:inline-flex">Pagine</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          {/* Desktop Tabs */}
+          <div className="hidden lg:block">
+            <TabsList className="grid w-full grid-cols-13 gap-1">
+              {allTabs.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id} className="text-xs xl:text-sm px-2 py-2">
+                  {tab.label}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
 
-          {/* Mobile dropdown for hidden tabs */}
-          <div className="md:hidden">
-            <select 
-              className="w-full p-2 border rounded-lg bg-white"
-              onChange={(e) => {
-                const tab = document.querySelector(`[data-value="${e.target.value}"]`) as HTMLElement;
-                tab?.click();
-              }}
-            >
-              <option value="">Altri strumenti...</option>
-              <option value="texts">Testi</option>
-              <option value="branding">Branding</option>
-              <option value="social">Social</option>
-              <option value="content-seo">SEO Contenuti</option>
-              <option value="analytics">Analytics</option>
-              <option value="icons">Icone</option>
-              <option value="favicon">Favicon</option>
-              <option value="pages">Pagine</option>
-            </select>
+          {/* Tablet Tabs */}
+          <div className="hidden md:block lg:hidden">
+            <div className="space-y-2">
+              <TabsList className="grid w-full grid-cols-5 gap-1">
+                {primaryTabs.map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id} className="text-xs px-2 py-2">
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <TabsList className="grid w-full grid-cols-8 gap-1">
+                {secondaryTabs.map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id} className="text-xs px-1 py-2">
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </div>
 
-          <TabsContent value="users" className="space-y-6">
-            <UsersManagement />
-          </TabsContent>
+          {/* Mobile Select */}
+          <div className="md:hidden">
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleziona sezione" />
+              </SelectTrigger>
+              <SelectContent>
+                {allTabs.map((tab) => (
+                  <SelectItem key={tab.id} value={tab.id}>
+                    {tab.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <TabsContent value="contents" className="space-y-6">
-            <ContentsManagement />
-          </TabsContent>
-
-          <TabsContent value="categories" className="space-y-6">
-            <CategoriesManagement />
-          </TabsContent>
-
-          <TabsContent value="tags" className="space-y-6">
-            <TagsManagement />
-          </TabsContent>
-
-          <TabsContent value="reviews" className="space-y-6">
-            <ReviewsManagement />
-          </TabsContent>
-
-          <TabsContent value="texts" className="space-y-6">
-            <TextsManagement />
-          </TabsContent>
-
-          <TabsContent value="branding" className="space-y-6">
-            <BrandingManagement />
-          </TabsContent>
-
-          <TabsContent value="social" className="space-y-6">
-            <SocialMetaManagement />
-          </TabsContent>
-
-          <TabsContent value="content-seo" className="space-y-6">
-            <ContentSEOManagement />
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <GoogleAnalyticsManagement />
-          </TabsContent>
-
-          <TabsContent value="icons" className="space-y-6">
-            <AppIconsManagement />
-          </TabsContent>
-
-          <TabsContent value="favicon" className="space-y-6">
-            <FaviconManagement />
-          </TabsContent>
-
-          <TabsContent value="pages" className="space-y-6">
-            <PagesManagement />
-          </TabsContent>
+          {/* Tab Content */}
+          {allTabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.id} className="space-y-6">
+              {tab.component}
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
 

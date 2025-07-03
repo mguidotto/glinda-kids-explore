@@ -471,7 +471,14 @@ const ContentsManagement = () => {
   };
 
   if (loading) {
-    return <div>Caricamento contenuti...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Caricamento contenuti...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -479,7 +486,7 @@ const ContentsManagement = () => {
       <CardHeader>
         <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div>
-            <CardTitle className="text-2xl font-bold">Gestione Contenuti</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl font-bold">Gestione Contenuti</CardTitle>
             <p className="text-gray-600 text-sm mt-1">Modifica tutti i contenuti della piattaforma</p>
           </div>
           
@@ -488,7 +495,7 @@ const ContentsManagement = () => {
               <Button 
                 onClick={resetForm}
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Nuovo Contenuto
@@ -496,7 +503,7 @@ const ContentsManagement = () => {
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-xl font-semibold">
+                <DialogTitle className="text-lg sm:text-xl font-semibold">
                   {editingContent ? "Modifica Contenuto" : "Nuovo Contenuto"}
                 </DialogTitle>
               </DialogHeader>
@@ -932,12 +939,12 @@ const ContentsManagement = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-6 border-t">
+                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 border-t">
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={() => setIsDialogOpen(false)}
-                    className="px-6 py-2"
+                    className="w-full sm:w-auto px-6 py-2"
                     disabled={saving}
                   >
                     Annulla
@@ -945,7 +952,7 @@ const ContentsManagement = () => {
                   <Button 
                     type="submit" 
                     disabled={uploading || saving}
-                    className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-2"
+                    className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-2"
                   >
                     {uploading ? "Caricamento immagine..." : saving ? "Salvataggio..." : editingContent ? "Aggiorna Contenuto" : "Crea Contenuto"}
                   </Button>
@@ -972,113 +979,67 @@ const ContentsManagement = () => {
 
         <div className="space-y-4">
           {contents.map((content) => (
-            <div key={content.id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-semibold">{content.title}</h3>
-                  <Badge variant={content.published ? "default" : "secondary"}>
-                    {content.published ? "Pubblicato" : "Bozza"}
-                  </Badge>
-                  {content.featured && (
-                    <Badge variant="outline">In Evidenza</Badge>
-                  )}
-                  {content.featured_image && (
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <Image className="h-3 w-3" />
-                      Immagine
+            <div key={content.id} className="bg-white p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h3 className="font-semibold text-base sm:text-lg truncate">{content.title}</h3>
+                    <Badge variant={content.published ? "default" : "secondary"}>
+                      {content.published ? "Pubblicato" : "Bozza"}
                     </Badge>
-                  )}
-                  {content.images && content.images.length > 0 && (
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <Image className="h-3 w-3" />
-                      Galleria ({content.images.length})
-                    </Badge>
-                  )}
-                  {content.slug && (
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <Search className="h-3 w-3" />
-                      SEO
-                    </Badge>
-                  )}
-                  {((content as any).event_date || (content as any).event_time) && (
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <CalendarIcon className="h-3 w-3" />
-                      Evento
-                    </Badge>
-                  )}
-                </div>
-                {content.description && (
-                  <p className="text-gray-600 text-sm mb-2 line-clamp-2">{content.description}</p>
-                )}
-                
-                {/* Show event date/time */}
-                {((content as any).event_date || (content as any).event_time) && (
-                  <div className="flex items-center gap-2 mb-2 text-sm text-blue-600">
-                    <CalendarIcon className="h-3 w-3" />
-                    <span>
-                      {(content as any).event_date && format(new Date((content as any).event_date), "dd/MM/yyyy")}
-                      {(content as any).event_time && ` alle ${(content as any).event_time}`}
-                      {(content as any).event_end_date && ` - ${format(new Date((content as any).event_end_date), "dd/MM/yyyy")}`}
-                      {(content as any).event_end_time && ` alle ${(content as any).event_end_time}`}
-                    </span>
+                    {content.featured && (
+                      <Badge variant="outline">In Evidenza</Badge>
+                    )}
+                    {content.featured_image && (
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        <Image className="h-3 w-3" />
+                        <span className="hidden sm:inline">Immagine</span>
+                      </Badge>
+                    )}
                   </div>
-                )}
-                
-                {/* Show tags */}
-                {content.content_tags && content.content_tags.length > 0 && (
-                  <div className="flex items-center gap-1 mb-2">
-                    <Tag className="h-3 w-3 text-gray-500" />
-                    <div className="flex flex-wrap gap-1">
-                      {content.content_tags.map((ct) => (
-                        <Badge key={ct.tags.id} variant="secondary" className="text-xs">
-                          {ct.tags.name}
-                        </Badge>
-                      ))}
-                    </div>
+                  
+                  {content.description && (
+                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{content.description}</p>
+                  )}
+                  
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500">
+                    <span>Modalità: {content.modality}</span>
+                    {content.categories && (
+                      <span>Categoria: {content.categories.name}</span>
+                    )}
+                    {content.providers && (
+                      <span>Provider: {content.providers.business_name}</span>
+                    )}
+                    {content.city && <span>Città: {content.city}</span>}
                   </div>
-                )}
-                
-                <div className="flex items-center gap-4 text-xs text-gray-500">
-                  <span>Modalità: {content.modality}</span>
-                  {content.categories && (
-                    <span>Categoria: {content.categories.name}</span>
-                  )}
-                  {content.providers && (
-                    <span>Provider: {content.providers.business_name}</span>
-                  )}
-                  {content.city && <span>Città: {content.city}</span>}
-                  {content.price_from && (
-                    <span>
-                      Prezzo: €{content.price_from}
-                      {content.price_to && content.price_to !== content.price_from && ` - €${content.price_to}`}
-                    </span>
-                  )}
-                  {content.slug && <span>URL: /{content.slug}</span>}
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => togglePublished(content.id, content.published ?? false)}
-                >
-                  {content.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => startEdit(content)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => deleteContent(content.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => togglePublished(content.id, content.published ?? false)}
+                    className="px-3 py-2"
+                  >
+                    {content.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => startEdit(content)}
+                    className="px-3 py-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => deleteContent(content.id)}
+                    className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

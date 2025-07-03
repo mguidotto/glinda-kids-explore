@@ -27,6 +27,9 @@ export const useContents = () => {
     setLoading(true);
     
     try {
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+      
       // If geolocation is provided, use the spatial search function
       if (filters?.latitude && filters?.longitude) {
         const { data, error } = await supabase.rpc('get_contents_within_radius', {
@@ -48,7 +51,8 @@ export const useContents = () => {
             `)
             .in('id', contentIds)
             .eq("published", true)
-            .eq("categories.active", true);
+            .eq("categories.active", true)
+            .or(`event_date.is.null,event_date.gte.${today}`);
 
           if (filters?.category && filters.category !== "all") {
             query = query.eq("categories.slug", filters.category);
@@ -86,7 +90,8 @@ export const useContents = () => {
             categories!inner(name, slug, active)
           `)
           .eq("published", true)
-          .eq("categories.active", true);
+          .eq("categories.active", true)
+          .or(`event_date.is.null,event_date.gte.${today}`);
 
         if (filters?.category && filters.category !== "all") {
           query = query.eq("categories.slug", filters.category);

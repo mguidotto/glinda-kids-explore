@@ -22,33 +22,30 @@ import { useAuth } from "./hooks/useAuth";
 import { useBranding } from "./hooks/useBranding";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 import { usePWA } from "./hooks/usePWA";
-import { useCapacitor } from "./hooks/useCapacitor";
+import { useMobile } from "./hooks/use-mobile";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const { user, loading } = useAuth();
-  const { getSetting } = useBranding();
-  const { isNative } = useCapacitor();
+  const { branding } = useBranding();
+  const isMobile = useMobile();
   
   useGoogleAnalytics();
   usePWA();
 
   useEffect(() => {
-    const siteTitle = getSetting('site_title');
-    if (siteTitle) {
-      document.title = siteTitle;
+    if (branding?.site_title) {
+      document.title = branding.site_title;
     }
-    
-    const faviconUrl = getSetting('favicon_url');
-    if (faviconUrl) {
-      const link = document.querySelector("link[rel*='icon']") as HTMLLinkElement || document.createElement('link');
+    if (branding?.favicon_url) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
       link.rel = 'shortcut icon';
-      link.href = faviconUrl;
+      link.href = branding.favicon_url;
       document.getElementsByTagName('head')[0].appendChild(link);
     }
-  }, [getSetting]);
+  }, [branding]);
 
   if (loading) {
     return (
@@ -89,7 +86,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen bg-gray-50 flex flex-col">
-            {isNative ? (
+            {isMobile ? (
               <MobileLayout>
                 <AppContent />
               </MobileLayout>

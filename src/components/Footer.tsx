@@ -33,7 +33,7 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">{getText('footer.partner', 'Partner')}</h4>
             <ul className="space-y-2 text-gray-300">
               <li><Link to="/auth" className="hover:text-[#7BB3BD]">{getText('footer.become_partner', 'Diventa Partner')}</Link></li>
-              <li><Link to="/provider-dashboard" className="hover:text-[#7BB3BD]">{getText('footer.partner_area', 'Area Partner')}</Link></li>
+              <li><Link to="/provider" className="hover:text-[#7BB3BD]">{getText('footer.partner_area', 'Area Partner')}</Link></li>
             </ul>
           </div>
         </div>

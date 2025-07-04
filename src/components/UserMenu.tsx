@@ -25,9 +25,9 @@ const UserMenu = () => {
     
     switch (profile.role) {
       case 'admin':
-        return '/admin-dashboard';
+        return '/admin';
       case 'provider':
-        return '/provider-dashboard';
+        return '/provider';
       default:
         return '/dashboard';
     }

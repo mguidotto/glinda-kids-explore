@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -71,8 +72,10 @@ const AdminDashboard = () => {
     { id: "pages", label: "Pagine", component: <PagesManagement /> },
   ];
 
-  const primaryTabs = allTabs.slice(0, 5);
-  const secondaryTabs = allTabs.slice(5);
+  // Organize tabs into logical groups for better desktop layout
+  const contentTabs = allTabs.slice(0, 5); // Users, Contents, Categories, Tags, Reviews
+  const customizationTabs = allTabs.slice(5, 10); // Texts, Branding, Social, SEO, Analytics
+  const assetTabs = allTabs.slice(10); // Icons, Favicon, Pages
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,29 +86,59 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          {/* Desktop Tabs */}
+          {/* Desktop Tabs - Organized in 3 rows for better readability */}
           <div className="hidden lg:block">
-            <TabsList className="grid w-full grid-cols-13 gap-1">
-              {allTabs.map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id} className="text-xs xl:text-sm px-2 py-2">
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="space-y-2">
+              {/* Content Management Row */}
+              <div className="mb-2">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">Gestione Contenuti</h3>
+                <TabsList className="grid w-full grid-cols-5 gap-1">
+                  {contentTabs.map((tab) => (
+                    <TabsTrigger key={tab.id} value={tab.id} className="text-sm px-4 py-2">
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+              
+              {/* Customization Row */}
+              <div className="mb-2">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">Personalizzazione</h3>
+                <TabsList className="grid w-full grid-cols-5 gap-1">
+                  {customizationTabs.map((tab) => (
+                    <TabsTrigger key={tab.id} value={tab.id} className="text-sm px-4 py-2">
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+              
+              {/* Assets Row */}
+              <div className="mb-2">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">Risorse</h3>
+                <TabsList className="grid w-full grid-cols-3 gap-1 max-w-md">
+                  {assetTabs.map((tab) => (
+                    <TabsTrigger key={tab.id} value={tab.id} className="text-sm px-4 py-2">
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+            </div>
           </div>
 
           {/* Tablet Tabs */}
           <div className="hidden md:block lg:hidden">
             <div className="space-y-2">
               <TabsList className="grid w-full grid-cols-5 gap-1">
-                {primaryTabs.map((tab) => (
+                {contentTabs.map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} className="text-xs px-2 py-2">
                     {tab.label}
                   </TabsTrigger>
                 ))}
               </TabsList>
               <TabsList className="grid w-full grid-cols-8 gap-1">
-                {secondaryTabs.map((tab) => (
+                {allTabs.slice(5).map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} className="text-xs px-1 py-2">
                     {tab.label}
                   </TabsTrigger>
@@ -121,11 +154,27 @@ const AdminDashboard = () => {
                 <SelectValue placeholder="Seleziona sezione" />
               </SelectTrigger>
               <SelectContent>
-                {allTabs.map((tab) => (
-                  <SelectItem key={tab.id} value={tab.id}>
-                    {tab.label}
-                  </SelectItem>
-                ))}
+                <optgroup label="Gestione Contenuti">
+                  {contentTabs.map((tab) => (
+                    <SelectItem key={tab.id} value={tab.id}>
+                      {tab.label}
+                    </SelectItem>
+                  ))}
+                </optgroup>
+                <optgroup label="Personalizzazione">
+                  {customizationTabs.map((tab) => (
+                    <SelectItem key={tab.id} value={tab.id}>
+                      {tab.label}
+                    </SelectItem>
+                  ))}
+                </optgroup>
+                <optgroup label="Risorse">
+                  {assetTabs.map((tab) => (
+                    <SelectItem key={tab.id} value={tab.id}>
+                      {tab.label}
+                    </SelectItem>
+                  ))}
+                </optgroup>
               </SelectContent>
             </Select>
           </div>

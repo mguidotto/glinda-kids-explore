@@ -5,42 +5,60 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBranding } from "@/hooks/useBranding";
-import { Globe, Loader2, Upload } from "lucide-react";
+import { Globe, Loader2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const FaviconManagement = () => {
   const { settings, isLoading, updateSetting, getSetting } = useBranding();
-  const [editingValue, setEditingValue] = useState<string>("");
-  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-  const handleEdit = (value: string) => {
-    setEditingValue(value);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    
     try {
-      await updateSetting('favicon_url', editingValue);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `favicon-${Date.now()}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('content-images')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('content-images')
+        .getPublicUrl(fileName);
+
+      await updateSetting('favicon_url', publicUrl);
       
       // Update the favicon in the document head
-      updateFaviconInDocument(editingValue);
+      updateFaviconInDocument(publicUrl);
       
       toast({
         title: "Favicon aggiornata",
         description: "La favicon del sito è stata aggiornata con successo.",
       });
-      
-      setEditingValue("");
     } catch (error) {
       toast({
         title: "Errore",
-        description: "Errore durante l'aggiornamento della favicon.",
+        description: "Errore durante il caricamento della favicon.",
         variant: "destructive",
       });
     } finally {
-      setSaving(false);
+      setUploading(false);
     }
+  };
+
+  const handleRemoveFavicon = async () => {
+    await updateSetting('favicon_url', '/favicon.ico');
+    updateFaviconInDocument('/favicon.ico');
+    
+    toast({
+      title: "Favicon ripristinata",
+      description: "La favicon è stata ripristinata a quella predefinita.",
+    });
   };
 
   const updateFaviconInDocument = (faviconUrl: string) => {
@@ -67,12 +85,7 @@ const FaviconManagement = () => {
     document.head.appendChild(link);
   };
 
-  const getCurrentValue = () => {
-    return editingValue !== "" ? editingValue : getSetting('favicon_url', '/favicon.ico');
-  };
-
-  const isEditing = editingValue !== "";
-  const currentFavicon = getCurrentValue();
+  const currentFavicon = getSetting('favicon_url', '/favicon.ico');
 
   if (isLoading) {
     return (
@@ -90,72 +103,98 @@ const FaviconManagement = () => {
           Gestione Favicon
         </CardTitle>
         <p className="text-sm text-gray-600">
-          Modifica la favicon che appare nella barra del browser
+          Gestisci la favicon che appare nella barra del browser
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="favicon_url">URL Favicon</Label>
-          <p className="text-xs text-gray-500">
-            Inserisci l'URL di un'immagine PNG, JPG o SVG (16x16 o 32x32 pixel consigliati)
-          </p>
-          <div className="flex gap-2">
-            <Input
-              id="favicon_url"
-              value={getCurrentValue()}
-              onChange={(e) => handleEdit(e.target.value)}
-              placeholder="https://esempio.com/favicon.png o /path/to/favicon.png"
-              className="flex-1"
-            />
-            {isEditing && (
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                size="sm"
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Salva'
-                )}
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {currentFavicon && (
+        {currentFavicon && currentFavicon !== '/favicon.ico' ? (
           <div className="space-y-4">
-            <div className="border-t pt-4">
-              <h4 className="font-medium text-sm mb-3">Anteprima Favicon</h4>
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <img 
-                  src={currentFavicon} 
-                  alt="Favicon Preview" 
-                  className="w-8 h-8 object-contain border rounded"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-                <div className="text-sm">
-                  <div className="font-medium">Preview 32x32</div>
-                  <div className="text-gray-500 text-xs">
-                    Come apparirà nella barra del browser
-                  </div>
-                </div>
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+              <img 
+                src={currentFavicon} 
+                alt="Favicon Preview" 
+                className="w-8 h-8 object-contain border rounded"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <div className="flex-1">
+                <div className="font-medium text-sm">Favicon Attuale</div>
+                <div className="text-xs text-gray-500 break-all">{currentFavicon}</div>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRemoveFavicon}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             
-            <div className="bg-blue-50 p-3 rounded-lg text-sm">
-              <div className="font-medium text-blue-900 mb-1">💡 Suggerimenti:</div>
-              <ul className="text-blue-800 space-y-1 text-xs">
-                <li>• Usa immagini PNG per la migliore compatibilità</li>
-                <li>• Dimensioni consigliate: 16x16, 32x32 o 64x64 pixel</li>
-                <li>• Evita immagini troppo complesse per piccole dimensioni</li>
-                <li>• Le modifiche si applicano immediatamente</li>
-              </ul>
+            <div>
+              <Label className="text-sm font-medium">Sostituisci Favicon</Label>
+              <p className="text-xs text-gray-500 mb-2">
+                Carica una nuova immagine PNG, JPG o SVG (16x16 o 32x32 pixel consigliati)
+              </p>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleFileUpload(file);
+                  }
+                }}
+                disabled={uploading}
+                className="max-w-xs"
+              />
+              {uploading && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Caricamento...</span>
+                </div>
+              )}
             </div>
           </div>
+        ) : (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+            <p className="text-sm text-gray-600 mb-3">
+              Carica una nuova favicon
+            </p>
+            <p className="text-xs text-gray-500 mb-4">
+              Formato supportato: PNG, JPG, SVG (16x16 o 32x32 pixel consigliati)
+            </p>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  handleFileUpload(file);
+                }
+              }}
+              disabled={uploading}
+              className="max-w-xs mx-auto"
+            />
+            {uploading && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Caricamento...</span>
+              </div>
+            )}
+          </div>
         )}
+
+        <div className="bg-blue-50 p-3 rounded-lg text-sm">
+          <div className="font-medium text-blue-900 mb-1">💡 Suggerimenti:</div>
+          <ul className="text-blue-800 space-y-1 text-xs">
+            <li>• Usa immagini PNG per la migliore compatibilità</li>
+            <li>• Dimensioni consigliate: 16x16, 32x32 o 64x64 pixel</li>
+            <li>• Evita immagini troppo complesse per piccole dimensioni</li>
+            <li>• Le modifiche si applicano immediatamente</li>
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

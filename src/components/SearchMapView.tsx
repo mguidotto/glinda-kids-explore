@@ -38,6 +38,10 @@ const SearchMapView: React.FC<SearchMapViewProps> = ({
   // Filter contents that have coordinates
   const contentsWithCoords = contents.filter(c => c.latitude && c.longitude);
 
+  // Count total contents and those with coordinates
+  const totalContents = contents.length;
+  const contentsWithCoordsCount = contentsWithCoords.length;
+
   useEffect(() => {
     if (contentsWithCoords.length > 0) {
       // Calculate center based on contents
@@ -78,11 +82,83 @@ const SearchMapView: React.FC<SearchMapViewProps> = ({
 
   if (contentsWithCoords.length === 0) {
     return (
-      <div className={`${className} flex items-center justify-center bg-gray-100 border rounded-lg`}>
-        <div className="text-center text-gray-600">
-          <MapPin className="h-8 w-8 mx-auto mb-2" />
-          <p>Nessun contenuto con posizione disponibile</p>
+      <div className="space-y-4">
+        <div className={`${className} flex items-center justify-center bg-gray-100 border rounded-lg`}>
+          <div className="text-center text-gray-600">
+            <MapPin className="h-8 w-8 mx-auto mb-2" />
+            <p className="font-medium">Coordinate non disponibili</p>
+            <p className="text-sm">
+              {totalContents > 0 
+                ? `${totalContents} contenuti trovati, ma nessuno ha coordinate precise`
+                : 'Nessun contenuto trovato'
+              }
+            </p>
+            {totalContents > 0 && (
+              <p className="text-xs mt-2 text-gray-500">
+                I contenuti verranno geocodificati automaticamente quando possibile
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* Show all contents in list format even without coordinates */}
+        {contents.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="font-medium text-gray-900">Contenuti trovati:</h3>
+            <div className="grid gap-3 max-h-64 overflow-y-auto">
+              {contents.map((content) => (
+                <Card 
+                  key={content.id} 
+                  className="cursor-pointer transition-all hover:shadow-md"
+                  onClick={() => handleContentClick(content)}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-start gap-3">
+                      {content.image && content.image !== "/placeholder.svg" && (
+                        <img 
+                          src={content.image} 
+                          alt={content.title}
+                          className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                        />
+                      )}
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">{content.title}</h4>
+                        
+                        {content.category && (
+                          <Badge 
+                            variant="secondary" 
+                            className="text-xs mt-1"
+                            style={{ 
+                              backgroundColor: content.category.color ? `${content.category.color}20` : undefined,
+                              color: content.category.color || undefined
+                            }}
+                          >
+                            {content.category.name}
+                          </Badge>
+                        )}
+                        
+                        <div className="flex items-center gap-1 text-gray-500 text-xs mt-1">
+                          <MapPin className="h-3 w-3" />
+                          <span>{content.city}</span>
+                          {!content.latitude && !content.longitude && (
+                            <span className="text-orange-500">(coordinate mancanti)</span>
+                          )}
+                        </div>
+                        
+                        {formatPrice(content.price) && (
+                          <div className="text-xs font-semibold text-green-600 mt-1">
+                            {formatPrice(content.price)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -120,6 +196,16 @@ const SearchMapView: React.FC<SearchMapViewProps> = ({
           loading="lazy"
         />
       </div>
+      
+      {/* Show info about coordinates */}
+      {contentsWithCoordsCount < totalContents && (
+        <div className="text-sm text-gray-600 bg-yellow-50 p-3 rounded-lg">
+          <p>
+            Mostrati {contentsWithCoordsCount} di {totalContents} contenuti sulla mappa. 
+            {totalContents - contentsWithCoordsCount} contenuti non hanno coordinate precise.
+          </p>
+        </div>
+      )}
       
       {/* Contents list below map */}
       <div className="grid gap-4 max-h-64 overflow-y-auto">

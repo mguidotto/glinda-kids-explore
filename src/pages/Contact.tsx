@@ -1,6 +1,5 @@
 
 import ContactForm from "@/components/ContactForm";
-import Footer from "@/components/Footer";
 import { useAppTexts } from "@/hooks/useAppTexts";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -32,8 +31,6 @@ const Contact = () => {
           <ContactForm />
         </section>
       </main>
-      
-      <Footer />
     </div>
   );
 };

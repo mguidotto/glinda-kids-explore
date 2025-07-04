@@ -1,4 +1,4 @@
-import Footer from "@/components/Footer";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppTexts } from "@/hooks/useAppTexts";
 import { Heart, Users, Award, Target } from "lucide-react";
@@ -74,7 +74,6 @@ const About = () => {
           </CardContent>
         </Card>
       </div>
-      <Footer />
     </div>
   );
 };

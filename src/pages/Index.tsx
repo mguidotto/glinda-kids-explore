@@ -8,7 +8,6 @@ import CategoryFilter from "@/components/CategoryFilter";
 import Hero from "@/components/Hero";
 import HomeSection from "@/components/HomeSections";
 import SearchBar from "@/components/SearchBar";
-import Footer from "@/components/Footer";
 import { useContents } from "@/hooks/useContents";
 import { useAppTexts } from "@/hooks/useAppTexts";
 import { useSEO } from "@/hooks/useSEO";
@@ -241,8 +240,6 @@ const Index = () => {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

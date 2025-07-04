@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const FaviconManagement = () => {
-  const { settings, isLoading, updateSetting, getSetting } = useBranding();
+  const { settings, isLoading, updateSetting, getSetting, updateFaviconInDocument } = useBranding();
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
@@ -21,19 +21,26 @@ const FaviconManagement = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `favicon-${Date.now()}.${fileExt}`;
       
+      console.log("Uploading favicon:", fileName);
+      
       const { data, error } = await supabase.storage
         .from('content-images')
         .upload(fileName, file);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Upload error:", error);
+        throw error;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('content-images')
         .getPublicUrl(fileName);
 
+      console.log("Favicon uploaded, URL:", publicUrl);
+      
       await updateSetting('favicon_url', publicUrl);
       
-      // Update the favicon in the document head
+      // Apply favicon immediately
       updateFaviconInDocument(publicUrl);
       
       toast({
@@ -41,6 +48,7 @@ const FaviconManagement = () => {
         description: "La favicon del sito è stata aggiornata con successo.",
       });
     } catch (error) {
+      console.error("Favicon upload error:", error);
       toast({
         title: "Errore",
         description: "Errore durante il caricamento della favicon.",
@@ -59,30 +67,6 @@ const FaviconManagement = () => {
       title: "Favicon ripristinata",
       description: "La favicon è stata ripristinata a quella predefinita.",
     });
-  };
-
-  const updateFaviconInDocument = (faviconUrl: string) => {
-    // Remove existing favicon links
-    const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
-    existingFavicons.forEach(link => link.remove());
-
-    // Add new favicon
-    const link = document.createElement('link');
-    link.rel = 'icon';
-    link.href = faviconUrl;
-    
-    // Determine type based on file extension
-    if (faviconUrl.endsWith('.png')) {
-      link.type = 'image/png';
-    } else if (faviconUrl.endsWith('.jpg') || faviconUrl.endsWith('.jpeg')) {
-      link.type = 'image/jpeg';
-    } else if (faviconUrl.endsWith('.svg')) {
-      link.type = 'image/svg+xml';
-    } else {
-      link.type = 'image/x-icon';
-    }
-    
-    document.head.appendChild(link);
   };
 
   const currentFavicon = getSetting('favicon_url', '/favicon.ico');
@@ -115,6 +99,7 @@ const FaviconManagement = () => {
                 alt="Favicon Preview" 
                 className="w-8 h-8 object-contain border rounded"
                 onError={(e) => {
+                  console.error("Favicon preview error for:", currentFavicon);
                   e.currentTarget.style.display = 'none';
                 }}
               />
@@ -142,6 +127,7 @@ const FaviconManagement = () => {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
+                    console.log("Selected file for favicon:", file.name, file.size);
                     handleFileUpload(file);
                   }
                 }}
@@ -151,7 +137,7 @@ const FaviconManagement = () => {
               {uploading && (
                 <div className="flex items-center gap-2 mt-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Caricamento...</span>
+                  <span className="text-sm">Caricamento favicon...</span>
                 </div>
               )}
             </div>
@@ -171,6 +157,7 @@ const FaviconManagement = () => {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
+                  console.log("Selected file for new favicon:", file.name, file.size);
                   handleFileUpload(file);
                 }
               }}
@@ -180,7 +167,7 @@ const FaviconManagement = () => {
             {uploading && (
               <div className="flex items-center justify-center gap-2 mt-4">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm">Caricamento...</span>
+                <span className="text-sm">Caricamento favicon...</span>
               </div>
             )}
           </div>

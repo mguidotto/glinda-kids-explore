@@ -31,6 +31,8 @@ export const useBranding = () => {
         }));
         setSettings(brandingSettings);
         applyBrandingToDocument(brandingSettings);
+        // Apply favicon immediately after fetching settings
+        applyFaviconToDocument(brandingSettings);
       }
     } catch (error) {
       console.error("Error fetching branding settings:", error);
@@ -47,6 +49,10 @@ export const useBranding = () => {
       });
 
       if (!error) {
+        // Immediately apply favicon update if it's a favicon change
+        if (key === 'favicon_url') {
+          updateFaviconInDocument(value);
+        }
         await fetchBrandingSettings();
       }
     } catch (error) {
@@ -57,6 +63,37 @@ export const useBranding = () => {
   const getSetting = (key: string, defaultValue = "") => {
     const setting = settings.find(s => s.key === key);
     return setting?.value || defaultValue;
+  };
+
+  const updateFaviconInDocument = (faviconUrl: string) => {
+    // Remove existing favicon links
+    const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
+    existingFavicons.forEach(link => link.remove());
+
+    // Add new favicon
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.href = faviconUrl;
+    
+    // Determine type based on file extension
+    if (faviconUrl.endsWith('.png')) {
+      link.type = 'image/png';
+    } else if (faviconUrl.endsWith('.jpg') || faviconUrl.endsWith('.jpeg')) {
+      link.type = 'image/jpeg';
+    } else if (faviconUrl.endsWith('.svg')) {
+      link.type = 'image/svg+xml';
+    } else {
+      link.type = 'image/x-icon';
+    }
+    
+    document.head.appendChild(link);
+  };
+
+  const applyFaviconToDocument = (brandingSettings: BrandingSetting[]) => {
+    const faviconSetting = brandingSettings.find(s => s.key === 'favicon_url');
+    if (faviconSetting && faviconSetting.value) {
+      updateFaviconInDocument(faviconSetting.value);
+    }
   };
 
   const applyBrandingToDocument = (brandingSettings: BrandingSetting[]) => {
@@ -88,6 +125,7 @@ export const useBranding = () => {
     isLoading,
     updateSetting,
     getSetting,
-    fetchBrandingSettings
+    fetchBrandingSettings,
+    updateFaviconInDocument
   };
 };

@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
@@ -20,15 +20,29 @@ import Footer from "./components/Footer";
 import { useAuth } from "./hooks/useAuth";
 import { useBranding } from "./hooks/useBranding";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
+import { useErrorTracking } from "./hooks/useErrorTracking";
 import { usePWA } from "./hooks/usePWA";
 
 const queryClient = new QueryClient();
+
+// Component to track route changes
+const RouteTracker = () => {
+  const location = useLocation();
+  const { trackPageView } = useGoogleAnalytics();
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname, trackPageView]);
+
+  return null;
+};
 
 const App = () => {
   const { user, loading } = useAuth();
   const { getSetting } = useBranding();
   
   useGoogleAnalytics();
+  useErrorTracking();
   usePWA();
 
   useEffect(() => {
@@ -61,6 +75,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <RouteTracker />
           <div className="min-h-screen bg-gray-50 flex flex-col">
             <Navigation />
             <main className="flex-1">

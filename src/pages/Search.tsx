@@ -11,6 +11,7 @@ import { useSEO } from "@/hooks/useSEO";
 import { Button } from "@/components/ui/button";
 import { MapPin, X, Grid, Map } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,6 +26,7 @@ const Search = () => {
   } | null>(null);
 
   const { contents, categories, loading, fetchContents } = useContents();
+  const { trackEvent } = useGoogleAnalytics();
 
   // SEO dinamico per la pagina ricerca
   useSEO({
@@ -86,6 +88,11 @@ const Search = () => {
     const newParams = new URLSearchParams(searchParams);
     if (query) {
       newParams.set('q', query);
+      // Track search event
+      trackEvent('search', {
+        search_term: query,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined
+      });
     } else {
       newParams.delete('q');
     }
@@ -95,10 +102,15 @@ const Search = () => {
   const handleLocationSelect = (latitude: number, longitude: number, address?: string) => {
     setCurrentLocation({ latitude, longitude, address });
     setShowLocationSearch(false);
+    // Track location search usage
+    trackEvent('location_search', {
+      has_address: !!address
+    });
   };
 
   const clearLocation = () => {
     setCurrentLocation(null);
+    trackEvent('location_cleared');
   };
 
   const handleCategoryChange = (category: string) => {
@@ -106,6 +118,10 @@ const Search = () => {
     const newParams = new URLSearchParams(searchParams);
     if (category !== 'all') {
       newParams.set('category', category);
+      // Track category filter usage
+      trackEvent('category_filter', {
+        category: category
+      });
     } else {
       newParams.delete('category');
     }

@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Search, ArrowLeft } from "lucide-react";
-import Navigation from "@/components/Navigation";
 
 const NotFound = () => {
   const location = useLocation();
@@ -22,8 +21,6 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <Card className="max-w-md w-full text-center">
           <CardHeader>

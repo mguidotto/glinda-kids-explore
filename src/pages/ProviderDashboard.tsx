@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, Edit, Trash2, Eye, Info } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
-import Navigation from "@/components/Navigation";
 import { useNavigate } from "react-router-dom";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
@@ -164,7 +162,6 @@ const ProviderDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="max-w-2xl mx-auto pt-8 px-4 text-center">
           <p>Caricamento...</p>
         </div>
@@ -175,7 +172,6 @@ const ProviderDashboard = () => {
   if (!provider) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="max-w-2xl mx-auto pt-8 px-4">
           <Card>
             <CardHeader>
@@ -256,7 +252,6 @@ const ProviderDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="max-w-6xl mx-auto pt-8 px-4">
         {message && (
           <Alert className="mb-4">

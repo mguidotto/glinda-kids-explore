@@ -1,5 +1,4 @@
 
-import Navigation from "@/components/Navigation";
 import ContactForm from "@/components/ContactForm";
 import Footer from "@/components/Footer";
 import { useAppTexts } from "@/hooks/useAppTexts";
@@ -18,8 +17,6 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-purple-50">
-      <Navigation />
-      
       <main className="max-w-4xl mx-auto pt-8 px-4 pb-16">
         <header className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

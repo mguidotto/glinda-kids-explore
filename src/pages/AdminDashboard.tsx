@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import UsersManagement from "@/components/admin/UsersManagement";
 import CategoriesManagement from "@/components/admin/CategoriesManagement";
@@ -31,7 +29,6 @@ const AdminDashboard = () => {
     console.log("Showing loading state");
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -46,7 +43,6 @@ const AdminDashboard = () => {
     console.log("Access denied - User:", !!user, "Profile:", !!profile, "Role:", profile?.role);
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Accesso non autorizzato</h2>
@@ -80,8 +76,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard Amministratore</h1>

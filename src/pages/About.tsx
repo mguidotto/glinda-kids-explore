@@ -1,5 +1,3 @@
-
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppTexts } from "@/hooks/useAppTexts";
@@ -10,7 +8,6 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-purple-50">
-      <Navigation />
       <div className="max-w-4xl mx-auto pt-8 px-4 pb-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

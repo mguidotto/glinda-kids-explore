@@ -23,8 +23,12 @@ const GoogleAnalyticsManagement = () => {
           .eq('key', 'google_analytics_id')
           .maybeSingle();
 
-        if (!error && data) {
-          setAnalyticsId(data.value || '');
+        if (error) {
+          console.error('Error fetching Google Analytics ID:', error);
+          toast.error('Errore nel caricamento dell\'ID di Google Analytics');
+        } else {
+          setAnalyticsId(data?.value || '');
+          console.log('Loaded Google Analytics ID:', data?.value || 'none');
         }
       } catch (error) {
         console.error('Error fetching Google Analytics ID:', error);
@@ -38,21 +42,35 @@ const GoogleAnalyticsManagement = () => {
   }, []);
 
   const handleSave = async () => {
+    if (!analyticsId.trim()) {
+      toast.error('Inserisci un ID di Google Analytics valido');
+      return;
+    }
+
     setSaving(true);
     try {
+      // Use upsert to handle both insert and update cases
       const { error } = await supabase
         .from('app_texts')
-        .upsert({
-          key: 'google_analytics_id',
-          value: analyticsId.trim(),
-          category: 'settings',
-          description: 'Google Analytics Measurement ID'
-        }, {
-          onConflict: 'key'
-        });
+        .upsert(
+          {
+            key: 'google_analytics_id',
+            value: analyticsId.trim(),
+            category: 'settings',
+            description: 'Google Analytics Measurement ID'
+          },
+          {
+            onConflict: 'key'
+          }
+        );
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving Google Analytics ID:', error);
+        toast.error('Errore nel salvataggio dell\'ID di Google Analytics');
+        return;
+      }
 
+      console.log('Google Analytics ID saved successfully:', analyticsId.trim());
       toast.success('Google Analytics ID salvato con successo');
       
       // Reload the page to apply the new Analytics ID
@@ -111,7 +129,7 @@ const GoogleAnalyticsManagement = () => {
 
         <Button 
           onClick={handleSave} 
-          disabled={saving}
+          disabled={saving || !analyticsId.trim()}
           className="w-full"
         >
           <Save className="h-4 w-4 mr-2" />
@@ -121,7 +139,18 @@ const GoogleAnalyticsManagement = () => {
         {analyticsId && (
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
             <p className="text-sm text-green-800">
-              ✅ Google Analytics è configurato e attivo su tutte le pagine.
+              ✅ Google Analytics è configurato con ID: <strong>{analyticsId}</strong>
+            </p>
+            <p className="text-sm text-green-600 mt-1">
+              L'Analytics è attivo su tutte le pagine del sito.
+            </p>
+          </div>
+        )}
+
+        {!analyticsId && (
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800">
+              ⚠️ Google Analytics non è ancora configurato.
             </p>
           </div>
         )}

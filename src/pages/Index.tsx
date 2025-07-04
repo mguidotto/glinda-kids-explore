@@ -1,10 +1,8 @@
-
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
-import Navigation from "@/components/Navigation";
 import CategoryFilter from "@/components/CategoryFilter";
 import Hero from "@/components/Hero";
 import HomeSection from "@/components/HomeSections";
@@ -144,8 +142,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navigation />
-      
       {/* Struttura SEO ottimizzata con H1 principale */}
       <header>
         <h1 className="sr-only">Glinda - Marketplace Attività Educative per Bambini da 0 a 10 anni</h1>

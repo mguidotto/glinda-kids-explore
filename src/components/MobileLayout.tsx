@@ -11,10 +11,15 @@ interface MobileLayoutProps {
 const MobileLayout = ({ children, showBottomNav = true }: MobileLayoutProps) => {
   const { isNative } = useCapacitor();
 
+  // Only apply mobile layout for native apps
+  if (!isNative) {
+    return <>{children}</>;
+  }
+
   return (
-    <div className={`min-h-screen ${isNative ? 'pb-20' : ''}`}>
+    <div className="min-h-screen pb-20">
       {children}
-      {isNative && showBottomNav && <MobileBottomNav />}
+      {showBottomNav && <MobileBottomNav />}
     </div>
   );
 };

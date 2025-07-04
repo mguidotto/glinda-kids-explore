@@ -1,3 +1,4 @@
+
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,11 @@ const Index = () => {
     categories: (content as any).categories
   }));
 
+  // Contenuti in evidenza - filtrati per featured = true
+  const featuredContents = transformedContents.filter(c => 
+    contents.find(orig => orig.id === c.id)?.featured === true
+  ).slice(0, 4);
+
   // Fix: Corretto l'ID della categoria "Servizi Educativi" da '1d46a6f7-5d27-48bb-979d-377d35ab29c6' a 'dbc5448f-0d00-4ec1-aafd-d91c4e967f39'
   const serviziEducativiContents = transformedContents.filter(c => 
     contents.find(orig => orig.id === c.id)?.category_id === 'dbc5448f-0d00-4ec1-aafd-d91c4e967f39'
@@ -158,6 +164,19 @@ const Index = () => {
             onCategoryChange={setSelectedCategory}
           />
         </section>
+
+        {featuredContents.length > 0 && (
+          <section aria-labelledby="featured-heading">
+            <h2 id="featured-heading" className="sr-only">Contenuti in Evidenza</h2>
+            <HomeSection 
+              title={getText('homepage.featured.title', 'Contenuti in Evidenza')}
+              subtitle={getText('homepage.featured.subtitle', 'Le migliori attività selezionate per te')}
+              contents={featuredContents}
+              sectionType="featured"
+              onViewAll={() => navigate('/search?featured=true')}
+            />
+          </section>
+        )}
 
         {serviziEducativiContents.length > 0 && (
           <section aria-labelledby="servizi-educativi-heading">

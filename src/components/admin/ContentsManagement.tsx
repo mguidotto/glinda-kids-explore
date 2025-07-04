@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -291,7 +292,7 @@ const ContentsManagement = () => {
         price_from: formData.price_from ? parseFloat(formData.price_from) : null,
         price_to: formData.price_to ? parseFloat(formData.price_to) : null,
         category_id: formData.category_id || null,
-        provider_id: formData.provider_id || null,
+        provider_id: formData.provider_id === "none" ? null : formData.provider_id || null,
         featured_image: featuredImageUrl || null,
         images: galleryImages,
         slug: formData.slug || null,
@@ -840,7 +841,7 @@ const ContentsManagement = () => {
                         <SelectValue placeholder="Seleziona provider" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nessun provider</SelectItem>
+                        <SelectItem value="none">Nessun provider</SelectItem>
                         {providers.map((provider) => (
                           <SelectItem key={provider.id} value={provider.id}>
                             {provider.business_name}

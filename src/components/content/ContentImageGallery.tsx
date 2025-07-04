@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,10 +13,25 @@ const ContentImageGallery = ({ featuredImage, images, title }: ContentImageGalle
   const [showLightbox, setShowLightbox] = useState(false);
 
   const hasGalleryImages = images && images.length > 0;
-  const allImages = [featuredImage, ...(images || [])].filter(img => img && img !== "/placeholder.svg");
+  // Use the uploaded placeholder if no featured image or if it's the default placeholder
+  const displayFeaturedImage = featuredImage && featuredImage !== "/placeholder.svg" 
+    ? featuredImage 
+    : "/lovable-uploads/58bed68c-faa4-42ee-bbee-0abe592b0423.png";
+  
+  const allImages = [displayFeaturedImage, ...(images || [])].filter(img => img && img !== "/placeholder.svg");
   
   if (allImages.length === 0) {
-    return null;
+    // Show the placeholder even if no images at all
+    return (
+      <div className="mb-6">
+        <img 
+          src="/lovable-uploads/58bed68c-faa4-42ee-bbee-0abe592b0423.png" 
+          alt={`Immagine placeholder per: ${title}`}
+          className="w-full h-64 md:h-80 object-cover rounded-lg"
+          loading="lazy"
+        />
+      </div>
+    );
   }
 
   const openLightbox = (index: number) => {

@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, Globe, Star, Calendar, Clock } from "lucide-react";
@@ -61,6 +60,9 @@ const ContentCard = ({
   
   const [reviewData, setReviewData] = useState<{ rating: number; count: number } | null>(null);
 
+  // Use the uploaded placeholder image when no image is available
+  const displayImage = image && image !== "/placeholder.svg" ? image : "/lovable-uploads/58bed68c-faa4-42ee-bbee-0abe592b0423.png";
+
   // Fetch real reviews for this content
   useEffect(() => {
     const fetchReviews = async () => {
@@ -117,16 +119,14 @@ const ContentCard = ({
   return (
     <Card className={`group hover:shadow-lg transition-all duration-200 ${featured ? 'ring-2 ring-blue-200' : ''}`}>
       <div className="relative">
-        {image && image !== "/placeholder.svg" && (
-          <div className="aspect-video overflow-hidden rounded-t-lg">
-            <img 
-              src={image} 
-              alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-              loading="lazy"
-            />
-          </div>
-        )}
+        <div className="aspect-video overflow-hidden rounded-t-lg">
+          <img 
+            src={displayImage} 
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            loading="lazy"
+          />
+        </div>
         
         <div className="absolute top-3 right-3">
           <FavoriteButton contentId={id} />

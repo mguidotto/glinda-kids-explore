@@ -17,21 +17,25 @@ const GoogleAnalyticsManagement = () => {
     const fetchAnalyticsId = async () => {
       setLoading(true);
       try {
+        console.log('Fetching Google Analytics ID from database...');
         const { data, error } = await supabase
           .from('app_texts')
           .select('value')
           .eq('key', 'google_analytics_id')
           .maybeSingle();
 
+        console.log('Database query result:', { data, error });
+
         if (error) {
           console.error('Error fetching Google Analytics ID:', error);
           toast.error('Errore nel caricamento dell\'ID di Google Analytics');
         } else {
-          setAnalyticsId(data?.value || '');
-          console.log('Loaded Google Analytics ID:', data?.value || 'none');
+          const idValue = data?.value || '';
+          setAnalyticsId(idValue);
+          console.log('Loaded Google Analytics ID:', idValue || 'none');
         }
       } catch (error) {
-        console.error('Error fetching Google Analytics ID:', error);
+        console.error('Unexpected error fetching Google Analytics ID:', error);
         toast.error('Errore nel caricamento dell\'ID di Google Analytics');
       } finally {
         setLoading(false);
@@ -42,6 +46,8 @@ const GoogleAnalyticsManagement = () => {
   }, []);
 
   const handleSave = async () => {
+    console.log('Starting save process for Google Analytics ID:', analyticsId.trim());
+    
     if (!analyticsId.trim()) {
       toast.error('Inserisci un ID di Google Analytics valido');
       return;
@@ -49,8 +55,25 @@ const GoogleAnalyticsManagement = () => {
 
     setSaving(true);
     try {
-      // Use upsert to handle both insert and update cases
-      const { error } = await supabase
+      // First, try to check current user and permissions
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      console.log('Current user:', userData?.user?.email, 'Error:', userError);
+
+      // Check if user has admin role
+      if (userData?.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userData.user.id)
+          .single();
+        
+        console.log('User profile role:', profileData?.role, 'Error:', profileError);
+      }
+
+      console.log('Attempting to upsert Google Analytics ID...');
+      
+      // Try the upsert operation
+      const { data: upsertData, error: upsertError } = await supabase
         .from('app_texts')
         .upsert(
           {
@@ -62,15 +85,40 @@ const GoogleAnalyticsManagement = () => {
           {
             onConflict: 'key'
           }
-        );
+        )
+        .select();
 
-      if (error) {
-        console.error('Error saving Google Analytics ID:', error);
-        toast.error('Errore nel salvataggio dell\'ID di Google Analytics');
+      console.log('Upsert result:', { data: upsertData, error: upsertError });
+
+      if (upsertError) {
+        console.error('Upsert error details:', upsertError);
+        toast.error(`Errore nel salvataggio: ${upsertError.message}`);
         return;
       }
 
-      console.log('Google Analytics ID saved successfully:', analyticsId.trim());
+      // Verify the record was actually saved
+      console.log('Verifying save by fetching the record...');
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('app_texts')
+        .select('*')
+        .eq('key', 'google_analytics_id')
+        .maybeSingle();
+
+      console.log('Verification result:', { data: verifyData, error: verifyError });
+
+      if (verifyError) {
+        console.error('Verification error:', verifyError);
+        toast.error('Errore nella verifica del salvataggio');
+        return;
+      }
+
+      if (!verifyData) {
+        console.error('Record not found after save attempt');
+        toast.error('Il record non è stato salvato correttamente');
+        return;
+      }
+
+      console.log('Google Analytics ID saved and verified successfully:', analyticsId.trim());
       toast.success('Google Analytics ID salvato con successo');
       
       // Reload the page to apply the new Analytics ID
@@ -78,8 +126,8 @@ const GoogleAnalyticsManagement = () => {
         window.location.reload();
       }, 1000);
     } catch (error) {
-      console.error('Error saving Google Analytics ID:', error);
-      toast.error('Errore nel salvataggio dell\'ID di Google Analytics');
+      console.error('Unexpected error during save:', error);
+      toast.error('Errore imprevisto nel salvataggio');
     } finally {
       setSaving(false);
     }

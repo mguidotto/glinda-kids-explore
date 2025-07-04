@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { MapPin, Users, Globe, Star, Calendar, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import FavoriteButton from "./FavoriteButton";
-import OpenInMapsButton from "./OpenInMapsButton";
 import { useContentUrl } from "@/hooks/useContentUrl";
 import EventDateTime from "./EventDateTime";
 import { useState, useEffect } from "react";
@@ -63,7 +63,6 @@ const ContentCard = ({
   // Use the uploaded placeholder image when no image is available
   const displayImage = image && image !== "/placeholder.svg" ? image : "/lovable-uploads/58bed68c-faa4-42ee-bbee-0abe592b0423.png";
 
-  // Fetch real reviews for this content
   useEffect(() => {
     const fetchReviews = async () => {
       const { data: reviews } = await supabase
@@ -117,130 +116,129 @@ const ContentCard = ({
   };
 
   return (
-    <Card className={`group hover:shadow-lg transition-all duration-200 ${featured ? 'ring-2 ring-blue-200' : ''}`}>
-      <div className="relative">
-        <div className="aspect-video overflow-hidden rounded-t-lg">
-          <img 
-            src={displayImage} 
-            alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-            loading="lazy"
-          />
-        </div>
-        
-        <div className="absolute top-3 right-3">
-          <FavoriteButton contentId={id} />
-        </div>
-        
-        {featured && (
-          <Badge className="absolute top-3 left-3 bg-blue-600 text-white">
-            In Evidenza
-          </Badge>
-        )}
-      </div>
-      
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {/* Category and Modality */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {category && (
-                <Badge 
-                  variant="secondary" 
-                  className="text-xs"
-                  style={{ 
-                    backgroundColor: category.color ? `${category.color}20` : undefined,
-                    color: category.color || undefined,
-                    borderColor: category.color || undefined
-                  }}
-                >
-                  {category.name}
-                </Badge>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-1 text-gray-500 text-xs">
-              {getModalityIcon()}
-              <span>{getModalityText()}</span>
+    <Link to={contentUrl} className="block">
+      <Card className={`group hover:shadow-lg transition-all duration-200 cursor-pointer h-full ${featured ? 'ring-2 ring-blue-200' : ''}`}>
+        <div className="relative">
+          <div className="aspect-video overflow-hidden rounded-t-lg">
+            <img 
+              src={displayImage} 
+              alt={title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              loading="lazy"
+            />
+          </div>
+          
+          <div className="absolute top-3 right-3">
+            <div onClick={(e) => e.preventDefault()}>
+              <FavoriteButton contentId={id} />
             </div>
           </div>
-
-          {/* Title */}
-          <Link to={contentUrl} className="block">
-            <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-              {title}
-            </h3>
-          </Link>
-
-          {/* Event Date/Time - Format human readable */}
-          <EventDateTime
-            eventDate={eventDate}
-            eventTime={eventTime}
-            eventEndDate={eventEndDate}
-            eventEndTime={eventEndTime}
-            className="text-xs"
-          />
-
-          {/* Description */}
-          {description && (
-            <p className="text-gray-600 text-sm line-clamp-2">
-              {description}
-            </p>
+          
+          {featured && (
+            <Badge className="absolute top-3 left-3 bg-blue-600 text-white">
+              In Evidenza
+            </Badge>
           )}
-
-          {/* Location and Distance */}
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              <span>{city || location}</span>
-            </div>
-            
-            {distance && (
-              <span className="text-xs">{distance.toFixed(1)} km</span>
-            )}
-          </div>
-
-          {/* Google Maps Button */}
-          {address && (
-            <div className="flex justify-center">
-              <OpenInMapsButton
-                address={address}
-                latitude={latitude}
-                longitude={longitude}
-                variant="ghost"
-                size="sm"
-                className="text-xs"
-              />
-            </div>
-          )}
-
-          {/* Rating and Price */}
-          <div className="flex items-center justify-between">
-            {/* Show real reviews only if available */}
-            {reviewData && (
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                <span className="text-sm font-medium">{reviewData.rating.toFixed(1)}</span>
-                <span className="text-sm text-gray-500">({reviewData.count})</span>
-              </div>
-            )}
-            
-            {formatPrice() && (
-              <div className="text-right ml-auto">
-                <span className="font-semibold text-green-600">
-                  {formatPrice()}
-                </span>
-                {purchasable && (
-                  <Badge variant="outline" className="ml-2 text-xs">
-                    Acquistabile
+        </div>
+        
+        <CardContent className="p-4 flex flex-col flex-1">
+          <div className="space-y-3 flex-1">
+            {/* Category and Modality */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {category && (
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs"
+                    style={{ 
+                      backgroundColor: category.color ? `${category.color}20` : undefined,
+                      color: category.color || undefined,
+                      borderColor: category.color || undefined
+                    }}
+                  >
+                    {category.name}
                   </Badge>
                 )}
               </div>
+              
+              <div className="flex items-center gap-1 text-gray-500 text-xs">
+                {getModalityIcon()}
+                <span>{getModalityText()}</span>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+              {title}
+            </h3>
+
+            {/* Event Date/Time - Format human readable */}
+            <EventDateTime
+              eventDate={eventDate}
+              eventTime={eventTime}
+              eventEndDate={eventEndDate}
+              eventEndTime={eventEndTime}
+              className="text-xs"
+            />
+
+            {/* Description */}
+            {description && (
+              <p className="text-gray-600 text-sm line-clamp-2 flex-1">
+                {description}
+              </p>
             )}
+
+            {/* Location and Distance */}
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <div className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                <span>{city || location}</span>
+              </div>
+              
+              {distance && (
+                <span className="text-xs">{distance.toFixed(1)} km</span>
+              )}
+            </div>
+
+            {/* Rating and Price */}
+            <div className="flex items-center justify-between">
+              {/* Show real reviews only if available */}
+              {reviewData && (
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                  <span className="text-sm font-medium">{reviewData.rating.toFixed(1)}</span>
+                  <span className="text-sm text-gray-500">({reviewData.count})</span>
+                </div>
+              )}
+              
+              {formatPrice() && (
+                <div className="text-right ml-auto">
+                  <span className="font-semibold text-green-600">
+                    {formatPrice()}
+                  </span>
+                  {purchasable && (
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      Acquistabile
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* Discover More Button */}
+          <div className="mt-4 flex justify-center">
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]"
+              onClick={(e) => e.preventDefault()}
+            >
+              Scopri di più
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 

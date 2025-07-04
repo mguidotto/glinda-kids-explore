@@ -1,4 +1,3 @@
-
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -75,15 +74,6 @@ const Index = () => {
     fetchStats();
   }, []);
 
-  const categoryOptions = [
-    { id: "all", name: "Tutti", count: contents.length },
-    ...categories.map(cat => ({
-      id: cat.slug,
-      name: cat.name,
-      count: contents.filter(c => (c as any).categories?.slug === cat.slug).length
-    }))
-  ];
-
   const transformedContents = contents.map((content: Content) => ({
     id: content.id,
     title: content.title || "",
@@ -123,6 +113,28 @@ const Index = () => {
   const eventiContents = transformedContents.filter(c => 
     contents.find(orig => orig.id === c.id)?.category_id === 'e378ba01-8790-4e60-8eb8-b94a27800fc1'
   ).slice(0, 4);
+
+  // Corretto il contatore delle categorie - ora mostra solo i contenuti effettivamente presenti nelle sezioni
+  const categoryOptions = [
+    { id: "all", name: "Tutti", count: contents.length },
+    ...categories.map(cat => {
+      let count = 0;
+      if (cat.slug === 'servizi-educativi') {
+        count = serviziEducativiContents.length;
+      } else if (cat.slug === 'corsi') {
+        count = corsiContents.length;
+      } else if (cat.slug === 'eventi') {
+        count = eventiContents.length;
+      } else {
+        count = contents.filter(c => (c as any).categories?.slug === cat.slug).length;
+      }
+      return {
+        id: cat.slug,
+        name: cat.name,
+        count: count
+      };
+    }).filter(cat => cat.count > 0) // Filtra le categorie con 0 elementi
+  ];
 
   const handleSearch = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}`);

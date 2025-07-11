@@ -1,8 +1,9 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +15,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -36,6 +38,12 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!privacyAccepted) {
+      toast.error("Devi accettare la Privacy Policy per registrarti.");
+      return;
+    }
+    
     setLoading(true);
     
     const { error } = await signUp(email, password, firstName, lastName);
@@ -153,10 +161,31 @@ const Auth = () => {
                     />
                   </div>
                 </div>
+                
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="privacy-register"
+                    checked={privacyAccepted}
+                    onCheckedChange={(checked) => setPrivacyAccepted(checked === true)}
+                    required
+                  />
+                  <label htmlFor="privacy-register" className="text-sm text-gray-700 leading-relaxed">
+                    Dichiaro di aver letto e accettato la{' '}
+                    <Link 
+                      to="/privacy" 
+                      target="_blank"
+                      className="text-[#8B4A6B] hover:underline font-medium"
+                    >
+                      Privacy Policy
+                    </Link>{' '}
+                    *
+                  </label>
+                </div>
+                
                 <Button 
                   type="submit" 
                   className="w-full bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]" 
-                  disabled={loading}
+                  disabled={loading || !privacyAccepted}
                 >
                   {loading ? "Registrazione in corso..." : "Registrati"}
                 </Button>

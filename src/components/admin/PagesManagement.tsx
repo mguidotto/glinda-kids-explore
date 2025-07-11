@@ -22,6 +22,10 @@ const PagesManagement = () => {
     phone: "",
     address: ""
   });
+  const [privacyData, setPrivacyData] = useState({
+    title: "",
+    content: ""
+  });
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -43,6 +47,8 @@ const PagesManagement = () => {
       const contactEmail = data.find(item => item.key === "contact.email")?.value || "";
       const contactPhone = data.find(item => item.key === "contact.phone")?.value || "";
       const contactAddress = data.find(item => item.key === "contact.address")?.value || "";
+      const privacyTitle = data.find(item => item.key === "privacy.title")?.value || "";
+      const privacyContent = data.find(item => item.key === "privacy.content")?.value || "";
 
       setAboutData({ title: aboutTitle, content: aboutContent });
       setContactData({ 
@@ -52,6 +58,7 @@ const PagesManagement = () => {
         phone: contactPhone,
         address: contactAddress
       });
+      setPrivacyData({ title: privacyTitle, content: privacyContent });
     }
   };
 
@@ -98,6 +105,20 @@ const PagesManagement = () => {
     }
   };
 
+  const savePrivacyPage = async () => {
+    setLoading(true);
+    try {
+      await updatePageText("privacy.title", privacyData.title);
+      await updatePageText("privacy.content", privacyData.content);
+      setMessage("Privacy Policy aggiornata con successo!");
+    } catch (error) {
+      setMessage("Errore nell'aggiornamento della Privacy Policy");
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -114,9 +135,10 @@ const PagesManagement = () => {
         )}
 
         <Tabs defaultValue="about">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="about">Chi Siamo</TabsTrigger>
             <TabsTrigger value="contact">Contattaci</TabsTrigger>
+            <TabsTrigger value="privacy">Privacy Policy</TabsTrigger>
           </TabsList>
           
           <TabsContent value="about" className="space-y-4">
@@ -213,6 +235,41 @@ const PagesManagement = () => {
             >
               <Save className="h-4 w-4 mr-2" />
               {loading ? "Salvataggio..." : "Salva Contattaci"}
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="privacy" className="space-y-4">
+            <div>
+              <Label htmlFor="privacyTitle">Titolo Privacy Policy</Label>
+              <Input
+                id="privacyTitle"
+                value={privacyData.title}
+                onChange={(e) => setPrivacyData({...privacyData, title: e.target.value})}
+                placeholder="Privacy Policy"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="privacyContent">Contenuto Privacy Policy</Label>
+              <Textarea
+                id="privacyContent"
+                value={privacyData.content}
+                onChange={(e) => setPrivacyData({...privacyData, content: e.target.value})}
+                rows={12}
+                placeholder="Inserisci qui il testo completo della Privacy Policy..."
+              />
+              <p className="text-sm text-gray-600 mt-2">
+                Puoi usare le interruzioni di riga che verranno rispettate nella visualizzazione.
+              </p>
+            </div>
+            
+            <Button 
+              onClick={savePrivacyPage} 
+              disabled={loading}
+              className="bg-[#8B4A6B] hover:bg-[#7A4060]"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? "Salvataggio..." : "Salva Privacy Policy"}
             </Button>
           </TabsContent>
         </Tabs>

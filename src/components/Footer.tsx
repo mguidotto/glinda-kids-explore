@@ -27,6 +27,7 @@ const Footer = () => {
             <ul className="space-y-2 text-gray-300">
               <li><Link to="/contact" className="hover:text-[#7BB3BD]">{getText('footer.contact', 'Contattaci')}</Link></li>
               <li><Link to="/about" className="hover:text-[#7BB3BD]">Chi Siamo</Link></li>
+              <li><Link to="/privacy" className="hover:text-[#7BB3BD]">Privacy Policy</Link></li>
             </ul>
           </div>
           <div>

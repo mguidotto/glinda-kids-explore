@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,10 +15,17 @@ const ContactForm = () => {
     email: '',
     message: ''
   });
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!privacyAccepted) {
+      toast.error("Devi accettare la Privacy Policy per continuare.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -28,6 +37,7 @@ const ContactForm = () => {
 
       toast.success("Messaggio inviato con successo! Ti risponderemo presto.");
       setFormData({ name: '', email: '', message: '' });
+      setPrivacyAccepted(false);
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error("Errore nell'invio del messaggio. Riprova più tardi.");
@@ -95,9 +105,29 @@ const ContactForm = () => {
             />
           </div>
 
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="privacy"
+              checked={privacyAccepted}
+              onCheckedChange={(checked) => setPrivacyAccepted(checked === true)}
+              required
+            />
+            <label htmlFor="privacy" className="text-sm text-gray-700 leading-relaxed">
+              Dichiaro di aver letto e accettato la{' '}
+              <Link 
+                to="/privacy" 
+                target="_blank"
+                className="text-[#8B4A6B] hover:underline font-medium"
+              >
+                Privacy Policy
+              </Link>{' '}
+              *
+            </label>
+          </div>
+
           <Button 
             type="submit" 
-            disabled={loading}
+            disabled={loading || !privacyAccepted}
             className="w-full bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]"
           >
             {loading ? 'Invio in corso...' : 'Invia Messaggio'}

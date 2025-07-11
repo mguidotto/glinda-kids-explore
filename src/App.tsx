@@ -10,6 +10,7 @@ import Search from "./pages/Search";
 import ContentDetail from "./pages/ContentDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
 import Auth from "./pages/Auth";
 import UserDashboard from "./pages/UserDashboard";
 import ProviderDashboard from "./pages/ProviderDashboard";
@@ -84,6 +85,7 @@ const App = () => {
                 <Route path="/search" element={<Search />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<Privacy />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<UserDashboard />} />
                 <Route path="/provider" element={<ProviderDashboard />} />

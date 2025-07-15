@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import SearchBar from "@/components/SearchBar";
@@ -63,7 +62,11 @@ const Search = () => {
     id: content.id,
     title: content.title || "",
     description: content.description || "",
-    category: content.categories ? { name: content.categories.name, color: content.categories.color } : null,
+    category: content.categories ? { 
+      name: content.categories.name, 
+      color: content.categories.color,
+      slug: content.categories.slug 
+    } : null,
     ageGroup: content.age_groups?.join(", ") || "",
     location: content.city || "",
     address: content.address,

@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers: { business_name: string; verified: boolean };
-  categories: { name: string; slug: string };
+  categories: { name: string; slug: string; color?: string };
   distance_km?: number;
   featured_image?: string;
 };
@@ -86,7 +86,9 @@ const Index = () => {
     price_from: content.price_from,
     payment_type: content.payment_type,
     slug: content.slug,
-    categories: (content as any).categories
+    categories: (content as any).categories ? {
+      slug: (content as any).categories.slug
+    } : null
   }));
 
   // Mostra tutti i contenuti in evidenza senza filtri categoria

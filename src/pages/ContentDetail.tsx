@@ -1,5 +1,5 @@
 
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ContentHeader from "@/components/content/ContentHeader";
@@ -17,7 +17,9 @@ import { useEffect } from "react";
 
 const ContentDetail = () => {
   const { slugOrId, contentSlug } = useParams();
+  const navigate = useNavigate();
   const { trackError } = useErrorTracking();
+  const { generateUrl } = useContentUrl();
   
   // Determine which parameter to use based on the route
   // If we have contentSlug, it means we're using category/content pattern
@@ -112,6 +114,14 @@ const ContentDetail = () => {
         error = result.error;
         
         console.log("[ContentDetail] ID search result:", { data, error });
+
+        // If found by ID, redirect to proper slug URL
+        if (data && data.slug && data.categories?.slug) {
+          const correctUrl = generateUrl(data.id, data.slug, data.categories.slug);
+          console.log("[ContentDetail] Redirecting to correct URL:", correctUrl);
+          navigate(correctUrl, { replace: true });
+          return data; // Return data while redirecting
+        }
       }
 
       if (error) {

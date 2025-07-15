@@ -57,7 +57,11 @@ const ContentCard = ({
   eventEndTime
 }: ContentCardProps) => {
   const { getContentUrl } = useContentUrl();
-  const contentUrl = getContentUrl({ id, slug, categories: category });
+  const contentUrl = getContentUrl({ 
+    id, 
+    slug, 
+    categories: category?.slug ? { slug: category.slug } : null 
+  });
   
   const [reviewData, setReviewData] = useState<{ rating: number; count: number } | null>(null);
 

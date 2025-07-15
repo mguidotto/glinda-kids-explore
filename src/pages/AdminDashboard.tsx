@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
@@ -74,10 +75,19 @@ const AdminDashboard = () => {
     { id: "pages", label: "Pagine", component: <PagesManagement /> },
   ];
 
+  // Filter out any tabs with invalid IDs and log them for debugging
+  const validTabs = allTabs.filter(tab => {
+    const isValid = tab.id && typeof tab.id === 'string' && tab.id.trim() !== '';
+    if (!isValid) {
+      console.error("Invalid tab found:", tab);
+    }
+    return isValid;
+  });
+
   // Organize tabs into logical groups for better desktop layout
-  const contentTabs = allTabs.slice(0, 6); // Users, Contents, Providers, Categories, Tags, Reviews
-  const customizationTabs = allTabs.slice(6, 10); // Texts, Branding, Social, SEO, Analytics
-  const assetTabs = allTabs.slice(10); // Icons, Favicon, Pages
+  const contentTabs = validTabs.slice(0, 6); // Users, Contents, Providers, Categories, Tags, Reviews
+  const customizationTabs = validTabs.slice(6, 10); // Texts, Branding, Social, SEO
+  const assetTabs = validTabs.slice(10); // Analytics, Icons, Favicon, Pages
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -118,7 +128,7 @@ const AdminDashboard = () => {
               {/* Assets Row */}
               <div className="mb-2">
                 <h3 className="text-sm font-medium text-gray-600 mb-2">Risorse</h3>
-                <TabsList className="grid w-full grid-cols-3 gap-1 max-w-md">
+                <TabsList className="grid w-full grid-cols-4 gap-1 max-w-md">
                   {assetTabs.map((tab) => (
                     <TabsTrigger key={tab.id} value={tab.id} className="text-sm px-4 py-2">
                       {tab.label}
@@ -139,8 +149,8 @@ const AdminDashboard = () => {
                   </TabsTrigger>
                 ))}
               </TabsList>
-              <TabsList className="grid w-full grid-cols-7 gap-1">
-                {allTabs.slice(6).map((tab) => (
+              <TabsList className="grid w-full grid-cols-8 gap-1">
+                {validTabs.slice(6).map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} className="text-xs px-1 py-2">
                     {tab.label}
                   </TabsTrigger>
@@ -185,7 +195,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Tab Content */}
-          {allTabs.map((tab) => (
+          {validTabs.map((tab) => (
             <TabsContent key={tab.id} value={tab.id} className="space-y-6">
               {tab.component}
             </TabsContent>
@@ -199,3 +209,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

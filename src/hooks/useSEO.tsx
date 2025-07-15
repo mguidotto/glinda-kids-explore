@@ -57,38 +57,38 @@ export const useSEO = (seoData: SEOData = {}) => {
     // Update title
     document.title = title;
 
-    // Update or create meta tags
+    // Update existing meta tags (not create new ones)
     const updateMetaTag = (name: string, content: string, property = false) => {
       const selector = property ? `meta[property="${name}"]` : `meta[name="${name}"]`;
-      let element = document.querySelector(selector) as HTMLMetaElement;
+      const element = document.querySelector(selector) as HTMLMetaElement;
       
-      if (!element) {
-        element = document.createElement('meta');
+      if (element) {
+        element.setAttribute('content', content);
+      } else {
+        // Solo se non esiste, lo creiamo (per compatibilità con pagine senza tag statici)
+        const newElement = document.createElement('meta');
         if (property) {
-          element.setAttribute('property', name);
+          newElement.setAttribute('property', name);
         } else {
-          element.setAttribute('name', name);
+          newElement.setAttribute('name', name);
         }
-        document.head.appendChild(element);
+        newElement.setAttribute('content', content);
+        document.head.appendChild(newElement);
       }
-      element.setAttribute('content', content);
     };
 
     // Update canonical link
-    let canonicalElement = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-    if (!canonicalElement) {
-      canonicalElement = document.createElement('link');
-      canonicalElement.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonicalElement);
+    const canonicalElement = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (canonicalElement) {
+      canonicalElement.setAttribute('href', canonical);
     }
-    canonicalElement.setAttribute('href', canonical);
 
-    // Basic meta tags
+    // Basic meta tags - aggiorna solo quelli esistenti
     updateMetaTag('description', description);
     updateMetaTag('keywords', keywords);
     updateMetaTag('robots', noIndex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
     
-    // Open Graph tags
+    // Open Graph tags - aggiorna solo quelli esistenti
     updateMetaTag('og:title', ogTitle, true);
     updateMetaTag('og:description', ogDescription, true);
     updateMetaTag('og:url', canonical, true);
@@ -96,7 +96,7 @@ export const useSEO = (seoData: SEOData = {}) => {
     updateMetaTag('og:type', ogType, true);
     updateMetaTag('og:site_name', 'Glinda', true);
     
-    // Twitter Card tags
+    // Twitter Card tags - aggiorna solo quelli esistenti
     updateMetaTag('twitter:card', 'summary_large_image');
     updateMetaTag('twitter:title', twitterTitle);
     updateMetaTag('twitter:description', twitterDescription);

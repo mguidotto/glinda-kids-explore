@@ -52,61 +52,53 @@ const ContentBookingSidebar = ({
   };
 
   return (
-    <div className="lg:col-span-1">
-      <Card className="sticky top-24">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>{shouldShowBooking ? 'Prenota' : 'Info'}</span>
-            {shouldShowPrice && (
-              <div className="flex items-center gap-1">
-                <Euro className="h-5 w-5 text-green-600" />
-                <span className="text-2xl font-bold text-green-600">
-                  {priceFrom}€
-                  {priceTo && priceTo !== priceFrom && (
-                    <span className="text-sm"> - {priceTo}€</span>
-                  )}
-                </span>
-              </div>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <Badge className="bg-green-100 text-green-800">
-              In Presenza
-            </Badge>
-          </div>
-
-          {shouldShowBooking && website && (
-            <>
-              <Separator />
-              <Button 
-                className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                onClick={handleBookingClick}
-              >
-                Prenota Ora
-              </Button>
-            </>
-          )}
-
-          {email && (
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={handleContactClick}
-            >
-              Chiedi informazioni
-            </Button>
-          )}
-
-          {shouldShowBooking && (
-            <div className="text-xs text-gray-500 text-center">
-              Cancellazione gratuita fino a 48h prima
+    <Card className="sticky top-24">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>{shouldShowBooking ? 'Prenota' : 'Info'}</span>
+          {shouldShowPrice && (
+            <div className="flex items-center gap-1">
+              <Euro className="h-5 w-5 text-green-600" />
+              <span className="text-2xl font-bold text-green-600">
+                {priceFrom}€
+                {priceTo && priceTo !== priceFrom && (
+                  <span className="text-sm"> - {priceTo}€</span>
+                )}
+              </span>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <Badge className="bg-green-100 text-green-800">
+            In Presenza
+          </Badge>
+        </div>
+
+        {shouldShowBooking && website && (
+          <>
+            <Separator />
+            <Button 
+              className="w-full bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+              onClick={handleBookingClick}
+            >
+              Prenota Ora
+            </Button>
+          </>
+        )}
+
+        {email && (
+          <Button 
+            variant="outline" 
+            className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold py-3 px-6 rounded-lg shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+            onClick={handleContactClick}
+          >
+            Chiedi informazioni
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

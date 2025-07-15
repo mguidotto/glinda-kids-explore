@@ -256,11 +256,11 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
             <Button
               type="submit"
               disabled={submitting || rating === 0}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 text-base"
+              className="w-full bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD] text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-lg"
             >
               {submitting ? (
                 <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                   Invio in corso...
                 </div>
               ) : (

@@ -232,6 +232,16 @@ const ContentDetail = () => {
               city={content.city}
             />
 
+            {/* Map Section */}
+            {content.latitude && content.longitude && (
+              <ContentMapSection
+                lat={content.latitude}
+                lng={content.longitude}
+                title={content.title}
+                address={content.address}
+              />
+            )}
+
             {/* Reviews Section */}
             <div className="space-y-6">
               <ReviewsList contentId={content.id} />
@@ -240,7 +250,7 @@ const ContentDetail = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1">
             <ContentBookingSidebar
               id={content.id}
               title={content.title}
@@ -254,16 +264,6 @@ const ContentDetail = () => {
               email={content.email}
               website={content.website}
             />
-
-            {/* Map Section - Moved to sidebar */}
-            {content.latitude && content.longitude && (
-              <ContentMapSection
-                lat={content.latitude}
-                lng={content.longitude}
-                title={content.title}
-                address={content.address}
-              />
-            )}
           </div>
         </div>
       </div>

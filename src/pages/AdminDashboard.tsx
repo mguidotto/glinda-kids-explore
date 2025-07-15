@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import Footer from "@/components/Footer";
 import UsersManagement from "@/components/admin/UsersManagement";
 import CategoriesManagement from "@/components/admin/CategoriesManagement";
@@ -155,27 +156,30 @@ const AdminDashboard = () => {
                 <SelectValue placeholder="Seleziona sezione" />
               </SelectTrigger>
               <SelectContent>
-                <optgroup label="Gestione Contenuti">
+                <SelectGroup>
+                  <SelectLabel>Gestione Contenuti</SelectLabel>
                   {contentTabs.map((tab) => (
                     <SelectItem key={tab.id} value={tab.id}>
                       {tab.label}
                     </SelectItem>
                   ))}
-                </optgroup>
-                <optgroup label="Personalizzazione">
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel>Personalizzazione</SelectLabel>
                   {customizationTabs.map((tab) => (
                     <SelectItem key={tab.id} value={tab.id}>
                       {tab.label}
                     </SelectItem>
                   ))}
-                </optgroup>
-                <optgroup label="Risorse">
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel>Risorse</SelectLabel>
                   {assetTabs.map((tab) => (
                     <SelectItem key={tab.id} value={tab.id}>
                       {tab.label}
                     </SelectItem>
                   ))}
-                </optgroup>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>

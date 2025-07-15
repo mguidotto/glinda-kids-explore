@@ -1,6 +1,6 @@
 
 {
-  "name": "Glinda - Marketplace per Genitori",
+  "name": "Glinda - Piattaforma per Genitori",
   "short_name": "Glinda",
   "description": "Scopri corsi, eventi e servizi educativi per bambini da 0 a 10 anni nella tua zona",
   "start_url": "/",
@@ -38,22 +38,6 @@
     }
   ],
   "categories": ["education", "lifestyle", "family", "kids"],
-  "screenshots": [
-    {
-      "src": "/screenshot-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Homepage mobile di Glinda"
-    },
-    {
-      "src": "/screenshot-tablet.png", 
-      "sizes": "768x1024",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Vista tablet di Glinda"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Cerca Eventi",

@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4 text-[#F4D03F]">Glinda</h3>
-            <p className="text-gray-300">{getText('footer.description', 'Il marketplace per genitori consapevoli.')}</p>
+            <p className="text-gray-300">{getText('footer.description', 'La piattaforma per genitori consapevoli.')}</p>
           </div>
           <div>
             <h4 className="font-semibold mb-4">{getText('footer.categories', 'Categorie')}</h4>

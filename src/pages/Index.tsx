@@ -110,7 +110,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-white">
       <header>
-        <h1 className="sr-only">Glinda - Marketplace Attività Educative per Bambini da 0 a 10 anni</h1>
+        <h1 className="sr-only">Glinda - Piattaforma Attività Educative per Bambini da 0 a 10 anni</h1>
       </header>
       
       <Hero onSearch={handleSearch} onExploreActivities={handleExploreActivities} />

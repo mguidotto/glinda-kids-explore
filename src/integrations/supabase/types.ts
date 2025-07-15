@@ -388,7 +388,9 @@ export type Database = {
           content_id: string | null
           created_at: string | null
           id: string
+          photos: string[] | null
           rating: number | null
+          reviewer_name: string | null
           title: string | null
           user_id: string | null
           validated: boolean | null
@@ -400,7 +402,9 @@ export type Database = {
           content_id?: string | null
           created_at?: string | null
           id?: string
+          photos?: string[] | null
           rating?: number | null
+          reviewer_name?: string | null
           title?: string | null
           user_id?: string | null
           validated?: boolean | null
@@ -412,7 +416,9 @@ export type Database = {
           content_id?: string | null
           created_at?: string | null
           id?: string
+          photos?: string[] | null
           rating?: number | null
+          reviewer_name?: string | null
           title?: string | null
           user_id?: string | null
           validated?: boolean | null

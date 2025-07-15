@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Star, MessageSquare, Camera, X } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 interface ReviewFormProps {
   contentId: string;
@@ -25,7 +26,6 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
   const [reviewerName, setReviewerName] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [hoverRating, setHoverRating] = useState(0);
 
   // Genera un nome casuale per utenti anonimi
@@ -41,11 +41,28 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
   const handleTakePhoto = async () => {
     if (!isNative) return;
     
-    const result = await takePicture();
-    if (result.dataUrl && !result.error) {
-      setPhotos(prev => [...prev, result.dataUrl!]);
-    } else if (result.error) {
-      setMessage(`Errore nella foto: ${result.error}`);
+    try {
+      const result = await takePicture();
+      if (result.dataUrl && !result.error) {
+        setPhotos(prev => [...prev, result.dataUrl!]);
+        toast({
+          title: "Foto aggiunta",
+          description: "La foto è stata aggiunta alla recensione"
+        });
+      } else if (result.error) {
+        toast({
+          title: "Errore",
+          description: `Errore nella foto: ${result.error}`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error taking photo:", error);
+      toast({
+        title: "Errore",
+        description: "Errore nell'acquisizione della foto",
+        variant: "destructive"
+      });
     }
   };
 
@@ -57,12 +74,15 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
     e.preventDefault();
 
     if (rating === 0) {
-      setMessage("Seleziona una valutazione");
+      toast({
+        title: "Errore",
+        description: "Seleziona una valutazione",
+        variant: "destructive"
+      });
       return;
     }
 
     setSubmitting(true);
-    setMessage(null);
 
     try {
       // Se l'utente non ha inserito un nome, ne generiamo uno casuale
@@ -92,9 +112,16 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
 
       if (error) {
         console.error("Error submitting review:", error);
-        setMessage("Errore nell'invio della recensione: " + error.message);
+        toast({
+          title: "Errore",
+          description: "Errore nell'invio della recensione: " + error.message,
+          variant: "destructive"
+        });
       } else {
-        setMessage("Recensione inviata con successo! Sarà visibile dopo la validazione dell'amministratore.");
+        toast({
+          title: "Successo",
+          description: "Recensione inviata con successo! Sarà visibile dopo la validazione dell'amministratore."
+        });
         setRating(0);
         setTitle("");
         setComment("");
@@ -104,15 +131,18 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
       }
     } catch (error) {
       console.error("Unexpected error:", error);
-      setMessage("Errore imprevisto nell'invio della recensione");
+      toast({
+        title: "Errore",
+        description: "Errore imprevisto nell'invio della recensione",
+        variant: "destructive"
+      });
     }
 
     setSubmitting(false);
-    setTimeout(() => setMessage(null), 5000);
   };
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
@@ -120,29 +150,23 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {message && (
-          <Alert className="mb-4">
-            <AlertDescription>{message}</AlertDescription>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Valutazione *</Label>
-            <div className="flex gap-1 mt-2">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Valutazione *</Label>
+            <div className="flex gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
                 <button
                   key={i}
                   type="button"
-                  className="p-1"
+                  className="p-1 rounded hover:bg-gray-100 transition-colors"
                   onMouseEnter={() => setHoverRating(i + 1)}
                   onMouseLeave={() => setHoverRating(0)}
                   onClick={() => setRating(i + 1)}
                 >
                   <Star
-                    className={`h-6 w-6 ${
+                    className={`h-8 w-8 transition-colors ${
                       i < (hoverRating || rating)
-                        ? 'text-yellow-400 fill-current'
+                        ? 'text-yellow-400 fill-yellow-400'
                         : 'text-gray-300'
                     }`}
                   />
@@ -151,30 +175,32 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="reviewerName">Il tuo nome (opzionale)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="reviewerName" className="text-sm font-medium">Il tuo nome (opzionale)</Label>
             <Input
               id="reviewerName"
               value={reviewerName}
               onChange={(e) => setReviewerName(e.target.value)}
               placeholder="Come ti chiami? (se non lo inserisci ne genereremo uno casuale)"
               maxLength={50}
+              className="w-full"
             />
           </div>
 
-          <div>
-            <Label htmlFor="title">Titolo (opzionale)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="title" className="text-sm font-medium">Titolo (opzionale)</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Riassumi la tua esperienza"
               maxLength={100}
+              className="w-full"
             />
           </div>
 
-          <div>
-            <Label htmlFor="comment">Commento (opzionale)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="comment" className="text-sm font-medium">Commento (opzionale)</Label>
             <Textarea
               id="comment"
               value={comment}
@@ -182,40 +208,41 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
               placeholder="Descrivi la tua esperienza in dettaglio"
               rows={4}
               maxLength={500}
+              className="w-full resize-none"
             />
           </div>
 
           {isNative && (
-            <div>
-              <Label>Foto (opzionale)</Label>
-              <div className="mt-2 space-y-3">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Foto (opzionale)</Label>
+              <div className="space-y-3">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleTakePhoto}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full sm:w-auto"
                 >
                   <Camera className="h-4 w-4" />
                   Aggiungi Foto
                 </Button>
                 
                 {photos.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {photos.map((photo, index) => (
-                      <div key={index} className="relative">
+                      <div key={index} className="relative group">
                         <img
                           src={photo}
                           alt={`Foto ${index + 1}`}
-                          className="w-full h-24 object-cover rounded"
+                          className="w-full h-32 object-cover rounded-lg border border-gray-200"
                         />
                         <Button
                           type="button"
                           variant="destructive"
                           size="sm"
-                          className="absolute top-1 right-1 h-6 w-6 p-0"
+                          className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => removePhoto(index)}
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
@@ -225,13 +252,22 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
             </div>
           )}
 
-          <Button
-            type="submit"
-            disabled={submitting || rating === 0}
-            className="w-full"
-          >
-            {submitting ? "Invio in corso..." : "Invia Recensione"}
-          </Button>
+          <div className="pt-4 border-t">
+            <Button
+              type="submit"
+              disabled={submitting || rating === 0}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 text-base"
+            >
+              {submitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Invio in corso...
+                </div>
+              ) : (
+                "Invia Recensione"
+              )}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

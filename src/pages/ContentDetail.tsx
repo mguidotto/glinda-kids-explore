@@ -1,4 +1,3 @@
-
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,11 +136,11 @@ const ContentDetail = () => {
     description: content?.meta_description || content?.description,
     ogTitle: content?.meta_title || content?.title,
     ogDescription: content?.meta_description || content?.description,
-    ogImage: content?.meta_image || content?.featured_image || 'https://glinda.lovable.app/icon-512x512.png',
+    ogImage: content?.meta_image || content?.featured_image || 'https://glinda.it/lovable-uploads/df33b161-f952-484f-9188-9e42eb514df1.png',
     ogType: "article",
     twitterTitle: content?.meta_title || content?.title,
     twitterDescription: content?.meta_description || content?.description,
-    twitterImage: content?.meta_image || content?.featured_image || 'https://glinda.lovable.app/icon-512x512.png'
+    twitterImage: content?.meta_image || content?.featured_image || 'https://glinda.it/lovable-uploads/df33b161-f952-484f-9188-9e42eb514df1.png'
   });
 
   useEffect(() => {

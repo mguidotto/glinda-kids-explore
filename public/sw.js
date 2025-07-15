@@ -1,12 +1,10 @@
-
 const CACHE_NAME = 'glinda-v2';
 const STATIC_CACHE_URLS = [
   '/',
   '/static/js/bundle.js',
   '/static/css/main.css',
   '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
+  'https://glinda.it/lovable-uploads/df33b161-f952-484f-9188-9e42eb514df1.png'
 ];
 
 // URLs that should never be cached

@@ -74,23 +74,37 @@ const AdminDashboard = () => {
     { id: "pages", label: "Pagine", component: <PagesManagement /> },
   ];
 
-  // Enhanced validation with debugging
+  // More robust validation to prevent empty string values
   const validTabs = allTabs.filter(tab => {
-    const isValid = tab.id && 
-                   typeof tab.id === 'string' && 
-                   tab.id.trim() !== '' && 
-                   tab.label && 
-                   typeof tab.label === 'string' && 
-                   tab.label.trim() !== '';
+    const hasValidId = tab.id && 
+                      typeof tab.id === 'string' && 
+                      tab.id.length > 0 &&
+                      tab.id.trim().length > 0;
+    
+    const hasValidLabel = tab.label && 
+                         typeof tab.label === 'string' && 
+                         tab.label.length > 0 &&
+                         tab.label.trim().length > 0;
+    
+    const hasComponent = !!tab.component;
+    
+    const isValid = hasValidId && hasValidLabel && hasComponent;
     
     if (!isValid) {
-      console.error("Invalid tab found:", { id: tab.id, label: tab.label, hasComponent: !!tab.component });
+      console.error("Invalid tab found:", { 
+        id: tab.id, 
+        label: tab.label, 
+        hasComponent,
+        hasValidId,
+        hasValidLabel
+      });
     }
     
     return isValid;
   });
 
   console.log("Valid tabs count:", validTabs.length, "out of", allTabs.length);
+  console.log("Valid tab IDs:", validTabs.map(tab => tab.id));
 
   // Organize tabs into logical groups for better desktop layout
   const contentTabs = validTabs.slice(0, 6); // Users, Contents, Providers, Categories, Tags, Reviews
@@ -176,27 +190,36 @@ const AdminDashboard = () => {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Gestione Contenuti</SelectLabel>
-                  {contentTabs.map((tab) => (
-                    <SelectItem key={`content-${tab.id}`} value={tab.id}>
-                      {tab.label}
-                    </SelectItem>
-                  ))}
+                  {contentTabs.map((tab) => {
+                    console.log("Rendering content tab:", tab.id, "length:", tab.id?.length);
+                    return (
+                      <SelectItem key={`content-${tab.id}`} value={tab.id}>
+                        {tab.label}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectGroup>
                 <SelectGroup>
                   <SelectLabel>Personalizzazione</SelectLabel>
-                  {customizationTabs.map((tab) => (
-                    <SelectItem key={`custom-${tab.id}`} value={tab.id}>
-                      {tab.label}
-                    </SelectItem>
-                  ))}
+                  {customizationTabs.map((tab) => {
+                    console.log("Rendering customization tab:", tab.id, "length:", tab.id?.length);
+                    return (
+                      <SelectItem key={`custom-${tab.id}`} value={tab.id}>
+                        {tab.label}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectGroup>
                 <SelectGroup>
                   <SelectLabel>Risorse</SelectLabel>
-                  {assetTabs.map((tab) => (
-                    <SelectItem key={`asset-${tab.id}`} value={tab.id}>
-                      {tab.label}
-                    </SelectItem>
-                  ))}
+                  {assetTabs.map((tab) => {
+                    console.log("Rendering asset tab:", tab.id, "length:", tab.id?.length);
+                    return (
+                      <SelectItem key={`asset-${tab.id}`} value={tab.id}>
+                        {tab.label}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectGroup>
               </SelectContent>
             </Select>

@@ -1,6 +1,7 @@
 
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useBranding } from './useBranding';
 
 interface SEOData {
   title?: string;
@@ -27,21 +28,27 @@ const DEFAULT_SEO = {
 
 export const useSEO = (seoData: SEOData = {}) => {
   const location = useLocation();
+  const { getSetting } = useBranding();
 
   useEffect(() => {
+    // Recupera i valori configurati dall'admin o usa i default
+    const adminTitle = getSetting('meta_title');
+    const adminDescription = getSetting('meta_description');
+    const adminOgImage = getSetting('og_image');
+    
     const {
-      title = DEFAULT_SEO.title,
-      description = DEFAULT_SEO.description,
+      title = adminTitle || DEFAULT_SEO.title,
+      description = adminDescription || DEFAULT_SEO.description,
       keywords = DEFAULT_SEO.keywords,
       canonical = `https://glinda.lovable.app${location.pathname}`,
       ogTitle = title,
       ogDescription = description,
-      ogImage = DEFAULT_SEO.ogImage,
+      ogImage = adminOgImage || seoData.ogImage || DEFAULT_SEO.ogImage,
       ogType = 'website',
       noIndex = false,
       twitterTitle = ogTitle,
       twitterDescription = ogDescription,
-      twitterImage = ogImage
+      twitterImage = adminOgImage || seoData.twitterImage || ogImage
     } = seoData;
 
     // Update title
@@ -92,5 +99,5 @@ export const useSEO = (seoData: SEOData = {}) => {
     updateMetaTag('twitter:description', twitterDescription);
     updateMetaTag('twitter:image', twitterImage);
 
-  }, [seoData, location.pathname]);
+  }, [seoData, location.pathname, getSetting]);
 };

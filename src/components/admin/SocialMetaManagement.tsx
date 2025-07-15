@@ -89,8 +89,24 @@ const SocialMetaManagement = () => {
   }
 
   const socialMetaSettings = [
-    { key: 'meta_title', label: 'Titolo Meta', type: 'text', description: 'Titolo per SEO e social media (Default: "Scopri corsi, eventi e servizi educativi per i tuoi bambini")' },
-    { key: 'meta_description', label: 'Descrizione Meta', type: 'textarea', description: 'Descrizione per SEO e social media (Default: "Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.")' },
+    { 
+      key: 'meta_title', 
+      label: 'Titolo Meta', 
+      type: 'text', 
+      description: 'Titolo per SEO e social media (Default: "Scopri corsi, eventi e servizi educativi per i tuoi bambini")' 
+    },
+    { 
+      key: 'meta_description', 
+      label: 'Descrizione Meta', 
+      type: 'textarea', 
+      description: 'Descrizione per SEO e social media (Default: "Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.")' 
+    },
+    { 
+      key: 'og_image', 
+      label: 'Immagine Open Graph/Twitter', 
+      type: 'image', 
+      description: 'Immagine condivisa sui social media (Default: icona app). Dimensioni consigliate: 1200x630px' 
+    },
   ];
 
   return (
@@ -101,7 +117,7 @@ const SocialMetaManagement = () => {
           Social Media Tags
         </CardTitle>
         <p className="text-sm text-gray-600">
-          Gestisci i tag meta per SEO e condivisioni social. I tag OpenGraph sono configurati direttamente nell'HTML con i valori di default dell'homepage.
+          Gestisci i tag meta per SEO e condivisioni social. I valori configurati qui sovrascriveranno quelli di default.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -113,53 +129,127 @@ const SocialMetaManagement = () => {
               <Label htmlFor={setting.key}>{setting.label}</Label>
               <p className="text-xs text-gray-500">{setting.description}</p>
               
-              <div className="flex gap-2">
-                {setting.type === 'textarea' ? (
-                  <Textarea
-                    id={setting.key}
-                    value={getCurrentValue(setting.key) || ''}
-                    onChange={(e) => handleEdit(setting.key, e.target.value)}
-                    placeholder={setting.label}
-                    className="flex-1"
-                    rows={3}
-                  />
-                ) : (
-                  <Input
-                    id={setting.key}
-                    value={getCurrentValue(setting.key) || ''}
-                    onChange={(e) => handleEdit(setting.key, e.target.value)}
-                    placeholder={setting.label}
-                    className="flex-1"
-                  />
-                )}
-                {isEditing(setting.key) && (
-                  <Button
-                    onClick={() => handleSave(setting.key)}
-                    disabled={saving[setting.key]}
-                    size="sm"
-                  >
-                    {saving[setting.key] ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      'Salva'
+              {setting.type === 'image' ? (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      id={setting.key}
+                      value={getCurrentValue(setting.key) || ''}
+                      onChange={(e) => handleEdit(setting.key, e.target.value)}
+                      placeholder="URL dell'immagine"
+                      className="flex-1"
+                    />
+                    {isEditing(setting.key) && (
+                      <Button
+                        onClick={() => handleSave(setting.key)}
+                        disabled={saving[setting.key]}
+                        size="sm"
+                      >
+                        {saving[setting.key] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Salva'
+                        )}
+                      </Button>
                     )}
-                  </Button>
-                )}
-              </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          handleFileUpload(setting.key, file);
+                        }
+                      }}
+                      className="flex-1"
+                      disabled={uploading[setting.key]}
+                    />
+                    {currentValue && (
+                      <Button
+                        onClick={() => handleRemoveImage(setting.key)}
+                        variant="outline"
+                        size="sm"
+                        disabled={uploading[setting.key]}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {uploading[setting.key] && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Caricamento immagine...
+                    </div>
+                  )}
+
+                  {currentValue && (
+                    <div className="mt-2">
+                      <img 
+                        src={currentValue} 
+                        alt="Anteprima Open Graph" 
+                        className="max-w-64 max-h-32 object-contain border rounded"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Anteprima immagine Open Graph/Twitter
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  {setting.type === 'textarea' ? (
+                    <Textarea
+                      id={setting.key}
+                      value={getCurrentValue(setting.key) || ''}
+                      onChange={(e) => handleEdit(setting.key, e.target.value)}
+                      placeholder={setting.label}
+                      className="flex-1"
+                      rows={3}
+                    />
+                  ) : (
+                    <Input
+                      id={setting.key}
+                      value={getCurrentValue(setting.key) || ''}
+                      onChange={(e) => handleEdit(setting.key, e.target.value)}
+                      placeholder={setting.label}
+                      className="flex-1"
+                    />
+                  )}
+                  {isEditing(setting.key) && (
+                    <Button
+                      onClick={() => handleSave(setting.key)}
+                      disabled={saving[setting.key]}
+                      size="sm"
+                    >
+                      {saving[setting.key] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        'Salva'
+                      )}
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
         
         <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold text-blue-900 mb-2">Tag OpenGraph e Twitter</h4>
+          <h4 className="font-semibold text-blue-900 mb-2">Come funziona</h4>
           <p className="text-sm text-blue-800">
-            I tag OpenGraph e Twitter sono configurati direttamente nell'HTML della pagina con questi valori di default:
+            I valori configurati qui sovrascriveranno quelli di default dell'applicazione. Se non imposti un valore, verrà utilizzato quello di default.
           </p>
           <ul className="text-xs text-blue-700 mt-2 space-y-1">
-            <li><strong>og:title:</strong> "Scopri corsi, eventi e servizi educativi per i tuoi bambini"</li>
-            <li><strong>og:description:</strong> "Glinda aiuta i genitori a trovare le migliori opportunità vicino a te."</li>
-            <li><strong>og:image:</strong> "https://glinda.lovable.app/icon-512x512.png"</li>
-            <li><strong>twitter:card:</strong> "summary_large_image"</li>
+            <li><strong>Titolo Meta:</strong> Utilizzato come titolo della pagina e nei meta tag Open Graph</li>
+            <li><strong>Descrizione Meta:</strong> Utilizzata per la descrizione SEO e Open Graph</li>
+            <li><strong>Immagine Open Graph:</strong> Mostrata quando il sito viene condiviso sui social media</li>
           </ul>
         </div>
       </CardContent>

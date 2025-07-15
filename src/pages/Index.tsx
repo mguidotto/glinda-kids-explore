@@ -1,4 +1,3 @@
-
 import { Search, MapPin, Calendar, Users, Star, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -86,6 +85,7 @@ const Index = () => {
     price_from: content.price_from,
     payment_type: content.payment_type,
     slug: content.slug,
+    modality: content.modality,
     categories: (content as any).categories ? {
       slug: (content as any).categories.slug
     } : null

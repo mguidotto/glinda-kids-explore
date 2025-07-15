@@ -22,6 +22,7 @@ type ContentItem = {
   payment_type?: string;
   slug?: string | null;
   categories?: { slug: string } | null;
+  modality?: string;
 };
 
 type HomeSectionProps = {
@@ -36,6 +37,14 @@ const ContentItemCard = ({ content }: { content: ContentItem }) => {
   const { getContentUrl } = useContentUrl();
   const shouldShowPrice = content.price_from && content.payment_type !== 'free';
   const shouldShowRating = content.rating && content.reviews;
+
+  // Show "Online" for online content, otherwise show city
+  const getLocationDisplay = () => {
+    if (content.modality === 'online') {
+      return 'Online';
+    }
+    return content.city;
+  };
 
   return (
     <Link to={getContentUrl(content)} className="block">
@@ -71,7 +80,7 @@ const ContentItemCard = ({ content }: { content: ContentItem }) => {
           <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
             <div className="flex items-center gap-1">
               <MapPin className="h-4 w-4" />
-              <span>{content.city}</span>
+              <span>{getLocationDisplay()}</span>
             </div>
             {content.duration && (
               <div className="flex items-center gap-1">

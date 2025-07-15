@@ -5,16 +5,32 @@ import { MapPin, Loader2 } from "lucide-react";
 
 interface MapComponentProps {
   address: string;
+  lat?: number;
+  lng?: number;
   className?: string;
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ address, className = "w-full h-64 rounded-lg" }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ 
+  address, 
+  lat, 
+  lng, 
+  className = "w-full h-64 rounded-lg" 
+}) => {
   const mapRef = useRef<HTMLIFrameElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(
+    lat && lng ? { lat, lon: lng } : null
+  );
 
   useEffect(() => {
+    // Se abbiamo già le coordinate, non facciamo geocoding
+    if (lat && lng) {
+      setCoordinates({ lat, lon: lng });
+      setLoading(false);
+      return;
+    }
+
     const geocodeAddress = async () => {
       if (!address) {
         setError("Indirizzo non fornito");
@@ -55,7 +71,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ address, className = "w-ful
     };
 
     geocodeAddress();
-  }, [address]);
+  }, [address, lat, lng]);
 
   if (loading) {
     return (
@@ -90,7 +106,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ address, className = "w-ful
     );
   }
 
-  // Crea l'URL della mappa con le coordinate trovate
+  // Crea l'URL della mappa con le coordinate trovate e un marker
   const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lon-0.01},${coordinates.lat-0.01},${coordinates.lon+0.01},${coordinates.lat+0.01}&layer=mapnik&marker=${coordinates.lat},${coordinates.lon}`;
 
   return (

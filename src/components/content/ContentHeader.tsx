@@ -70,6 +70,14 @@ const ContentHeader = ({
     return `€${price_from || price_to}`;
   };
 
+  // Show "Online" for online content, otherwise show city
+  const getLocationDisplay = () => {
+    if (modality === 'online') {
+      return 'Online';
+    }
+    return city;
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -107,12 +115,10 @@ const ContentHeader = ({
           </div>
           
           {/* Location */}
-          {city && (
-            <div className="flex items-center gap-1 text-gray-600">
-              <MapPin className="h-4 w-4" />
-              <span className="text-sm">{city}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1 text-gray-600">
+            <MapPin className="h-4 w-4" />
+            <span className="text-sm">{getLocationDisplay()}</span>
+          </div>
           
           {/* Price */}
           {formatPrice() && (

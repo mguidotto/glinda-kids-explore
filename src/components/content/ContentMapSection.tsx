@@ -16,7 +16,7 @@ const ContentMapSection = ({ lat, lng, title, address }: ContentMapSectionProps)
         <CardTitle>Posizione</CardTitle>
       </CardHeader>
       <CardContent>
-        <MapComponent address={address} />
+        <MapComponent address={address} lat={lat} lng={lng} />
       </CardContent>
     </Card>
   );

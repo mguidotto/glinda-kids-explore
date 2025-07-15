@@ -163,7 +163,7 @@ const SearchMapView: React.FC<SearchMapViewProps> = ({
     );
   }
 
-  // Create OpenStreetMap embed URL
+  // Create OpenStreetMap embed URL with markers for all contents
   const bounds = contentsWithCoords.reduce(
     (acc, content) => {
       const lat = content.latitude!;
@@ -183,7 +183,12 @@ const SearchMapView: React.FC<SearchMapViewProps> = ({
     }
   );
 
-  const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bounds.minLng},${bounds.minLat},${bounds.maxLng},${bounds.maxLat}&layer=mapnik`;
+  // Create multiple markers for the map URL
+  const markers = contentsWithCoords.map(content => 
+    `&marker=${content.latitude},${content.longitude}`
+  ).join('');
+
+  const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bounds.minLng},${bounds.minLat},${bounds.maxLng},${bounds.maxLat}&layer=mapnik${markers}`;
 
   return (
     <div className="space-y-4">

@@ -166,22 +166,30 @@ const Search = () => {
                 )}
               </div>
 
-              {/* View mode toggle */}
-              <div className="flex items-center gap-2">
+              {/* View mode toggle - Improved UX */}
+              <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
                 <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
-                  className="flex items-center gap-2"
+                  className={`flex items-center gap-2 transition-all ${
+                    viewMode === 'grid' 
+                      ? 'bg-white shadow-sm text-gray-900' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                  }`}
                 >
                   <Grid className="h-4 w-4" />
                   Griglia
                 </Button>
                 <Button
-                  variant={viewMode === 'map' ? 'default' : 'outline'}
+                  variant={viewMode === 'map' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('map')}
-                  className="flex items-center gap-2"
+                  className={`flex items-center gap-2 transition-all ${
+                    viewMode === 'map' 
+                      ? 'bg-white shadow-sm text-gray-900' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                  }`}
                 >
                   <Map className="h-4 w-4" />
                   Mappa

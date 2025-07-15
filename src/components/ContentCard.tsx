@@ -14,7 +14,7 @@ interface ContentCardProps {
   id: string;
   title: string;
   description?: string | null;
-  category?: { name: string; color?: string | null } | null;
+  category?: { name: string; color?: string | null; slug?: string } | null;
   ageGroup?: string | null;
   location?: string | null;
   address?: string | null;
@@ -57,7 +57,7 @@ const ContentCard = ({
   eventEndTime
 }: ContentCardProps) => {
   const { getContentUrl } = useContentUrl();
-  const contentUrl = getContentUrl({ id, slug, categories: { slug: category?.name?.toLowerCase() || '' } });
+  const contentUrl = getContentUrl({ id, slug, categories: category });
   
   const [reviewData, setReviewData] = useState<{ rating: number; count: number } | null>(null);
 
@@ -124,6 +124,9 @@ const ContentCard = ({
     return city || location;
   };
 
+  // Check if we should hide the modality label for "servizi educativi"
+  const shouldHideModalityLabel = category?.name?.toLowerCase() === 'servizi educativi';
+
   return (
     <Link to={contentUrl} className="block">
       <Card className={`group hover:shadow-lg transition-all duration-200 cursor-pointer h-full ${featured ? 'ring-2 ring-blue-200' : ''}`}>
@@ -170,10 +173,13 @@ const ContentCard = ({
                 )}
               </div>
               
-              <div className="flex items-center gap-1 text-gray-500 text-xs">
-                {getModalityIcon()}
-                <span>{getModalityText()}</span>
-              </div>
+              {/* Modality - Hidden for "servizi educativi" */}
+              {!shouldHideModalityLabel && (
+                <div className="flex items-center gap-1 text-gray-500 text-xs">
+                  {getModalityIcon()}
+                  <span>{getModalityText()}</span>
+                </div>
+              )}
             </div>
 
             {/* Title */}

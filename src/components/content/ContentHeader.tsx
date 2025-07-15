@@ -78,6 +78,9 @@ const ContentHeader = ({
     return city;
   };
 
+  // Check if we should hide the modality label for "servizi educativi"
+  const shouldHideModalityLabel = category?.name?.toLowerCase() === 'servizi educativi';
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -108,11 +111,13 @@ const ContentHeader = ({
             </Badge>
           )}
           
-          {/* Modality */}
-          <div className="flex items-center gap-1 text-gray-600">
-            {getModalityIcon()}
-            <span className="text-sm">{getModalityText()}</span>
-          </div>
+          {/* Modality - Hidden for "servizi educativi" */}
+          {!shouldHideModalityLabel && (
+            <div className="flex items-center gap-1 text-gray-600">
+              {getModalityIcon()}
+              <span className="text-sm">{getModalityText()}</span>
+            </div>
+          )}
           
           {/* Location */}
           <div className="flex items-center gap-1 text-gray-600">

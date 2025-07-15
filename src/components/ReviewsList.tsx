@@ -59,6 +59,34 @@ const ReviewsList = ({ contentId }: ReviewsListProps) => {
     return (sum / reviews.length).toFixed(1);
   };
 
+  const getReviewerName = (review: Review) => {
+    // Se è presente il reviewer_name (per recensioni anonime), usalo
+    if ((review as any).reviewer_name) {
+      return (review as any).reviewer_name;
+    }
+    
+    // Altrimenti usa il nome del profilo se disponibile
+    if (review.profiles?.first_name && review.profiles?.last_name) {
+      return `${review.profiles.first_name} ${review.profiles.last_name}`;
+    }
+    
+    if (review.profiles?.first_name) {
+      return review.profiles.first_name;
+    }
+    
+    // Fallback
+    return "Utente";
+  };
+
+  const getReviewerInitials = (review: Review) => {
+    const name = getReviewerName(review);
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
   if (loading) {
     return <div>Caricamento recensioni...</div>;
   }
@@ -87,13 +115,13 @@ const ReviewsList = ({ contentId }: ReviewsListProps) => {
               <div className="flex items-start gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>
-                    {review.profiles?.first_name?.[0]}{review.profiles?.last_name?.[0]}
+                    {getReviewerInitials(review)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium">
-                      {review.profiles?.first_name} {review.profiles?.last_name}
+                      {getReviewerName(review)}
                     </span>
                     <div className="flex">{renderStars(review.rating || 0)}</div>
                     <span className="text-xs text-gray-500">

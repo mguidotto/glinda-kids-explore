@@ -40,8 +40,15 @@ const ContentBookingSidebar = ({
   }
 
   const handleBookingClick = () => {
-    console.log("Booking clicked for content:", id);
-    // Add booking logic here
+    if (website) {
+      window.open(website, '_blank');
+    }
+  };
+
+  const handleContactClick = () => {
+    if (email) {
+      window.location.href = `mailto:${email}`;
+    }
   };
 
   return (
@@ -70,22 +77,27 @@ const ContentBookingSidebar = ({
             </Badge>
           </div>
 
-          {shouldShowBooking && (
+          {shouldShowBooking && website && (
             <>
               <Separator />
               <Button 
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                disabled={!purchasable}
                 onClick={handleBookingClick}
               >
-                {purchasable ? 'Prenota Ora' : 'Contatta per Info'}
+                Prenota Ora
               </Button>
             </>
           )}
 
-          <Button variant="outline" className="w-full">
-            Contatta il Provider
-          </Button>
+          {email && (
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleContactClick}
+            >
+              Chiedi informazioni
+            </Button>
+          )}
 
           {shouldShowBooking && (
             <div className="text-xs text-gray-500 text-center">

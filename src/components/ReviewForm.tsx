@@ -22,10 +22,21 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
+  const [reviewerName, setReviewerName] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [hoverRating, setHoverRating] = useState(0);
+
+  // Genera un nome casuale per utenti anonimi
+  const generateRandomName = () => {
+    const names = [
+      "Marco", "Giulia", "Andrea", "Francesca", "Matteo", "Sara", "Luca", "Elena",
+      "Alessandro", "Chiara", "Lorenzo", "Valeria", "Davide", "Martina", "Federico",
+      "Silvia", "Riccardo", "Valentina", "Simone", "Lucia", "Francesco", "Alessia"
+    ];
+    return names[Math.floor(Math.random() * names.length)];
+  };
 
   const handleTakePhoto = async () => {
     if (!isNative) return;
@@ -44,11 +55,6 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user) {
-      setMessage("Devi essere autenticato per lasciare una recensione");
-      return;
-    }
 
     if (rating === 0) {
       setMessage("Seleziona una valutazione");
@@ -57,17 +63,28 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
 
     setSubmitting(true);
 
+    // Se l'utente non ha inserito un nome, ne generiamo uno casuale
+    const finalReviewerName = reviewerName.trim() || generateRandomName();
+
+    // Prepara i dati della recensione
+    const reviewData = {
+      content_id: contentId,
+      rating,
+      title: title.trim() || null,
+      comment: comment.trim() || null,
+      photos: photos.length > 0 ? photos : null,
+      validated: false,
+      reviewer_name: finalReviewerName
+    };
+
+    // Se l'utente è autenticato, aggiungi il suo ID
+    if (user) {
+      (reviewData as any).user_id = user.id;
+    }
+
     const { error } = await supabase
       .from("reviews")
-      .insert({
-        content_id: contentId,
-        user_id: user.id,
-        rating,
-        title: title.trim() || null,
-        comment: comment.trim() || null,
-        photos: photos.length > 0 ? photos : null,
-        validated: false
-      });
+      .insert(reviewData);
 
     if (error) {
       console.error("Error submitting review:", error);
@@ -77,6 +94,7 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
       setRating(0);
       setTitle("");
       setComment("");
+      setReviewerName("");
       setPhotos([]);
       onReviewSubmitted?.();
     }
@@ -84,21 +102,6 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
     setSubmitting(false);
     setTimeout(() => setMessage(null), 5000);
   };
-
-  if (!user) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-center text-gray-600">
-            <a href="/auth" className="text-orange-600 hover:underline">
-              Accedi
-            </a>
-            {" "}per lasciare una recensione
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
@@ -138,6 +141,17 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="reviewerName">Il tuo nome (opzionale)</Label>
+            <Input
+              id="reviewerName"
+              value={reviewerName}
+              onChange={(e) => setReviewerName(e.target.value)}
+              placeholder="Come ti chiami? (se non lo inserisci ne genereremo uno casuale)"
+              maxLength={50}
+            />
           </div>
 
           <div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,6 +16,7 @@ import GoogleAnalyticsManagement from "@/components/admin/GoogleAnalyticsManagem
 import ContentSEOManagement from "@/components/admin/ContentSEOManagement";
 import FaviconManagement from "@/components/admin/FaviconManagement";
 import { useAuth } from "@/hooks/useAuth";
+import ProvidersManagement from "@/components/admin/ProvidersManagement";
 
 const AdminDashboard = () => {
   const { user, profile, loading } = useAuth();
@@ -59,6 +59,7 @@ const AdminDashboard = () => {
   const allTabs = [
     { id: "users", label: "Utenti", component: <UsersManagement /> },
     { id: "contents", label: "Contenuti", component: <ContentsManagement /> },
+    { id: "providers", label: "Provider", component: <ProvidersManagement /> },
     { id: "categories", label: "Categorie", component: <CategoriesManagement /> },
     { id: "tags", label: "Tag", component: <TagsManagement /> },
     { id: "reviews", label: "Recensioni", component: <ReviewsManagement /> },
@@ -73,8 +74,8 @@ const AdminDashboard = () => {
   ];
 
   // Organize tabs into logical groups for better desktop layout
-  const contentTabs = allTabs.slice(0, 5); // Users, Contents, Categories, Tags, Reviews
-  const customizationTabs = allTabs.slice(5, 10); // Texts, Branding, Social, SEO, Analytics
+  const contentTabs = allTabs.slice(0, 6); // Users, Contents, Providers, Categories, Tags, Reviews
+  const customizationTabs = allTabs.slice(6, 10); // Texts, Branding, Social, SEO, Analytics
   const assetTabs = allTabs.slice(10); // Icons, Favicon, Pages
 
   return (
@@ -92,7 +93,7 @@ const AdminDashboard = () => {
               {/* Content Management Row */}
               <div className="mb-2">
                 <h3 className="text-sm font-medium text-gray-600 mb-2">Gestione Contenuti</h3>
-                <TabsList className="grid w-full grid-cols-5 gap-1">
+                <TabsList className="grid w-full grid-cols-6 gap-1">
                   {contentTabs.map((tab) => (
                     <TabsTrigger key={tab.id} value={tab.id} className="text-sm px-4 py-2">
                       {tab.label}
@@ -104,7 +105,7 @@ const AdminDashboard = () => {
               {/* Customization Row */}
               <div className="mb-2">
                 <h3 className="text-sm font-medium text-gray-600 mb-2">Personalizzazione</h3>
-                <TabsList className="grid w-full grid-cols-5 gap-1">
+                <TabsList className="grid w-full grid-cols-4 gap-1">
                   {customizationTabs.map((tab) => (
                     <TabsTrigger key={tab.id} value={tab.id} className="text-sm px-4 py-2">
                       {tab.label}
@@ -130,15 +131,15 @@ const AdminDashboard = () => {
           {/* Tablet Tabs */}
           <div className="hidden md:block lg:hidden">
             <div className="space-y-2">
-              <TabsList className="grid w-full grid-cols-5 gap-1">
+              <TabsList className="grid w-full grid-cols-6 gap-1">
                 {contentTabs.map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} className="text-xs px-2 py-2">
                     {tab.label}
                   </TabsTrigger>
                 ))}
               </TabsList>
-              <TabsList className="grid w-full grid-cols-8 gap-1">
-                {allTabs.slice(5).map((tab) => (
+              <TabsList className="grid w-full grid-cols-7 gap-1">
+                {allTabs.slice(6).map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} className="text-xs px-1 py-2">
                     {tab.label}
                   </TabsTrigger>

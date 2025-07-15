@@ -25,10 +25,10 @@ const Index = () => {
   const { contents, categories, loading, fetchContents } = useContents();
   const { getText } = useAppTexts();
 
-  // SEO ottimizzato per homepage
+  // SEO ottimizzato per homepage con i nuovi valori
   useSEO({
-    title: 'Glinda - Trova le Migliori Attività per Bambini 0-10 anni | Corsi, Eventi, Servizi Educativi',
-    description: 'Marketplace #1 per genitori: scopri corsi, eventi e servizi educativi verificati per bambini da 0 a 10 anni. Prenota online le migliori attività vicino a te!',
+    title: 'Scopri corsi, eventi e servizi educativi per i tuoi bambini',
+    description: 'Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.',
     keywords: 'attività bambini, corsi bambini infanzia, eventi famiglia, servizi educativi, laboratori creativi, sport bambini, musica bambini, arte bambini',
     canonical: 'https://glinda.lovable.app/'
   });

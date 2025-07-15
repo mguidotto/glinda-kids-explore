@@ -89,15 +89,8 @@ const SocialMetaManagement = () => {
   }
 
   const socialMetaSettings = [
-    { key: 'meta_title', label: 'Titolo Meta', type: 'text', description: 'Titolo per SEO e social media' },
-    { key: 'meta_description', label: 'Descrizione Meta', type: 'textarea', description: 'Descrizione per SEO e social media' },
-    { key: 'og_title', label: 'Open Graph Title', type: 'text', description: 'Titolo per Facebook/LinkedIn' },
-    { key: 'og_description', label: 'Open Graph Description', type: 'textarea', description: 'Descrizione per Facebook/LinkedIn' },
-    { key: 'og_image', label: 'Open Graph Image', type: 'image', description: 'Immagine per Facebook/LinkedIn (1200x630px)' },
-    { key: 'twitter_title', label: 'Twitter Title', type: 'text', description: 'Titolo per Twitter/X' },
-    { key: 'twitter_description', label: 'Twitter Description', type: 'textarea', description: 'Descrizione per Twitter/X' },
-    { key: 'twitter_image', label: 'Twitter Image', type: 'image', description: 'Immagine per Twitter/X (1200x600px)' },
-    { key: 'twitter_card', label: 'Twitter Card Type', type: 'text', description: 'Tipo di card Twitter (summary_large_image)' },
+    { key: 'meta_title', label: 'Titolo Meta', type: 'text', description: 'Titolo per SEO e social media (Default: "Scopri corsi, eventi e servizi educativi per i tuoi bambini")' },
+    { key: 'meta_description', label: 'Descrizione Meta', type: 'textarea', description: 'Descrizione per SEO e social media (Default: "Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.")' },
   ];
 
   return (
@@ -108,7 +101,7 @@ const SocialMetaManagement = () => {
           Social Media Tags
         </CardTitle>
         <p className="text-sm text-gray-600">
-          Gestisci i tag meta per SEO e condivisioni social
+          Gestisci i tag meta per SEO e condivisioni social. I tag OpenGraph sono configurati direttamente nell'HTML con i valori di default dell'homepage.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -120,118 +113,55 @@ const SocialMetaManagement = () => {
               <Label htmlFor={setting.key}>{setting.label}</Label>
               <p className="text-xs text-gray-500">{setting.description}</p>
               
-              {setting.type === 'image' ? (
-                <div className="space-y-3">
-                  {currentValue ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                        <img 
-                          src={currentValue} 
-                          alt={`${setting.label} Preview`} 
-                          className="max-w-32 max-h-20 object-contain border rounded"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                        <div className="flex-1">
-                          <div className="text-sm font-medium">{setting.label}</div>
-                          <div className="text-xs text-gray-500 break-all">{currentValue}</div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRemoveImage(setting.key)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600 mb-2">Sostituisci immagine:</p>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              handleFileUpload(setting.key, file);
-                            }
-                          }}
-                          disabled={uploading[setting.key]}
-                          className="max-w-xs"
-                        />
-                        {uploading[setting.key] && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span className="text-xs">Caricamento...</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                      <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600 mb-3">
-                        Carica un'immagine per {setting.label}
-                      </p>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            handleFileUpload(setting.key, file);
-                          }
-                        }}
-                        disabled={uploading[setting.key]}
-                        className="max-w-xs mx-auto"
-                      />
-                      {uploading[setting.key] && (
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span className="text-sm">Caricamento...</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  {setting.type === 'textarea' ? (
-                    <Textarea
-                      id={setting.key}
-                      value={getCurrentValue(setting.key) || ''}
-                      onChange={(e) => handleEdit(setting.key, e.target.value)}
-                      placeholder={setting.label}
-                      className="flex-1"
-                      rows={3}
-                    />
-                  ) : (
-                    <Input
-                      id={setting.key}
-                      value={getCurrentValue(setting.key) || ''}
-                      onChange={(e) => handleEdit(setting.key, e.target.value)}
-                      placeholder={setting.label}
-                      className="flex-1"
-                    />
-                  )}
-                  {isEditing(setting.key) && (
-                    <Button
-                      onClick={() => handleSave(setting.key)}
-                      disabled={saving[setting.key]}
-                      size="sm"
-                    >
-                      {saving[setting.key] ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        'Salva'
-                      )}
-                    </Button>
-                  )}
-                </div>
-              )}
+              <div className="flex gap-2">
+                {setting.type === 'textarea' ? (
+                  <Textarea
+                    id={setting.key}
+                    value={getCurrentValue(setting.key) || ''}
+                    onChange={(e) => handleEdit(setting.key, e.target.value)}
+                    placeholder={setting.label}
+                    className="flex-1"
+                    rows={3}
+                  />
+                ) : (
+                  <Input
+                    id={setting.key}
+                    value={getCurrentValue(setting.key) || ''}
+                    onChange={(e) => handleEdit(setting.key, e.target.value)}
+                    placeholder={setting.label}
+                    className="flex-1"
+                  />
+                )}
+                {isEditing(setting.key) && (
+                  <Button
+                    onClick={() => handleSave(setting.key)}
+                    disabled={saving[setting.key]}
+                    size="sm"
+                  >
+                    {saving[setting.key] ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Salva'
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           );
         })}
+        
+        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+          <h4 className="font-semibold text-blue-900 mb-2">Tag OpenGraph e Twitter</h4>
+          <p className="text-sm text-blue-800">
+            I tag OpenGraph e Twitter sono configurati direttamente nell'HTML della pagina con questi valori di default:
+          </p>
+          <ul className="text-xs text-blue-700 mt-2 space-y-1">
+            <li><strong>og:title:</strong> "Scopri corsi, eventi e servizi educativi per i tuoi bambini"</li>
+            <li><strong>og:description:</strong> "Glinda aiuta i genitori a trovare le migliori opportunità vicino a te."</li>
+            <li><strong>og:image:</strong> "https://glinda.lovable.app/icon-512x512.png"</li>
+            <li><strong>twitter:card:</strong> "summary_large_image"</li>
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

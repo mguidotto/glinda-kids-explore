@@ -18,8 +18,8 @@ interface SEOData {
 }
 
 const DEFAULT_SEO = {
-  title: 'Glinda - Marketplace Attività Educative per Bambini 0-10 anni',
-  description: 'Scopri i migliori corsi, eventi e servizi educativi per bambini da 0 a 10 anni su Glinda. Marketplace di fiducia per genitori.',
+  title: 'Scopri corsi, eventi e servizi educativi per i tuoi bambini',
+  description: 'Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.',
   keywords: 'attività bambini, corsi bambini, eventi familiari, servizi educativi, marketplace genitori',
   canonical: 'https://glinda.lovable.app/',
   ogImage: 'https://glinda.lovable.app/icon-512x512.png'

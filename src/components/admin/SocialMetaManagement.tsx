@@ -102,6 +102,12 @@ const SocialMetaManagement = () => {
       description: 'Descrizione per SEO e social media (Default: "Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.")' 
     },
     { 
+      key: 'canonical_url', 
+      label: 'URL Canonical Base', 
+      type: 'text', 
+      description: 'URL base per i tag canonical (Default: "https://glinda.lovable.app"). Verrà utilizzato come base per tutte le pagine.' 
+    },
+    { 
       key: 'og_image', 
       label: 'Immagine Open Graph/Twitter', 
       type: 'image', 
@@ -249,6 +255,7 @@ const SocialMetaManagement = () => {
           <ul className="text-xs text-blue-700 mt-2 space-y-1">
             <li><strong>Titolo Meta:</strong> Utilizzato come titolo della pagina e nei meta tag Open Graph</li>
             <li><strong>Descrizione Meta:</strong> Utilizzata per la descrizione SEO e Open Graph</li>
+            <li><strong>URL Canonical Base:</strong> Base per i tag canonical delle pagine (es. https://tuosito.com)</li>
             <li><strong>Immagine Open Graph:</strong> Mostrata quando il sito viene condiviso sui social media</li>
           </ul>
         </div>

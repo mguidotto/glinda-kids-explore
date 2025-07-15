@@ -22,7 +22,7 @@ const DEFAULT_SEO = {
   title: 'Scopri corsi, eventi e servizi educativi per i tuoi bambini',
   description: 'Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.',
   keywords: 'attività bambini, corsi bambini, eventi familiari, servizi educativi, marketplace genitori',
-  canonical: 'https://glinda.lovable.app/',
+  canonical: 'https://glinda.lovable.app',
   ogImage: 'https://glinda.lovable.app/icon-512x512.png'
 };
 
@@ -35,12 +35,15 @@ export const useSEO = (seoData: SEOData = {}) => {
     const adminTitle = getSetting('meta_title');
     const adminDescription = getSetting('meta_description');
     const adminOgImage = getSetting('og_image');
+    const adminCanonicalBase = getSetting('canonical_url');
+    
+    const canonicalBase = adminCanonicalBase || DEFAULT_SEO.canonical;
     
     const {
       title = adminTitle || DEFAULT_SEO.title,
       description = adminDescription || DEFAULT_SEO.description,
       keywords = DEFAULT_SEO.keywords,
-      canonical = `https://glinda.lovable.app${location.pathname}`,
+      canonical = `${canonicalBase}${location.pathname}`,
       ogTitle = title,
       ogDescription = description,
       ogImage = adminOgImage || seoData.ogImage || DEFAULT_SEO.ogImage,

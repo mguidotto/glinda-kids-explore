@@ -1,3 +1,4 @@
+
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -232,16 +233,6 @@ const ContentDetail = () => {
               city={content.city}
             />
 
-            {/* Map Section */}
-            {content.latitude && content.longitude && (
-              <ContentMapSection
-                lat={content.latitude}
-                lng={content.longitude}
-                title={content.title}
-                address={content.address}
-              />
-            )}
-
             {/* Reviews Section */}
             <div className="space-y-6">
               <ReviewsList contentId={content.id} />
@@ -250,7 +241,7 @@ const ContentDetail = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
             <ContentBookingSidebar
               id={content.id}
               title={content.title}
@@ -264,6 +255,16 @@ const ContentDetail = () => {
               email={content.email}
               website={content.website}
             />
+
+            {/* Map Section moved to sidebar */}
+            {content.latitude && content.longitude && (
+              <ContentMapSection
+                lat={content.latitude}
+                lng={content.longitude}
+                title={content.title}
+                address={content.address}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -256,7 +256,7 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
             <Button
               type="submit"
               disabled={submitting || rating === 0}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 text-base"
+              className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
             >
               {submitting ? (
                 <div className="flex items-center gap-2">

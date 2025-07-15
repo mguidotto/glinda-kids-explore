@@ -51,13 +51,13 @@ const Navigation = () => {
               </>
             ) : (
               <>
-                {console.log("Rendering Accedi button (desktop)")}
-                <Link to="/auth">
+                {console.log("Rendering Collabora con noi button (desktop)")}
+                <Link to="/contact">
                   <Button 
                     className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]"
-                    aria-label="Accedi al tuo account"
+                    aria-label="Collabora con noi"
                   >
-                    Accedi
+                    Collabora con noi
                   </Button>
                 </Link>
               </>
@@ -118,14 +118,14 @@ const Navigation = () => {
               </>
             ) : (
               <>
-                {console.log("Rendering Accedi button (mobile)")}
+                {console.log("Rendering Collabora con noi button (mobile)")}
                 <Link 
-                  to="/auth"
+                  to="/contact"
                   className="block px-4 py-2 text-white bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] rounded-lg transition-colors text-center"
                   onClick={() => setIsOpen(false)}
-                  aria-label="Accedi al tuo account"
+                  aria-label="Collabora con noi"
                 >
-                  Accedi
+                  Collabora con noi
                 </Link>
               </>
             )}

@@ -1,6 +1,6 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
 import LocationSearch from "@/components/LocationSearch";
 import CategoryFilter from "@/components/CategoryFilter";
@@ -267,8 +267,6 @@ const Search = () => {
           )}
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

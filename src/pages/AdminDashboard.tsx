@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
@@ -75,14 +74,23 @@ const AdminDashboard = () => {
     { id: "pages", label: "Pagine", component: <PagesManagement /> },
   ];
 
-  // Filter out any tabs with invalid IDs and log them for debugging
+  // Enhanced validation with debugging
   const validTabs = allTabs.filter(tab => {
-    const isValid = tab.id && typeof tab.id === 'string' && tab.id.trim() !== '';
+    const isValid = tab.id && 
+                   typeof tab.id === 'string' && 
+                   tab.id.trim() !== '' && 
+                   tab.label && 
+                   typeof tab.label === 'string' && 
+                   tab.label.trim() !== '';
+    
     if (!isValid) {
-      console.error("Invalid tab found:", tab);
+      console.error("Invalid tab found:", { id: tab.id, label: tab.label, hasComponent: !!tab.component });
     }
+    
     return isValid;
   });
+
+  console.log("Valid tabs count:", validTabs.length, "out of", allTabs.length);
 
   // Organize tabs into logical groups for better desktop layout
   const contentTabs = validTabs.slice(0, 6); // Users, Contents, Providers, Categories, Tags, Reviews
@@ -128,7 +136,7 @@ const AdminDashboard = () => {
               {/* Assets Row */}
               <div className="mb-2">
                 <h3 className="text-sm font-medium text-gray-600 mb-2">Risorse</h3>
-                <TabsList className="grid w-full grid-cols-4 gap-1 max-w-md">
+                <TabsList className="grid w-full gap-1" style={{ gridTemplateColumns: `repeat(${assetTabs.length}, minmax(0, 1fr))` }}>
                   {assetTabs.map((tab) => (
                     <TabsTrigger key={tab.id} value={tab.id} className="text-sm px-4 py-2">
                       {tab.label}
@@ -169,7 +177,7 @@ const AdminDashboard = () => {
                 <SelectGroup>
                   <SelectLabel>Gestione Contenuti</SelectLabel>
                   {contentTabs.map((tab) => (
-                    <SelectItem key={tab.id} value={tab.id}>
+                    <SelectItem key={`content-${tab.id}`} value={tab.id}>
                       {tab.label}
                     </SelectItem>
                   ))}
@@ -177,7 +185,7 @@ const AdminDashboard = () => {
                 <SelectGroup>
                   <SelectLabel>Personalizzazione</SelectLabel>
                   {customizationTabs.map((tab) => (
-                    <SelectItem key={tab.id} value={tab.id}>
+                    <SelectItem key={`custom-${tab.id}`} value={tab.id}>
                       {tab.label}
                     </SelectItem>
                   ))}
@@ -185,7 +193,7 @@ const AdminDashboard = () => {
                 <SelectGroup>
                   <SelectLabel>Risorse</SelectLabel>
                   {assetTabs.map((tab) => (
-                    <SelectItem key={tab.id} value={tab.id}>
+                    <SelectItem key={`asset-${tab.id}`} value={tab.id}>
                       {tab.label}
                     </SelectItem>
                   ))}
@@ -209,4 +217,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-

@@ -23,7 +23,7 @@ const DEFAULT_SEO = {
   description: 'Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.',
   keywords: 'attività bambini, corsi bambini, eventi familiari, servizi educativi, marketplace genitori',
   canonical: 'https://glinda.lovable.app',
-  ogImage: 'https://glinda.lovable.app/icon-512x512.png'
+  ogImage: 'https://glinda.it/lovable-uploads/df33b161-f952-484f-9188-9e42eb514df1.png'
 };
 
 export const useSEO = (seoData: SEOData = {}) => {

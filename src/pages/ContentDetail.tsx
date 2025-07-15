@@ -20,13 +20,15 @@ const ContentDetail = () => {
   const { trackError } = useErrorTracking();
   
   // Determine which parameter to use based on the route
+  // If we have contentSlug, it means we're using category/content pattern
   const searchParam = contentSlug || slugOrId;
+  const categorySlug = contentSlug ? slugOrId : null;
   
-  console.log("[ContentDetail] Route params:", { slugOrId, contentSlug, searchParam });
+  console.log("[ContentDetail] Route params:", { slugOrId, contentSlug, searchParam, categorySlug });
   console.log("[ContentDetail] Current location:", window.location.href);
 
   const { data: content, isLoading, error } = useQuery({
-    queryKey: ["content", searchParam],
+    queryKey: ["content", searchParam, categorySlug],
     queryFn: async () => {
       console.log("[ContentDetail] Fetching content for param:", searchParam);
       
@@ -35,7 +37,7 @@ const ContentDetail = () => {
         throw new Error("No search parameter provided");
       }
 
-      // First try to find by slug
+      // First try to find by slug (with category validation if provided)
       let { data, error } = await supabase
         .from("contents")
         .select(`
@@ -66,6 +68,12 @@ const ContentDetail = () => {
         .maybeSingle();
 
       console.log("[ContentDetail] Slug search result:", { data, error });
+
+      // If we have a category slug, verify it matches
+      if (data && categorySlug && data.categories?.slug !== categorySlug) {
+        console.log("[ContentDetail] Category slug mismatch, content not found");
+        data = null;
+      }
 
       // If not found by slug, try by ID (if it looks like a UUID)
       if (!data && !error) {
@@ -256,7 +264,7 @@ const ContentDetail = () => {
               website={content.website}
             />
 
-            {/* Map Section moved to sidebar */}
+            {/* Map Section in sidebar */}
             {content.latitude && content.longitude && (
               <ContentMapSection
                 lat={content.latitude}

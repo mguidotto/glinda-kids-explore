@@ -18,8 +18,13 @@ export const useContentUrl = () => {
     return `/content/${content.id}`;
   };
 
-  const generateUrl = (id: string, slug?: string | null, title?: string): string => {
-    // For backwards compatibility, provide generateUrl that uses ID-based routing
+  const generateUrl = (id: string, slug?: string | null, categorySlug?: string | null): string => {
+    // Use category/content slug pattern if both are available
+    if (slug && slug.trim() && categorySlug && categorySlug.trim()) {
+      return `/${categorySlug}/${slug}`;
+    }
+    
+    // Fallback to ID-based routing
     return `/content/${id}`;
   };
 

@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import ImageGalleryUpload from "./ImageGalleryUpload";
 import AddressAutocomplete from "./AddressAutocomplete";
 import { geocodeAddressWithCity } from "@/utils/geocoding";
+import { generateSlug, ensureUniqueSlug } from "@/utils/slugUtils";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers?: { business_name: string; verified: boolean };
@@ -62,7 +63,7 @@ const ContentsManagement = () => {
     price_to: "",
     published: false,
     featured: false,
-    modality: "presenza" as Database["public"]["Enums"]["modality"],
+    modality: "" as string, // Changed to allow empty string
     website: "",
     phone: "",
     email: "",
@@ -136,17 +137,17 @@ const ContentsManagement = () => {
     }
   };
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[àáâãäå]/g, 'a')
-      .replace(/[èéêë]/g, 'e')
-      .replace(/[ìíîï]/g, 'i')
-      .replace(/[òóôõö]/g, 'o')
-      .replace(/[ùúûü]/g, 'u')
-      .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
+  // Auto-generate slug when title changes
+  const handleTitleChange = async (title: string) => {
+    setFormData(prev => ({ ...prev, title }));
+    
+    if (title.trim()) {
+      const baseSlug = generateSlug(title);
+      const uniqueSlug = await ensureUniqueSlug(baseSlug, editingContent?.id);
+      setFormData(prev => ({ ...prev, slug: uniqueSlug }));
+    } else {
+      setFormData(prev => ({ ...prev, slug: "" }));
+    }
   };
 
   const uploadFeaturedImage = async (file: File): Promise<string | null> => {
@@ -321,6 +322,7 @@ const ContentsManagement = () => {
         event_end_time: formData.event_end_time || null,
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
+        modality: formData.modality || null, // Allow null for empty modality
       };
 
       console.log('Saving content data:', contentData);
@@ -415,7 +417,7 @@ const ContentsManagement = () => {
       price_to: "",
       published: false,
       featured: false,
-      modality: "presenza",
+      modality: "", // Reset to empty string
       website: "",
       phone: "",
       email: "",
@@ -452,7 +454,7 @@ const ContentsManagement = () => {
       price_to: content.price_to?.toString() || "",
       published: content.published ?? false,
       featured: content.featured ?? false,
-      modality: content.modality,
+      modality: content.modality || "", // Handle null modality
       website: content.website || "",
       phone: content.phone || "",
       email: content.email || "",
@@ -494,15 +496,15 @@ const ContentsManagement = () => {
     console.log("[ContentsManagement] Generating URL for content:", {
       id: content.id,
       slug: content.slug,
-      title: content.title
+      title: content.title,
+      categorySlug: content.categories?.slug
     });
     
-    // Try multiple URL patterns to see which one works
-    if (content.slug) {
-      // Test if the content has a slug, use it in the format expected by the router
-      const slugUrl = `/content/${content.slug}`;
-      console.log("[ContentsManagement] Generated slug URL:", slugUrl);
-      return slugUrl;
+    // Use category/content slug pattern if both are available
+    if (content.slug && content.categories?.slug) {
+      const categoryContentUrl = `/${content.categories.slug}/${content.slug}`;
+      console.log("[ContentsManagement] Generated category/content URL:", categoryContentUrl);
+      return categoryContentUrl;
     }
     
     // Fallback to ID-based URL
@@ -641,14 +643,7 @@ const ContentsManagement = () => {
                       <Input
                         id="title"
                         value={formData.title}
-                        onChange={(e) => {
-                          const title = e.target.value;
-                          setFormData(prev => ({ 
-                            ...prev, 
-                            title,
-                            slug: prev.slug || generateSlug(title)
-                          }));
-                        }}
+                        onChange={(e) => handleTitleChange(e.target.value)}
                         required
                       />
                     </div>
@@ -838,15 +833,16 @@ const ContentsManagement = () => {
                     </div>
                     
                     <div>
-                      <Label htmlFor="slug">URL Slug</Label>
+                      <Label htmlFor="slug">URL Slug *</Label>
                       <Input
                         id="slug"
                         placeholder="url-del-contenuto"
                         value={formData.slug}
                         onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                        required
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        L'URL sarà: /content/{formData.slug || "url-del-contenuto"}
+                        L'URL sarà: /categoria/{formData.slug || "url-del-contenuto"}
                       </p>
                     </div>
 
@@ -943,12 +939,13 @@ const ContentsManagement = () => {
                       <Label htmlFor="modality">Modalità</Label>
                       <Select
                         value={formData.modality}
-                        onValueChange={(value: Database["public"]["Enums"]["modality"]) => setFormData(prev => ({ ...prev, modality: value }))}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, modality: value }))}
                       >
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Seleziona modalità (opzionale)" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="">Non specificata</SelectItem>
                           <SelectItem value="presenza">In Presenza</SelectItem>
                           <SelectItem value="online">Online</SelectItem>
                           <SelectItem value="ibrido">Ibrida</SelectItem>
@@ -1114,7 +1111,7 @@ const ContentsManagement = () => {
                   )}
                   
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500">
-                    <span>Modalità: {content.modality}</span>
+                    {content.modality && <span>Modalità: {content.modality}</span>}
                     {content.categories && (
                       <span>Categoria: {content.categories.name}</span>
                     )}

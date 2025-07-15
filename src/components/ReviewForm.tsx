@@ -1,68 +1,57 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useCapacitor } from "@/hooks/useCapacitor";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Star, MessageSquare, Camera, X } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { Star, AlertCircle, Camera } from "lucide-react";
+import { useCapacitor } from "@/hooks/useCapacitor";
 
 interface ReviewFormProps {
   contentId: string;
-  onReviewSubmitted?: () => void;
 }
 
-const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
+const generateRandomName = () => {
+  const adjectives = ['Felice', 'Entusiasta', 'Soddisfatto', 'Curioso', 'Avventuroso', 'Creativo', 'Amichevole', 'Gentile'];
+  const nouns = ['Genitore', 'Mamma', 'Papà', 'Famiglia', 'Visitatore', 'Cliente', 'Utente', 'Ospite'];
+  
+  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+  const randomNumber = Math.floor(Math.random() * 1000);
+  
+  return `${randomAdjective}${randomNoun}${randomNumber}`;
+};
+
+const ReviewForm = ({ contentId }: ReviewFormProps) => {
   const { user } = useAuth();
-  const { isNative, takePicture } = useCapacitor();
+  const { isNative, takePhoto } = useCapacitor();
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
   const [reviewerName, setReviewerName] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [hoverRating, setHoverRating] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  // Genera un nome casuale per utenti anonimi
-  const generateRandomName = () => {
-    const names = [
-      "Marco", "Giulia", "Andrea", "Francesca", "Matteo", "Sara", "Luca", "Elena",
-      "Alessandro", "Chiara", "Lorenzo", "Valeria", "Davide", "Martina", "Federico",
-      "Silvia", "Riccardo", "Valentina", "Simone", "Lucia", "Francesco", "Alessia"
-    ];
-    return names[Math.floor(Math.random() * names.length)];
-  };
+  const handlePhotoCapture = async () => {
+    if (!isNative) {
+      setError("La funzione fotocamera è disponibile solo nell'app mobile");
+      return;
+    }
 
-  const handleTakePhoto = async () => {
-    if (!isNative) return;
-    
     try {
-      const result = await takePicture();
-      if (result.dataUrl && !result.error) {
-        setPhotos(prev => [...prev, result.dataUrl!]);
-        toast({
-          title: "Foto aggiunta",
-          description: "La foto è stata aggiunta alla recensione"
-        });
-      } else if (result.error) {
-        toast({
-          title: "Errore",
-          description: `Errore nella foto: ${result.error}`,
-          variant: "destructive"
-        });
+      const photo = await takePhoto();
+      if (photo?.webPath) {
+        setPhotos(prev => [...prev, photo.webPath!]);
       }
     } catch (error) {
-      console.error("Error taking photo:", error);
-      toast({
-        title: "Errore",
-        description: "Errore nell'acquisizione della foto",
-        variant: "destructive"
-      });
+      console.error('Errore durante la cattura della foto:', error);
+      setError("Errore durante la cattura della foto");
     }
   };
 
@@ -72,102 +61,131 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (rating === 0) {
-      toast({
-        title: "Errore",
-        description: "Seleziona una valutazione",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setSubmitting(true);
+    setIsSubmitting(true);
+    setError(null);
 
     try {
-      // Se l'utente non ha inserito un nome, ne generiamo uno casuale
-      const finalReviewerName = reviewerName.trim() || generateRandomName();
+      if (rating === 0) {
+        setError("Per favore seleziona una valutazione");
+        return;
+      }
 
-      // Prepara i dati della recensione
-      const reviewData: any = {
+      // Check if user already has a review for this content
+      if (user) {
+        const { data: existingReview } = await supabase
+          .from("reviews")
+          .select("id")
+          .eq("content_id", contentId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (existingReview) {
+          setError("Hai già lasciato una recensione per questo contenuto");
+          return;
+        }
+      }
+
+      // Generate random name if not provided and user is not logged in
+      let finalReviewerName = reviewerName;
+      if (!user && !reviewerName.trim()) {
+        finalReviewerName = generateRandomName();
+      }
+
+      const reviewData = {
         content_id: contentId,
+        user_id: user?.id || null,
         rating,
         title: title.trim() || null,
         comment: comment.trim() || null,
+        reviewer_name: finalReviewerName.trim() || null,
         photos: photos.length > 0 ? photos : null,
-        validated: false,
-        reviewer_name: finalReviewerName
+        validated: false
       };
 
-      // Se l'utente è autenticato, aggiungi il suo ID
-      if (user) {
-        reviewData.user_id = user.id;
-      }
+      console.log("Submitting review:", reviewData);
 
-      console.log("[ReviewForm] Submitting review:", reviewData);
-
-      const { error } = await supabase
+      const { error: submitError } = await supabase
         .from("reviews")
-        .insert(reviewData);
+        .insert([reviewData]);
 
-      if (error) {
-        console.error("Error submitting review:", error);
-        toast({
-          title: "Errore",
-          description: "Errore nell'invio della recensione: " + error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Successo",
-          description: "Recensione inviata con successo! Sarà visibile dopo la validazione dell'amministratore."
-        });
-        setRating(0);
-        setTitle("");
-        setComment("");
-        setReviewerName("");
-        setPhotos([]);
-        onReviewSubmitted?.();
+      if (submitError) {
+        console.error("Errore durante l'invio della recensione:", submitError);
+        
+        // Check for duplicate key error
+        if (submitError.code === '23505') {
+          setError("Hai già lasciato una recensione per questo contenuto");
+        } else {
+          setError(`Errore durante l'invio della recensione: ${submitError.message}`);
+        }
+        return;
       }
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      toast({
-        title: "Errore",
-        description: "Errore imprevisto nell'invio della recensione",
-        variant: "destructive"
-      });
-    }
 
-    setSubmitting(false);
+      setSuccess(true);
+      
+      // Reset form
+      setRating(0);
+      setTitle("");
+      setComment("");
+      setReviewerName("");
+      setPhotos([]);
+
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setSuccess(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error("Errore imprevisto:", error);
+      setError("Si è verificato un errore imprevisto. Riprova più tardi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
+  if (success) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="p-6">
+          <Alert>
+            <AlertDescription>
+              Grazie per la tua recensione! Sarà pubblicata dopo la verifica da parte del nostro team.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="w-full">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
-          Lascia una Recensione
-        </CardTitle>
+        <CardTitle className="text-xl font-semibold">Lascia una Recensione</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Rating */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Valutazione *</Label>
             <div className="flex gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {[1, 2, 3, 4, 5].map((star) => (
                 <button
-                  key={i}
+                  key={star}
                   type="button"
-                  className="p-1 rounded hover:bg-gray-100 transition-colors"
-                  onMouseEnter={() => setHoverRating(i + 1)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  onClick={() => setRating(i + 1)}
+                  onClick={() => setRating(star)}
+                  className="p-1 hover:scale-110 transition-transform"
                 >
                   <Star
-                    className={`h-8 w-8 transition-colors ${
-                      i < (hoverRating || rating)
-                        ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-gray-300'
+                    className={`h-8 w-8 ${
+                      star <= rating 
+                        ? "fill-yellow-400 text-yellow-400" 
+                        : "text-gray-300 hover:text-yellow-300"
                     }`}
                   />
                 </button>
@@ -175,75 +193,85 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="reviewerName" className="text-sm font-medium">Il tuo nome (opzionale)</Label>
-            <Input
-              id="reviewerName"
-              value={reviewerName}
-              onChange={(e) => setReviewerName(e.target.value)}
-              placeholder="Come ti chiami? (se non lo inserisci ne genereremo uno casuale)"
-              maxLength={50}
-              className="w-full"
-            />
-          </div>
+          {/* Name (only for non-logged users) */}
+          {!user && (
+            <div className="space-y-2">
+              <Label htmlFor="reviewer-name" className="text-sm font-medium">
+                Nome (opzionale)
+              </Label>
+              <Input
+                id="reviewer-name"
+                value={reviewerName}
+                onChange={(e) => setReviewerName(e.target.value)}
+                placeholder="Il tuo nome o lascia vuoto per un nome casuale"
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500">
+                Se lasci vuoto, verrà generato un nome casuale per proteggere la tua privacy
+              </p>
+            </div>
+          )}
 
+          {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-sm font-medium">Titolo (opzionale)</Label>
+            <Label htmlFor="review-title" className="text-sm font-medium">
+              Titolo (opzionale)
+            </Label>
             <Input
-              id="title"
+              id="review-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Riassumi la tua esperienza"
-              maxLength={100}
               className="w-full"
             />
           </div>
 
+          {/* Comment */}
           <div className="space-y-2">
-            <Label htmlFor="comment" className="text-sm font-medium">Commento (opzionale)</Label>
+            <Label htmlFor="review-comment" className="text-sm font-medium">
+              Commento (opzionale)
+            </Label>
             <Textarea
-              id="comment"
+              id="review-comment"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Descrivi la tua esperienza in dettaglio"
+              placeholder="Condividi la tua esperienza..."
               rows={4}
-              maxLength={500}
               className="w-full resize-none"
             />
           </div>
 
+          {/* Photo capture (only for native apps) */}
           {isNative && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label className="text-sm font-medium">Foto (opzionale)</Label>
               <div className="space-y-3">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={handleTakePhoto}
-                  className="flex items-center gap-2 w-full sm:w-auto"
+                  onClick={handlePhotoCapture}
+                  className="w-full"
                 >
-                  <Camera className="h-4 w-4" />
-                  Aggiungi Foto
+                  <Camera className="h-4 w-4 mr-2" />
+                  Scatta una foto
                 </Button>
                 
                 {photos.length > 0 && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-2">
                     {photos.map((photo, index) => (
-                      <div key={index} className="relative group">
+                      <div key={index} className="relative">
                         <img
                           src={photo}
                           alt={`Foto ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          className="w-full h-20 object-cover rounded border"
                         />
-                        <Button
+                        <button
                           type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => removePhoto(index)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
                         >
-                          <X className="h-4 w-4" />
-                        </Button>
+                          ×
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -252,22 +280,14 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
             </div>
           )}
 
-          <div className="pt-4 border-t">
-            <Button
-              type="submit"
-              disabled={submitting || rating === 0}
-              className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              {submitting ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Invio in corso...
-                </div>
-              ) : (
-                "Invia Recensione"
-              )}
-            </Button>
-          </div>
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={isSubmitting || rating === 0}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            {isSubmitting ? "Invio in corso..." : "Invia Recensione"}
+          </Button>
         </form>
       </CardContent>
     </Card>

@@ -63,7 +63,7 @@ const ContentsManagement = () => {
     price_to: "",
     published: false,
     featured: false,
-    modality: "" as string, // Changed to allow empty string
+    modality: "unspecified" as string, // Changed from "" to "unspecified"
     website: "",
     phone: "",
     email: "",
@@ -304,9 +304,9 @@ const ContentsManagement = () => {
         }
       }
 
-      // Handle modality conversion - convert empty string to null and validate enum values
+      // Handle modality conversion - convert "unspecified" to null and validate enum values
       let modalityValue: "online" | "presenza" | "ibrido" | null = null;
-      if (formData.modality && ["online", "presenza", "ibrido"].includes(formData.modality)) {
+      if (formData.modality && formData.modality !== "unspecified" && ["online", "presenza", "ibrido"].includes(formData.modality)) {
         modalityValue = formData.modality as "online" | "presenza" | "ibrido";
       }
 
@@ -431,7 +431,7 @@ const ContentsManagement = () => {
       price_to: "",
       published: false,
       featured: false,
-      modality: "",
+      modality: "unspecified", // Changed from "" to "unspecified"
       website: "",
       phone: "",
       email: "",
@@ -468,7 +468,7 @@ const ContentsManagement = () => {
       price_to: content.price_to?.toString() || "",
       published: content.published ?? false,
       featured: content.featured ?? false,
-      modality: content.modality || "",
+      modality: content.modality || "unspecified", // Convert null to "unspecified"
       website: content.website || "",
       phone: content.phone || "",
       email: content.email || "",
@@ -959,7 +959,7 @@ const ContentsManagement = () => {
                           <SelectValue placeholder="Seleziona modalità (opzionale)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Non specificata</SelectItem>
+                          <SelectItem value="unspecified">Non specificata</SelectItem>
                           <SelectItem value="presenza">In Presenza</SelectItem>
                           <SelectItem value="online">Online</SelectItem>
                           <SelectItem value="ibrido">Ibrida</SelectItem>

@@ -22,7 +22,7 @@ const DEFAULT_SEO = {
   title: 'Scopri corsi, eventi e servizi educativi per i tuoi bambini',
   description: 'Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.',
   keywords: 'attività bambini, corsi bambini, eventi familiari, servizi educativi, genitori',
-  canonical: 'https://glinda.lovable.app',
+  canonical: 'https://www.glinda.it',
   ogImage: 'https://glinda.it/lovable-uploads/df33b161-f952-484f-9188-9e42eb514df1.png'
 };
 

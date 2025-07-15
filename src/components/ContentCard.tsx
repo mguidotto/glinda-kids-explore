@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -115,6 +116,14 @@ const ContentCard = ({
     return `€${price.from || price.to}`;
   };
 
+  // Show "Online" for online content, otherwise show city or location
+  const getLocationDisplay = () => {
+    if (modality === 'online') {
+      return 'Online';
+    }
+    return city || location;
+  };
+
   return (
     <Link to={contentUrl} className="block">
       <Card className={`group hover:shadow-lg transition-all duration-200 cursor-pointer h-full ${featured ? 'ring-2 ring-blue-200' : ''}`}>
@@ -192,10 +201,10 @@ const ContentCard = ({
             <div className="flex items-center justify-between text-sm text-gray-500">
               <div className="flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
-                <span>{city || location}</span>
+                <span>{getLocationDisplay()}</span>
               </div>
               
-              {distance && (
+              {distance && modality !== 'online' && (
                 <span className="text-xs">{distance.toFixed(1)} km</span>
               )}
             </div>

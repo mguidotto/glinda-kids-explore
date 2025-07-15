@@ -62,41 +62,49 @@ const ReviewForm = ({ contentId, onReviewSubmitted }: ReviewFormProps) => {
     }
 
     setSubmitting(true);
+    setMessage(null);
 
-    // Se l'utente non ha inserito un nome, ne generiamo uno casuale
-    const finalReviewerName = reviewerName.trim() || generateRandomName();
+    try {
+      // Se l'utente non ha inserito un nome, ne generiamo uno casuale
+      const finalReviewerName = reviewerName.trim() || generateRandomName();
 
-    // Prepara i dati della recensione
-    const reviewData = {
-      content_id: contentId,
-      rating,
-      title: title.trim() || null,
-      comment: comment.trim() || null,
-      photos: photos.length > 0 ? photos : null,
-      validated: false,
-      reviewer_name: finalReviewerName
-    };
+      // Prepara i dati della recensione
+      const reviewData: any = {
+        content_id: contentId,
+        rating,
+        title: title.trim() || null,
+        comment: comment.trim() || null,
+        photos: photos.length > 0 ? photos : null,
+        validated: false,
+        reviewer_name: finalReviewerName
+      };
 
-    // Se l'utente è autenticato, aggiungi il suo ID
-    if (user) {
-      (reviewData as any).user_id = user.id;
-    }
+      // Se l'utente è autenticato, aggiungi il suo ID
+      if (user) {
+        reviewData.user_id = user.id;
+      }
 
-    const { error } = await supabase
-      .from("reviews")
-      .insert(reviewData);
+      console.log("[ReviewForm] Submitting review:", reviewData);
 
-    if (error) {
-      console.error("Error submitting review:", error);
-      setMessage("Errore nell'invio della recensione");
-    } else {
-      setMessage("Recensione inviata con successo! Sarà visibile dopo la validazione dell'amministratore.");
-      setRating(0);
-      setTitle("");
-      setComment("");
-      setReviewerName("");
-      setPhotos([]);
-      onReviewSubmitted?.();
+      const { error } = await supabase
+        .from("reviews")
+        .insert(reviewData);
+
+      if (error) {
+        console.error("Error submitting review:", error);
+        setMessage("Errore nell'invio della recensione: " + error.message);
+      } else {
+        setMessage("Recensione inviata con successo! Sarà visibile dopo la validazione dell'amministratore.");
+        setRating(0);
+        setTitle("");
+        setComment("");
+        setReviewerName("");
+        setPhotos([]);
+        onReviewSubmitted?.();
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      setMessage("Errore imprevisto nell'invio della recensione");
     }
 
     setSubmitting(false);

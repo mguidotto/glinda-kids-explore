@@ -28,7 +28,7 @@ const generateRandomName = () => {
 
 const ReviewForm = ({ contentId }: ReviewFormProps) => {
   const { user } = useAuth();
-  const { isNative, takePhoto } = useCapacitor();
+  const { isNative, takePicture } = useCapacitor();
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
@@ -45,9 +45,9 @@ const ReviewForm = ({ contentId }: ReviewFormProps) => {
     }
 
     try {
-      const photo = await takePhoto();
-      if (photo?.webPath) {
-        setPhotos(prev => [...prev, photo.webPath!]);
+      const photo = await takePicture();
+      if (photo?.dataUrl) {
+        setPhotos(prev => [...prev, photo.dataUrl!]);
       }
     } catch (error) {
       console.error('Errore durante la cattura della foto:', error);

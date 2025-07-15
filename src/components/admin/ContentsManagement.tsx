@@ -304,12 +304,27 @@ const ContentsManagement = () => {
         }
       }
 
+      // Handle modality conversion - convert empty string to null and validate enum values
+      let modalityValue: "online" | "presenza" | "ibrido" | null = null;
+      if (formData.modality && ["online", "presenza", "ibrido"].includes(formData.modality)) {
+        modalityValue = formData.modality as "online" | "presenza" | "ibrido";
+      }
+
       const contentData = {
-        ...formData,
-        price_from: formData.price_from ? parseFloat(formData.price_from) : null,
-        price_to: formData.price_to ? parseFloat(formData.price_to) : null,
+        title: formData.title,
+        description: formData.description || null,
         category_id: formData.category_id || null,
         provider_id: formData.provider_id === "none" ? null : formData.provider_id || null,
+        city: formData.city || null,
+        address: formData.address || null,
+        price_from: formData.price_from ? parseFloat(formData.price_from) : null,
+        price_to: formData.price_to ? parseFloat(formData.price_to) : null,
+        published: formData.published,
+        featured: formData.featured,
+        modality: modalityValue,
+        website: formData.website || null,
+        phone: formData.phone || null,
+        email: formData.email || null,
         featured_image: featuredImageUrl || null,
         images: galleryImages,
         slug: formData.slug || null,
@@ -322,7 +337,6 @@ const ContentsManagement = () => {
         event_end_time: formData.event_end_time || null,
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
-        modality: formData.modality || null, // Allow null for empty modality
       };
 
       console.log('Saving content data:', contentData);
@@ -417,7 +431,7 @@ const ContentsManagement = () => {
       price_to: "",
       published: false,
       featured: false,
-      modality: "", // Reset to empty string
+      modality: "",
       website: "",
       phone: "",
       email: "",
@@ -454,7 +468,7 @@ const ContentsManagement = () => {
       price_to: content.price_to?.toString() || "",
       published: content.published ?? false,
       featured: content.featured ?? false,
-      modality: content.modality || "", // Handle null modality
+      modality: content.modality || "",
       website: content.website || "",
       phone: content.phone || "",
       email: content.email || "",

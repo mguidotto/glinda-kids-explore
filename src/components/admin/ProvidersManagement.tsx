@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, Plus, Mail, Phone, MapPin, Globe, Building } from "lucide-react";
+import { Trash2, Edit, Plus, Mail, Phone, MapPin, Globe, Building, Upload, X } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -31,6 +31,7 @@ const ProvidersManagement = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [newProvider, setNewProvider] = useState({
     business_name: "",
     description: "",
@@ -39,7 +40,8 @@ const ProvidersManagement = () => {
     website: "",
     address: "",
     city: "",
-    verified: false
+    verified: false,
+    avatar_url: ""
   });
 
   useEffect(() => {
@@ -61,6 +63,69 @@ const ProvidersManagement = () => {
     setLoading(false);
   };
 
+  const uploadAvatar = async (file: File, isEdit = false) => {
+    try {
+      setAvatarUploading(true);
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('content-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('content-images')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = data.publicUrl;
+
+      if (isEdit && selectedProvider) {
+        setSelectedProvider({ ...selectedProvider, avatar_url: avatarUrl });
+      } else {
+        setNewProvider({ ...newProvider, avatar_url: avatarUrl });
+      }
+
+      return avatarUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      setError('Errore nel caricamento dell\'avatar');
+      throw error;
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>, isEdit = false) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Il file deve essere inferiore a 2MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setError('Il file deve essere un\'immagine');
+      return;
+    }
+
+    await uploadAvatar(file, isEdit);
+  };
+
+  const removeAvatar = (isEdit = false) => {
+    if (isEdit && selectedProvider) {
+      setSelectedProvider({ ...selectedProvider, avatar_url: "" });
+    } else {
+      setNewProvider({ ...newProvider, avatar_url: "" });
+    }
+  };
+
   const createProvider = async () => {
     if (!newProvider.business_name) {
       setError("Il nome dell'attività è obbligatorio");
@@ -68,6 +133,8 @@ const ProvidersManagement = () => {
     }
 
     setLoading(true);
+    // Non impostiamo user_id per i provider creati dagli admin
+    // Gli admin possono creare provider indipendenti
     const { error } = await supabase
       .from("providers")
       .insert({
@@ -78,7 +145,9 @@ const ProvidersManagement = () => {
         website: newProvider.website || null,
         address: newProvider.address || null,
         city: newProvider.city || null,
-        verified: newProvider.verified
+        verified: newProvider.verified,
+        avatar_url: newProvider.avatar_url || null,
+        user_id: null // Gli admin creano provider senza associarli a un utente specifico
       });
 
     if (error) {
@@ -94,7 +163,8 @@ const ProvidersManagement = () => {
         website: "",
         address: "",
         city: "",
-        verified: false
+        verified: false,
+        avatar_url: ""
       });
       fetchProviders();
     }
@@ -115,7 +185,8 @@ const ProvidersManagement = () => {
         website: selectedProvider.website,
         address: selectedProvider.address,
         city: selectedProvider.city,
-        verified: selectedProvider.verified
+        verified: selectedProvider.verified,
+        avatar_url: selectedProvider.avatar_url
       })
       .eq("id", selectedProvider.id);
 
@@ -166,6 +237,46 @@ const ProvidersManagement = () => {
               <DialogTitle>Crea Nuovo Provider</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <Avatar className="w-20 h-20">
+                    <AvatarImage src={newProvider.avatar_url} alt="Avatar" />
+                    <AvatarFallback className="bg-gray-200">
+                      <Building className="h-8 w-8 text-gray-500" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {newProvider.avatar_url && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                      onClick={() => removeAvatar(false)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-col items-center space-y-2">
+                  <Label htmlFor="avatar-upload" className="cursor-pointer">
+                    <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                      <Upload className="h-4 w-4" />
+                      <span className="text-sm">
+                        {avatarUploading ? "Caricamento..." : "Carica Avatar"}
+                      </span>
+                    </div>
+                  </Label>
+                  <Input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleAvatarUpload(e, false)}
+                    disabled={avatarUploading}
+                  />
+                  <p className="text-xs text-gray-500">Max 2MB, formati supportati: JPG, PNG</p>
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="business_name">Nome Attività *</Label>
                 <Input
@@ -241,7 +352,7 @@ const ProvidersManagement = () => {
               </div>
               <Button 
                 onClick={createProvider} 
-                disabled={loading}
+                disabled={loading || avatarUploading}
                 className="w-full bg-[#8B4A6B] hover:bg-[#7A4060]"
               >
                 {loading ? "Creazione..." : "Crea Provider"}
@@ -286,16 +397,21 @@ const ProvidersManagement = () => {
                 {providers.map((provider) => (
                   <TableRow key={provider.id}>
                     <TableCell>
-                      <div>
-                        <div className="font-medium flex items-center gap-2">
-                          <Building className="h-4 w-4" />
-                          {provider.business_name}
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={provider.avatar_url || ''} alt={provider.business_name} />
+                          <AvatarFallback className="bg-gray-200">
+                            <Building className="h-5 w-5 text-gray-500" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{provider.business_name}</div>
+                          {provider.description && (
+                            <div className="text-sm text-gray-600 mt-1">
+                              {provider.description.slice(0, 50)}...
+                            </div>
+                          )}
                         </div>
-                        {provider.description && (
-                          <div className="text-sm text-gray-600 mt-1">
-                            {provider.description.slice(0, 50)}...
-                          </div>
-                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -381,6 +497,46 @@ const ProvidersManagement = () => {
           </DialogHeader>
           {selectedProvider && (
             <div className="space-y-4">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <Avatar className="w-20 h-20">
+                    <AvatarImage src={selectedProvider.avatar_url || ''} alt="Avatar" />
+                    <AvatarFallback className="bg-gray-200">
+                      <Building className="h-8 w-8 text-gray-500" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {selectedProvider.avatar_url && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                      onClick={() => removeAvatar(true)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-col items-center space-y-2">
+                  <Label htmlFor="edit-avatar-upload" className="cursor-pointer">
+                    <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                      <Upload className="h-4 w-4" />
+                      <span className="text-sm">
+                        {avatarUploading ? "Caricamento..." : "Carica Avatar"}
+                      </span>
+                    </div>
+                  </Label>
+                  <Input
+                    id="edit-avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleAvatarUpload(e, true)}
+                    disabled={avatarUploading}
+                  />
+                  <p className="text-xs text-gray-500">Max 2MB, formati supportati: JPG, PNG</p>
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="edit_business_name">Nome Attività *</Label>
                 <Input
@@ -449,7 +605,7 @@ const ProvidersManagement = () => {
               </div>
               <Button 
                 onClick={updateProvider} 
-                disabled={loading}
+                disabled={loading || avatarUploading}
                 className="w-full bg-[#8B4A6B] hover:bg-[#7A4060]"
               >
                 {loading ? "Aggiornamento..." : "Aggiorna Provider"}

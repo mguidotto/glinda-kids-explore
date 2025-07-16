@@ -26,5 +26,5 @@ Disallow: /admin-dashboard
 Disallow: /provider-dashboard
 Disallow: /dashboard
 
-# Sitemap
+# Sitemap dinamica aggiornata
 Sitemap: https://glinda.lovable.app/sitemap.xml

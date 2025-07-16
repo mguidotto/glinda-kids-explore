@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 interface Category {
   id: string;
   name: string;
-  count: number;
+  count?: number; // Make count optional
 }
 
 interface CategoryFilterProps {
@@ -29,16 +29,18 @@ const CategoryFilter = ({ categories, selectedCategory, onCategoryChange }: Cate
           }`}
         >
           {category.name}
-          <Badge 
-            variant="secondary" 
-            className={`${
-              selectedCategory === category.id 
-                ? "bg-white/20 text-white" 
-                : "bg-gray-100 text-gray-600"
-            }`}
-          >
-            {category.count}
-          </Badge>
+          {category.count !== undefined && (
+            <Badge 
+              variant="secondary" 
+              className={`${
+                selectedCategory === category.id 
+                  ? "bg-white/20 text-white" 
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {category.count}
+            </Badge>
+          )}
         </Button>
       ))}
     </div>

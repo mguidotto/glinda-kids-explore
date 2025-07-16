@@ -1,7 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { MapPin, Users, Globe, Star, Calendar, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import FavoriteButton from "./FavoriteButton";
@@ -243,17 +242,6 @@ const ContentCard = ({
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Discover More Button */}
-          <div className="mt-4 flex justify-center">
-            <Button 
-              size="sm" 
-              className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]"
-              onClick={(e) => e.preventDefault()}
-            >
-              Scopri di più
-            </Button>
           </div>
         </CardContent>
       </Card>

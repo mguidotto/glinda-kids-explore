@@ -13,7 +13,7 @@ const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
   const { getText } = useAppTexts();
 
   const handleExploreClick = () => {
-    console.log('Explore activities clicked');
+    console.log('Explore activities clicked - calling onExploreActivities');
     onExploreActivities();
   };
 

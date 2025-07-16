@@ -1,9 +1,16 @@
 
 import { Link } from "react-router-dom";
 import { useAppTexts } from "@/hooks/useAppTexts";
+import { useContents } from "@/hooks/useContents";
+import { useEffect } from "react";
 
 const Footer = () => {
   const { getText } = useAppTexts();
+  const { categories, fetchCategories } = useContents();
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   return (
     <footer className="bg-gray-900 text-white py-12">
@@ -16,10 +23,16 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">{getText('footer.categories', 'Categorie')}</h4>
             <ul className="space-y-2 text-gray-300">
-              <li><Link to="/search?category=servizi-educativi" className="hover:text-[#7BB3BD]">Servizi Educativi</Link></li>
-              <li><Link to="/search?category=corsi" className="hover:text-[#7BB3BD]">Corsi</Link></li>
-              <li><Link to="/search?category=eventi" className="hover:text-[#7BB3BD]">Eventi</Link></li>
-              <li><Link to="/search?category=centri" className="hover:text-[#7BB3BD]">Centri</Link></li>
+              {categories.slice(0, 4).map((category) => (
+                <li key={category.id}>
+                  <Link 
+                    to={`/search?category=${category.slug}`} 
+                    className="hover:text-[#7BB3BD]"
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>

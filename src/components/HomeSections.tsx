@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -107,13 +108,7 @@ const ContentItemCard = ({ content }: { content: ContentItem }) => {
                 <div className="h-6"></div>
               )}
             </div>
-            <Button 
-              size="sm" 
-              className="bg-gradient-to-r from-[#8B4A6B] to-[#7BB3BD] hover:from-[#7A4060] hover:to-[#6BA3AD]"
-              onClick={(e) => e.preventDefault()} // Prevent double navigation since card is already clickable
-            >
-              Scopri di più
-            </Button>
+            {/* Removed onClick preventDefault to allow navigation */}
           </div>
           
           {shouldShowRating && (

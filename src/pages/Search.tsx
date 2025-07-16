@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import SearchBar from "@/components/SearchBar";
@@ -49,12 +50,12 @@ const Search = () => {
     });
   }, [selectedCategory, searchQuery, currentLocation]);
 
+  // Remove count from category options
   const categoryOptions = [
-    { id: "all", name: "Tutti", count: contents.length },
+    { id: "all", name: "Tutti" },
     ...categories.map(cat => ({
       id: cat.slug,
-      name: cat.name,
-      count: contents.filter(c => (c as any).categories?.slug === cat.slug).length
+      name: cat.name
     }))
   ];
 

@@ -11,10 +11,6 @@ const Sitemap = () => {
       try {
         const xml = await generateDynamicSitemap();
         setSitemapXml(xml);
-        
-        // Set the correct content type for XML
-        document.contentType = 'application/xml';
-        
       } catch (error) {
         console.error('Error generating sitemap:', error);
         setSitemapXml('<?xml version="1.0" encoding="UTF-8"?><error>Failed to generate sitemap</error>');
@@ -27,23 +23,41 @@ const Sitemap = () => {
   }, []);
 
   useEffect(() => {
-    // Set proper headers for XML response
-    if (!loading) {
-      const head = document.head;
+    // Set proper meta tag for XML content type
+    if (!loading && sitemapXml) {
+      const existingMeta = document.querySelector('meta[http-equiv="Content-Type"]');
+      if (existingMeta) {
+        existingMeta.remove();
+      }
+      
       const metaContentType = document.createElement('meta');
       metaContentType.setAttribute('http-equiv', 'Content-Type');
       metaContentType.setAttribute('content', 'application/xml; charset=utf-8');
-      head.appendChild(metaContentType);
+      document.head.appendChild(metaContentType);
     }
-  }, [loading]);
+  }, [loading, sitemapXml]);
 
   if (loading) {
-    return <div>Generating sitemap...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Generating sitemap...</div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
-      {sitemapXml}
+    <div className="min-h-screen bg-white">
+      <pre 
+        style={{ 
+          fontFamily: 'monospace', 
+          whiteSpace: 'pre-wrap',
+          margin: 0,
+          padding: '1rem',
+          fontSize: '14px',
+          lineHeight: '1.4'
+        }}
+        dangerouslySetInnerHTML={{ __html: sitemapXml }}
+      />
     </div>
   );
 };

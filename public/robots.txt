@@ -21,10 +21,27 @@ Allow: /
 User-agent: LinkedInBot
 Allow: /
 
-# Blocca le pagine amministrative
-Disallow: /admin-dashboard
-Disallow: /provider-dashboard
-Disallow: /dashboard
+# Blocca le pagine amministrative e di autenticazione
+Disallow: /admin*
+Disallow: /provider*
+Disallow: /dashboard*
+Disallow: /auth*
 
-# Sitemap
+# Blocca parametri di ricerca con contenuto duplicato
+Disallow: /*?q=*
+Disallow: /*?category=*
+Disallow: /*?featured=*
+
+# Consenti le pagine principali
+Allow: /search$
+Allow: /about$
+Allow: /contact$
+Allow: /privacy$
+
+# Sitemap dinamica
 Sitemap: https://glinda.lovable.app/sitemap.xml
+
+# Direttive per migliorare la scansione
+User-agent: *
+Request-rate: 1/10s
+Visit-time: 0600-2200

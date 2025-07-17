@@ -11,6 +11,9 @@ import { useAppTexts } from "@/hooks/useAppTexts";
 import { useSEO } from "@/hooks/useSEO";
 import { Database } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
+import SEOPerformanceOptimizer from "@/components/seo/SEOPerformanceOptimizer";
+import SchemaOrganization from "@/components/seo/SchemaOrganization";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 type Content = Database["public"]["Tables"]["contents"]["Row"] & {
   providers: { business_name: string; verified: boolean };
@@ -24,12 +27,13 @@ const Index = () => {
   const { contents, categories, loading, fetchContents } = useContents();
   const { getText } = useAppTexts();
 
-  // SEO ottimizzato per homepage con i nuovi valori
-  useSEO({
+  // Enhanced SEO for homepage
+  useMetaTags({
     title: 'Scopri corsi, eventi e servizi educativi per i tuoi bambini',
     description: 'Glinda aiuta i genitori a trovare le migliori opportunità vicino a te.',
     keywords: 'attività bambini, corsi bambini infanzia, eventi famiglia, servizi educativi, laboratori creativi, sport bambini, musica bambini, arte bambini',
-    canonical: 'https://glinda.lovable.app/'
+    canonical: 'https://glinda.lovable.app/',
+    ogType: 'website'
   });
 
   const [stats, setStats] = useState({
@@ -110,48 +114,53 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header>
-        <h1 className="sr-only">Glinda - Piattaforma Attività Educative per Bambini da 0 a 10 anni</h1>
-      </header>
+    <>
+      <SEOPerformanceOptimizer />
+      <SchemaOrganization />
       
-      <Hero onSearch={handleSearch} onExploreActivities={handleExploreActivities} />
+      <div className="min-h-screen bg-white">
+        <header>
+          <h1 className="sr-only">Glinda - Piattaforma Attività Educative per Bambini da 0 a 10 anni</h1>
+        </header>
+        
+        <Hero onSearch={handleSearch} onExploreActivities={handleExploreActivities} />
 
-      <main>
-        {featuredContents.length > 0 && (
-          <section aria-labelledby="featured-heading">
-            <h2 id="featured-heading" className="sr-only">Contenuti in Evidenza</h2>
-            <HomeSection 
-              title={getText('homepage.featured.title', 'Contenuti in Evidenza')}
-              subtitle={getText('homepage.featured.subtitle', 'Le migliori attività selezionate per te')}
-              contents={featuredContents}
-              sectionType="featured"
-              onViewAll={handleViewAll}
-            />
-          </section>
-        )}
+        <main>
+          {featuredContents.length > 0 && (
+            <section aria-labelledby="featured-heading">
+              <h2 id="featured-heading" className="sr-only">Contenuti in Evidenza</h2>
+              <HomeSection 
+                title={getText('homepage.featured.title', 'Contenuti in Evidenza')}
+                subtitle={getText('homepage.featured.subtitle', 'Le migliori attività selezionate per te')}
+                contents={featuredContents}
+                sectionType="featured"
+                onViewAll={handleViewAll}
+              />
+            </section>
+          )}
 
-        <section className="py-16 bg-gray-50" aria-labelledby="stats-heading">
-          <div className="max-w-6xl mx-auto px-4">
-            <h2 id="stats-heading" className="sr-only">Le Nostre Statistiche</h2>
-            <div className="grid md:grid-cols-3 gap-8 text-center">
-              <div>
-                <div className="text-3xl font-bold text-[#8B4A6B] mb-2">{stats.totalContents}</div>
-                <div className="text-gray-600">{getText('homepage.stats.contents', 'Contenuti Verificati')}</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#FF6B7A] mb-2">{stats.verifiedProviders}</div>
-                <div className="text-gray-600">{getText('homepage.stats.providers', 'Provider Certificati')}</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#F4D03F] mb-2">{stats.avgRating}</div>
-                <div className="text-gray-600">{getText('homepage.stats.rating', 'Valutazione Media')}</div>
+          <section className="py-16 bg-gray-50" aria-labelledby="stats-heading">
+            <div className="max-w-6xl mx-auto px-4">
+              <h2 id="stats-heading" className="sr-only">Le Nostre Statistiche</h2>
+              <div className="grid md:grid-cols-3 gap-8 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-[#8B4A6B] mb-2">{stats.totalContents}</div>
+                  <div className="text-gray-600">{getText('homepage.stats.contents', 'Contenuti Verificati')}</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-[#FF6B7A] mb-2">{stats.verifiedProviders}</div>
+                  <div className="text-gray-600">{getText('homepage.stats.providers', 'Provider Certificati')}</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-[#F4D03F] mb-2">{stats.avgRating}</div>
+                  <div className="text-gray-600">{getText('homepage.stats.rating', 'Valutazione Media')}</div>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-      </main>
-    </div>
+          </section>
+        </main>
+      </div>
+    </>
   );
 };
 

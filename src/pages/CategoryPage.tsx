@@ -6,12 +6,11 @@ import { supabase } from '../integrations/supabase/client';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import MobileLayout from '../components/MobileLayout';
-import ContentCard from '../components/ContentCard';
-import { useMobile } from '../hooks/use-mobile';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const CategoryPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   const { data: category } = useQuery({
     queryKey: ['category', slug],
@@ -63,7 +62,10 @@ const CategoryPage = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {contents?.map((content) => (
-            <ContentCard key={content.id} content={content} />
+            <div key={content.id} className="border rounded-lg p-4">
+              <h3 className="font-semibold">{content.title}</h3>
+              <p className="text-sm text-muted-foreground">{content.description}</p>
+            </div>
           ))}
         </div>
         

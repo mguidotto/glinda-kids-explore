@@ -3,10 +3,10 @@ import React from 'react';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import MobileLayout from '../components/MobileLayout';
-import { useMobile } from '../hooks/use-mobile';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const ComingSoon = () => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   const content = (
     <div className="min-h-screen bg-background">

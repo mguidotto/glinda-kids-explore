@@ -6,17 +6,25 @@ import HomeSections from '../components/HomeSections';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import MobileLayout from '../components/MobileLayout';
-import { useMobile } from '../hooks/use-mobile';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const Home = () => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
+
+  const handleSearch = (query: string) => {
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
+
+  const handleExploreActivities = () => {
+    navigate('/search');
+  };
 
   const content = (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <Hero />
-      <HomeSections />
+      <Hero onSearch={handleSearch} onExploreActivities={handleExploreActivities} />
+      <HomeSections title="Contenuti in evidenza" contents={[]} />
       <Footer />
     </div>
   );

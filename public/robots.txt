@@ -26,6 +26,7 @@ Disallow: /admin*
 Disallow: /provider*
 Disallow: /dashboard*
 Disallow: /auth*
+Disallow: /sitemap-debug
 
 # Blocca parametri di ricerca con contenuto duplicato
 Disallow: /*?q=*
@@ -38,7 +39,7 @@ Allow: /about$
 Allow: /contact$
 Allow: /privacy$
 
-# Sitemap dinamica
+# Sitemap statica
 Sitemap: https://glinda.lovable.app/sitemap.xml
 
 # Direttive per migliorare la scansione

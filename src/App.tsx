@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,7 +23,7 @@ import { useBranding } from "./hooks/useBranding";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 import { useErrorTracking } from "./hooks/useErrorTracking";
 import { usePWA } from "./hooks/usePWA";
-import Sitemap from "./pages/Sitemap";
+import SitemapDebug from "./pages/SitemapDebug";
 
 const queryClient = new QueryClient();
 
@@ -90,7 +91,7 @@ const App = () => {
                 <Route path="/dashboard" element={<UserDashboard />} />
                 <Route path="/provider" element={<ProviderDashboard />} />
                 <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/sitemap.xml" element={<Sitemap />} />
+                <Route path="/sitemap-debug" element={<SitemapDebug />} />
                 {/* Content routes - handle both slug and ID based URLs */}
                 <Route path="/content/:slugOrId" element={<ContentDetail />} />
                 <Route path="/:categorySlug/:contentSlug" element={<ContentDetail />} />

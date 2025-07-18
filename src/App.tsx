@@ -16,6 +16,7 @@ import UserDashboard from "./pages/UserDashboard";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import SitemapXml from "./pages/SitemapXml";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { useAuth } from "./hooks/useAuth";
@@ -91,6 +92,7 @@ const App = () => {
                 <Route path="/dashboard" element={<UserDashboard />} />
                 <Route path="/provider" element={<ProviderDashboard />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/sitemap.xml" element={<SitemapXml />} />
                 <Route path="/sitemap-debug" element={<SitemapDebug />} />
                 {/* Content routes - handle both slug and ID based URLs */}
                 <Route path="/content/:slugOrId" element={<ContentDetail />} />

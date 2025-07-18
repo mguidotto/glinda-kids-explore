@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const generateDynamicSitemap = async () => {
-  const baseUrl = 'https://glinda.lovable.app';
+  const baseUrl = 'https://www.glinda.it';
   const currentDate = new Date().toISOString().split('T')[0];
   
   // Static pages
@@ -10,7 +10,8 @@ export const generateDynamicSitemap = async () => {
     { url: '/', priority: '1.0', changefreq: 'daily' },
     { url: '/search', priority: '0.8', changefreq: 'weekly' },
     { url: '/about', priority: '0.7', changefreq: 'monthly' },
-    { url: '/contact', priority: '0.6', changefreq: 'monthly' }
+    { url: '/contact', priority: '0.6', changefreq: 'monthly' },
+    { url: '/privacy', priority: '0.5', changefreq: 'yearly' }
   ];
 
   // Fetch dynamic content pages

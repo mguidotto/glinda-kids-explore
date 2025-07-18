@@ -1,8 +1,49 @@
 
 import { useCallback } from 'react';
 import { generateDynamicSitemap } from '@/utils/sitemapGenerator';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 export const useSitemapGenerator = () => {
+  const { toast } = useToast();
+
+  const updateStaticSitemap = useCallback(async () => {
+    try {
+      console.log('Generating sitemap for static update...');
+      const xml = await generateDynamicSitemap();
+      
+      console.log('Calling update-sitemap function...');
+      const { data, error } = await supabase.functions.invoke('update-sitemap', {
+        body: { sitemapContent: xml }
+      });
+
+      if (error) {
+        console.error('Error calling update-sitemap function:', error);
+        toast({
+          title: "Errore",
+          description: "Errore durante l'aggiornamento della sitemap",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      console.log('Sitemap updated successfully:', data);
+      toast({
+        title: "Successo",
+        description: "Sitemap aggiornata con successo!"
+      });
+      return true;
+    } catch (error) {
+      console.error('Error updating static sitemap:', error);
+      toast({
+        title: "Errore",
+        description: "Errore durante l'aggiornamento della sitemap",
+        variant: "destructive"
+      });
+      return false;
+    }
+  }, [toast]);
+
   const generateAndDownloadSitemap = useCallback(async () => {
     try {
       console.log('Generating sitemap for download...');
@@ -48,6 +89,7 @@ export const useSitemapGenerator = () => {
   }, []);
 
   return {
+    updateStaticSitemap,
     generateAndDownloadSitemap,
     logSitemapContent
   };

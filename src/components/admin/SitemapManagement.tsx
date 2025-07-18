@@ -3,33 +3,54 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Download, FileText, ExternalLink } from "lucide-react";
+import { Loader2, Download, FileText, ExternalLink, RefreshCw } from "lucide-react";
 import { useSitemapGenerator } from "@/hooks/useSitemapGenerator";
 
 const SitemapManagement = () => {
-  const [generating, setGenerating] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  const { generateAndDownloadSitemap, logSitemapContent } = useSitemapGenerator();
+  const { updateStaticSitemap, generateAndDownloadSitemap, logSitemapContent } = useSitemapGenerator();
 
-  const handleGenerateSitemap = async () => {
-    setGenerating(true);
+  const handleUpdateSitemap = async () => {
+    setUpdating(true);
+    setMessage(null);
+    setError(null);
+
+    try {
+      const success = await updateStaticSitemap();
+      if (success) {
+        setMessage('Sitemap aggiornata con successo! Il file /sitemap.xml è stato aggiornato.');
+      } else {
+        setError('Errore durante l\'aggiornamento della sitemap');
+      }
+    } catch (err) {
+      setError('Errore durante l\'aggiornamento della sitemap');
+      console.error(err);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDownloadSitemap = async () => {
+    setDownloading(true);
     setMessage(null);
     setError(null);
 
     try {
       const success = await generateAndDownloadSitemap();
       if (success) {
-        setMessage('Sitemap generata e scaricata con successo! Sostituisci il file public/sitemap.xml con quello scaricato.');
+        setMessage('Sitemap scaricata con successo!');
       } else {
-        setError('Errore nella generazione della sitemap');
+        setError('Errore durante il download della sitemap');
       }
     } catch (err) {
-      setError('Errore nella generazione della sitemap');
+      setError('Errore durante il download della sitemap');
       console.error(err);
     } finally {
-      setGenerating(false);
+      setDownloading(false);
     }
   };
 
@@ -68,36 +89,48 @@ const SitemapManagement = () => {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-3">
-            <h3 className="font-semibold">Genera Sitemap</h3>
+            <h3 className="font-semibold">Aggiorna Sitemap Statica</h3>
             <p className="text-sm text-gray-600">
-              Genera una sitemap aggiornata con tutti i contenuti pubblicati, 
-              le categorie attive e le pagine statiche.
+              Aggiorna direttamente il file /sitemap.xml con il contenuto più recente.
             </p>
             <Button 
-              onClick={handleGenerateSitemap}
-              disabled={generating}
-              className="w-full"
+              onClick={handleUpdateSitemap}
+              disabled={updating}
+              className="w-full bg-green-600 hover:bg-green-700"
             >
-              {generating ? (
+              {updating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generando...
+                  Aggiornando...
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Genera e Scarica Sitemap
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Aggiorna sitemap.xml
                 </>
               )}
             </Button>
           </div>
 
           <div className="space-y-3">
-            <h3 className="font-semibold">Debug e Visualizzazione</h3>
+            <h3 className="font-semibold">Download e Debug</h3>
             <p className="text-sm text-gray-600">
-              Visualizza il contenuto della sitemap nella console per debug.
+              Scarica la sitemap o visualizzala per debug.
             </p>
             <div className="space-y-2">
+              <Button 
+                onClick={handleDownloadSitemap}
+                disabled={downloading}
+                variant="outline"
+                className="w-full"
+              >
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Scarica sitemap.xml
+              </Button>
               <Button 
                 onClick={handleViewSitemap}
                 variant="outline"
@@ -121,10 +154,10 @@ const SitemapManagement = () => {
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <h4 className="font-semibold text-blue-900 mb-2">Istruzioni</h4>
           <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-            <li>Clicca "Genera e Scarica Sitemap" per ottenere il file XML aggiornato</li>
-            <li>Sostituisci il file <code>public/sitemap.xml</code> con quello scaricato</li>
-            <li>La sitemap sarà automaticamente accessibile su <code>/sitemap.xml</code></li>
-            <li>Ripeti questo processo quando aggiungi/modifichi contenuti</li>
+            <li>Clicca "Aggiorna sitemap.xml" per aggiornare automaticamente il file statico</li>
+            <li>La sitemap sarà immediatamente accessibile su <code>/sitemap.xml</code></li>
+            <li>Usa "Scarica sitemap.xml" per ottenere una copia locale</li>
+            <li>Ripeti l'aggiornamento quando aggiungi/modifichi contenuti</li>
           </ol>
         </div>
 

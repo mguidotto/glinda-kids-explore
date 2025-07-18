@@ -4,13 +4,17 @@ import { generateDynamicSitemap } from '@/utils/sitemapGenerator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Download, RefreshCw } from 'lucide-react';
+import { Loader2, Download, RefreshCw, Upload } from 'lucide-react';
+import { useSitemapGenerator } from '@/hooks/useSitemapGenerator';
 
 const SitemapDebug = () => {
   const [sitemapXml, setSitemapXml] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const { updateStaticSitemap, generateAndDownloadSitemap } = useSitemapGenerator();
 
   const fetchSitemap = async () => {
     setLoading(true);
@@ -29,28 +33,32 @@ const SitemapDebug = () => {
     }
   };
 
-  const regenerateStaticSitemap = async () => {
-    setGenerating(true);
+  const handleUpdateSitemap = async () => {
+    setUpdating(true);
+    setError(null);
+    
     try {
-      const xml = await generateDynamicSitemap();
-      
-      // Create a blob and download it
-      const blob = new Blob([xml], { type: 'application/xml' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'sitemap.xml';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
-      console.log('Static sitemap file generated and downloaded');
+      const success = await updateStaticSitemap();
+      if (!success) {
+        setError('Errore durante l\'aggiornamento della sitemap');
+      }
     } catch (error) {
-      console.error('Error generating static sitemap:', error);
-      setError(error instanceof Error ? error.message : 'Failed to generate static sitemap');
+      console.error('Error updating sitemap:', error);
+      setError(error instanceof Error ? error.message : 'Failed to update sitemap');
     } finally {
-      setGenerating(false);
+      setUpdating(false);
+    }
+  };
+
+  const handleDownloadSitemap = async () => {
+    setDownloading(true);
+    try {
+      await generateAndDownloadSitemap();
+    } catch (error) {
+      console.error('Error downloading sitemap:', error);
+      setError(error instanceof Error ? error.message : 'Failed to download sitemap');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -77,7 +85,7 @@ const SitemapDebug = () => {
         <CardHeader>
           <CardTitle>Sitemap Debug & Generator</CardTitle>
           <p className="text-sm text-gray-600">
-            Debug della sitemap e generazione del file statico per SEO
+            Debug della sitemap e gestione del file statico per SEO
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -87,17 +95,29 @@ const SitemapDebug = () => {
             </Alert>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button onClick={fetchSitemap} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
               Rigenera Sitemap
             </Button>
             <Button 
-              onClick={regenerateStaticSitemap} 
-              disabled={generating}
-              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleUpdateSitemap} 
+              disabled={updating}
+              className="bg-green-600 hover:bg-green-700"
             >
-              {generating ? (
+              {updating ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
+              Aggiorna /sitemap.xml
+            </Button>
+            <Button 
+              onClick={handleDownloadSitemap} 
+              disabled={downloading}
+              variant="outline"
+            >
+              {downloading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Download className="h-4 w-4 mr-2" />
@@ -128,20 +148,19 @@ const SitemapDebug = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <h4 className="font-semibold">Per implementare la sitemap statica:</h4>
+            <h4 className="font-semibold">Per aggiornare la sitemap:</h4>
             <ol className="list-decimal list-inside space-y-1 text-sm">
-              <li>Scarica il file sitemap.xml usando il pulsante sopra</li>
-              <li>Sostituisci il file public/sitemap.xml con quello scaricato</li>
-              <li>La sitemap sarà accessibile su /sitemap.xml</li>
-              <li>Rigenera periodicamente quando aggiungi nuovi contenuti</li>
+              <li>Clicca "Aggiorna /sitemap.xml" per aggiornare automaticamente il file statico</li>
+              <li>La sitemap sarà immediatamente accessibile su /sitemap.xml</li>
+              <li>Usa "Scarica sitemap.xml" per ottenere una copia di backup</li>
+              <li>Ripeti quando aggiungi nuovi contenuti</li>
             </ol>
           </div>
           
           <Alert>
             <AlertDescription>
-              <strong>Nota:</strong> Questa pagina è solo per debug. La sitemap finale 
-              dovrebbe essere servita come file statico da /sitemap.xml per funzionare 
-              correttamente con i motori di ricerca.
+              <strong>Dominio aggiornato:</strong> Tutti gli URL utilizzano ora il dominio 
+              corretto <strong>www.glinda.it</strong> invece di glinda.lovable.app.
             </AlertDescription>
           </Alert>
         </CardContent>

@@ -50,18 +50,20 @@ const SitemapXml = () => {
     fetchSitemap();
   }, []);
 
-  // Set content type to XML
+  // Set proper meta tag for XML content type
   useEffect(() => {
-    if (!loading) {
-      document.contentType = 'application/xml';
+    if (!loading && sitemapXml) {
+      const existingMeta = document.querySelector('meta[http-equiv="Content-Type"]');
+      if (existingMeta) {
+        existingMeta.remove();
+      }
       
-      // Set proper response headers if possible
-      const meta = document.createElement('meta');
-      meta.httpEquiv = 'Content-Type';
-      meta.content = 'application/xml; charset=utf-8';
-      document.head.appendChild(meta);
+      const metaContentType = document.createElement('meta');
+      metaContentType.setAttribute('http-equiv', 'Content-Type');
+      metaContentType.setAttribute('content', 'application/xml; charset=utf-8');
+      document.head.appendChild(metaContentType);
     }
-  }, [loading]);
+  }, [loading, sitemapXml]);
 
   if (loading) {
     return <div>Generating sitemap...</div>;

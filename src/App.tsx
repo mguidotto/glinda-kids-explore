@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import ContentDetail from "./pages/ContentDetail";
+import CategoryPage from "./pages/CategoryPage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -97,6 +98,8 @@ const App = () => {
                 {/* Content routes - handle both slug and ID based URLs */}
                 <Route path="/content/:slugOrId" element={<ContentDetail />} />
                 <Route path="/:categorySlug/:contentSlug" element={<ContentDetail />} />
+                {/* Category pages - must be after more specific routes */}
+                <Route path="/:slug" element={<CategoryPage />} />
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search, CalendarIcon, Clock, AlertCircle, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Image, Upload, X, Tag, Search, CalendarIcon, Clock, AlertCircle, ExternalLink, Hash } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,8 @@ const ContentsManagement = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [generatingSlugsBatch, setGeneratingSlugsBatch] = useState(false);
+  const [slugProgress, setSlugProgress] = useState({ current: 0, total: 0 });
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -527,6 +529,78 @@ const ContentsManagement = () => {
     return idUrl;
   };
 
+  const generateMissingSlugsBatch = async () => {
+    try {
+      setGeneratingSlugsBatch(true);
+      setMessage("Ricerca contenuti senza slug...");
+      
+      // Get all contents without slug
+      const { data: contentsWithoutSlug, error } = await supabase
+        .from("contents")
+        .select("id, title, slug")
+        .or("slug.is.null,slug.eq.");
+
+      if (error) {
+        throw error;
+      }
+
+      if (!contentsWithoutSlug || contentsWithoutSlug.length === 0) {
+        setMessage("Tutti i contenuti hanno già uno slug.");
+        setGeneratingSlugsBatch(false);
+        return;
+      }
+
+      const total = contentsWithoutSlug.length;
+      setSlugProgress({ current: 0, total });
+      setMessage(`Generazione slug per ${total} contenuti...`);
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < contentsWithoutSlug.length; i++) {
+        const content = contentsWithoutSlug[i];
+        setSlugProgress({ current: i + 1, total });
+        setMessage(`Generando slug: ${i + 1}/${total} - ${content.title}`);
+
+        try {
+          if (content.title) {
+            const baseSlug = generateSlug(content.title);
+            const uniqueSlug = await ensureUniqueSlug(baseSlug, content.id);
+
+            const { error: updateError } = await supabase
+              .from("contents")
+              .update({ slug: uniqueSlug })
+              .eq("id", content.id);
+
+            if (updateError) {
+              console.error(`Errore aggiornamento slug per ${content.title}:`, updateError);
+              errorCount++;
+            } else {
+              successCount++;
+            }
+          } else {
+            errorCount++;
+          }
+        } catch (slugError) {
+          console.error(`Errore generazione slug per ${content.title}:`, slugError);
+          errorCount++;
+        }
+
+        // Small delay to avoid overwhelming the database
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      setMessage(`Generazione slug completata! ${successCount} generati con successo, ${errorCount} errori.`);
+      fetchContents(); // Refresh the list
+    } catch (error) {
+      console.error("Error generating slugs:", error);
+      setError("Errore durante la generazione degli slug");
+    } finally {
+      setGeneratingSlugsBatch(false);
+      setSlugProgress({ current: 0, total: 0 });
+    }
+  };
+
   const batchGeocodeContents = async () => {
     try {
       setLoading(true);
@@ -607,11 +681,25 @@ const ContentsManagement = () => {
           
           <div className="flex flex-col sm:flex-row gap-2">
             <Button 
+              onClick={generateMissingSlugsBatch}
+              variant="outline"
+              size="lg"
+              className="w-full sm:w-auto"
+              disabled={loading || generatingSlugsBatch}
+            >
+              <Hash className="h-4 w-4 mr-2" />
+              {generatingSlugsBatch ? 
+                `Generando... ${slugProgress.current}/${slugProgress.total}` : 
+                "Genera Slug Mancanti"
+              }
+            </Button>
+            
+            <Button 
               onClick={batchGeocodeContents}
               variant="outline"
               size="lg"
               className="w-full sm:w-auto"
-              disabled={loading}
+              disabled={loading || generatingSlugsBatch}
             >
               Geocodifica Contenuti Esistenti
             </Button>

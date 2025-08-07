@@ -292,19 +292,20 @@ const ContentDetail = () => {
 
             {/* Sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              <ContentBookingSidebar
-                id={content.id}
-                title={content.title}
-                priceFrom={content.price_from}
-                priceTo={content.price_to}
-                purchasable={content.purchasable}
-                bookingRequired={content.booking_required}
-                stripePriceId={content.stripe_price_id}
-                paymentType={content.payment_type}
-                phone={content.phone}
-                email={content.email}
-                website={content.website}
-              />
+               <ContentBookingSidebar
+                 id={content.id}
+                 title={content.title}
+                 priceFrom={content.price_from}
+                 priceTo={content.price_to}
+                 purchasable={content.purchasable}
+                 bookingRequired={content.booking_required}
+                 stripePriceId={content.stripe_price_id}
+                 paymentType={content.payment_type}
+                 phone={content.phone}
+                 email={content.email}
+                 website={content.website}
+                 modality={content.modality}
+               />
 
               {/* Map Section in sidebar */}
               {content.latitude && content.longitude && (

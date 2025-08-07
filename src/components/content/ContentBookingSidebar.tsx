@@ -17,6 +17,7 @@ interface ContentBookingSidebarProps {
   phone?: string | null;
   email?: string | null;
   website?: string | null;
+  modality?: string | null;
 }
 
 const ContentBookingSidebar = ({
@@ -30,7 +31,8 @@ const ContentBookingSidebar = ({
   paymentType,
   phone,
   email,
-  website
+  website,
+  modality
 }: ContentBookingSidebarProps) => {
   const shouldShowPrice = priceFrom || priceTo;
   const shouldShowBooking = bookingRequired || purchasable;
@@ -69,6 +71,12 @@ const ContentBookingSidebar = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <Badge className="bg-green-100 text-green-800">
+            {modality === 'online' ? 'Online' : 'In Presenza'}
+          </Badge>
+        </div>
+
         {website && (
           <>
             <Separator />

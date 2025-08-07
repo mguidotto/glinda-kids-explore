@@ -9,8 +9,8 @@ interface ContentHeaderProps {
   city?: string | null;
   address?: string | null;
   modality?: string | null;
-  price_from?: number | null;
-  price_to?: number | null;
+  price_from?: number | string | null;
+  price_to?: number | string | null;
   category?: { name: string; slug: string; color?: string | null } | null;
   tags?: Array<{ id: string; name: string; slug: string }> | null;
   eventDate?: string | null;
@@ -49,11 +49,18 @@ const ContentHeader = ({
 
   const formatPrice = () => {
     if (price_from && price_to) {
-      return `€${price_from} - €${price_to}`;
+      // Remove € from string if present and parse as number
+      const fromPrice = typeof price_from === 'string' ? price_from.replace('€', '') : price_from;
+      const toPrice = typeof price_to === 'string' ? price_to.replace('€', '') : price_to;
+      return `${fromPrice} - ${toPrice}`;
     } else if (price_from) {
-      return `Da €${price_from}`;
+      // Remove € from string if present
+      const fromPrice = typeof price_from === 'string' ? price_from.replace('€', '') : price_from;
+      return `${fromPrice}`;
     } else if (price_to) {
-      return `Fino a €${price_to}`;
+      // Remove € from string if present
+      const toPrice = typeof price_to === 'string' ? price_to.replace('€', '') : price_to;
+      return `${toPrice}`;
     }
     return null;
   };
@@ -124,7 +131,6 @@ const ContentHeader = ({
         
         {formatPrice() && (
           <div className="flex items-center gap-1">
-            <Euro className="h-4 w-4" />
             <span className="font-medium">{formatPrice()}</span>
           </div>
         )}

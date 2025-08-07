@@ -8,8 +8,8 @@ import { Separator } from "@/components/ui/separator";
 interface ContentBookingSidebarProps {
   id: string;
   title: string;
-  priceFrom?: number | null;
-  priceTo?: number | null;
+  priceFrom?: number | string | null;
+  priceTo?: number | string | null;
   purchasable?: boolean;
   bookingRequired?: boolean;
   stripePriceId?: string | null;
@@ -35,7 +35,7 @@ const ContentBookingSidebar = ({
   const shouldShowPrice = priceFrom || priceTo;
   const shouldShowBooking = bookingRequired || purchasable;
   
-  if (!shouldShowBooking && !shouldShowPrice) {
+  if (!shouldShowBooking && !shouldShowPrice && !website) {
     return null;
   }
 
@@ -58,11 +58,10 @@ const ContentBookingSidebar = ({
           <span>{shouldShowBooking ? 'Prenota' : 'Info'}</span>
           {shouldShowPrice && (
             <div className="flex items-center gap-1">
-              <Euro className="h-5 w-5 text-green-600" />
               <span className="text-2xl font-bold text-green-600">
-                {priceFrom}€
+                {typeof priceFrom === 'string' ? priceFrom.replace('€', '') : priceFrom}
                 {priceTo && priceTo !== priceFrom && (
-                  <span className="text-sm"> - {priceTo}€</span>
+                  <span className="text-sm"> - {typeof priceTo === 'string' ? priceTo.replace('€', '') : priceTo}</span>
                 )}
               </span>
             </div>
@@ -70,20 +69,14 @@ const ContentBookingSidebar = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <Badge className="bg-green-100 text-green-800">
-            In Presenza
-          </Badge>
-        </div>
-
-        {shouldShowBooking && website && (
+        {website && (
           <>
             <Separator />
             <Button 
               className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
               onClick={handleBookingClick}
             >
-              Prenota Ora
+              {shouldShowBooking ? 'Prenota Ora' : 'Vai al Sito'}
             </Button>
           </>
         )}

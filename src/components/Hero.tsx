@@ -32,21 +32,6 @@ const Hero = ({ onSearch, onExploreActivities }: HeroProps) => {
           </p>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 mb-8 shadow-2xl">
-          <SearchBar onSearch={onSearch} placeholder="Cerca attività, corsi, eventi..." />
-        </div>
-
-        <div className="flex justify-center">
-          <Button 
-            size="lg" 
-            className="bg-white text-[#8B4A6B] hover:bg-white/90 font-semibold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-            onClick={handleExploreClick}
-            aria-label="Esplora le attività disponibili per bambini"
-          >
-            <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
-            {getText('hero.explore', 'Esplora Attività')}
-          </Button>
-        </div>
       </div>
 
       {/* Elementi decorativi con aria-hidden */}

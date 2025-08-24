@@ -123,22 +123,18 @@ const Index = () => {
           <h1 className="sr-only">Glinda - Piattaforma Attività Educative per Bambini da 0 a 10 anni</h1>
         </header>
         
-        <Hero onSearch={handleSearch} onExploreActivities={handleExploreActivities} />
+        <section className="py-16 bg-gradient-to-br from-purple-50 to-blue-50" aria-labelledby="about-heading">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 id="about-heading" className="text-3xl font-bold text-[#8B4A6B] mb-6">Chi siamo</h2>
+            <p className="text-lg text-gray-700 leading-relaxed">
+              Glinda si occupa di raccogliere corsi per genitori, offrendo un supporto concreto e mirato alla genitorialità. 
+              La nostra missione è quella di aiutare i genitori a trovare le risorse e le opportunità formative più adatte 
+              per accompagnare al meglio la crescita dei propri figli, creando una rete di supporto e condivisione.
+            </p>
+          </div>
+        </section>
 
         <main>
-          {featuredContents.length > 0 && (
-            <section aria-labelledby="featured-heading">
-              <h2 id="featured-heading" className="sr-only">Contenuti in Evidenza</h2>
-              <HomeSection 
-                title={getText('homepage.featured.title', 'Contenuti in Evidenza')}
-                subtitle={getText('homepage.featured.subtitle', 'Le migliori attività selezionate per te')}
-                contents={featuredContents}
-                sectionType="featured"
-                onViewAll={handleViewAll}
-              />
-            </section>
-          )}
-
           <section className="py-16 bg-gray-50" aria-labelledby="stats-heading">
             <div className="max-w-6xl mx-auto px-4">
               <h2 id="stats-heading" className="sr-only">Le Nostre Statistiche</h2>

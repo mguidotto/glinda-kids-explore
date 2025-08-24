@@ -123,6 +123,8 @@ const Index = () => {
           <h1 className="sr-only">Glinda - Piattaforma Attività Educative per Bambini da 0 a 10 anni</h1>
         </header>
         
+        <Hero onSearch={handleSearch} onExploreActivities={handleExploreActivities} />
+
         <section className="py-16 bg-gradient-to-br from-purple-50 to-blue-50" aria-labelledby="about-heading">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <h2 id="about-heading" className="text-3xl font-bold text-[#8B4A6B] mb-6">Chi siamo</h2>

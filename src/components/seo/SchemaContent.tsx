@@ -3,26 +3,25 @@ interface SchemaContentProps {
   content: {
     id: string;
     title: string;
-    description?: string;
-    featured_image?: string;
-    meta_image?: string;
-    city?: string;
-    address?: string;
-    price_from?: number;
-    price_to?: number;
-    event_date?: string;
-    event_time?: string;
-    event_end_date?: string;
-    event_end_time?: string;
-    modality?: string;
+    description?: string | null;
+    featured_image?: string | null;
+    meta_image?: string | null;
+    city?: string | null;
+    address?: string | null;
+    price_from?: string | null;
+    event_date?: string | null;
+    event_time?: string | null;
+    event_end_date?: string | null;
+    event_end_time?: string | null;
+    modality?: string | null;
     categories?: {
       name: string;
       slug: string;
-    };
+    } | null;
     providers?: {
       business_name: string;
       verified: boolean;
-    };
+    } | null;
   };
   reviews?: {
     rating: number;

@@ -138,10 +138,8 @@ const ProviderDashboard = () => {
         category_id: categoryId,
         title,
         description,
-        content_type: contentType as any,
         modality: modality as any,
-        price_from: priceFrom || null,
-        price_to: priceTo || null,
+        price_from: priceFrom ? priceFrom.toString() : null,
         city,
         address,
         phone,
@@ -325,8 +323,8 @@ const ProviderDashboard = () => {
                           <p className="text-gray-600 text-sm">{content.description}</p>
                           <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                             <span>{content.city}</span>
-                            {content.price_from && content.price_to && (
-                              <span>€{content.price_from} - €{content.price_to}</span>
+                            {content.price_from && (
+                              <span>{content.price_from}</span>
                             )}
                             <span className={`px-2 py-1 rounded text-xs ${
                               content.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'

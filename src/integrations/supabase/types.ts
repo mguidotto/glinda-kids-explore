@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -145,11 +145,10 @@ export type Database = {
           meta_description: string | null
           meta_image: string | null
           meta_title: string | null
-          modality: Database["public"]["Enums"]["modality"]
+          modality: Database["public"]["Enums"]["modality"] | null
           payment_type: string | null
           phone: string | null
-          price_from: number | null
-          price_to: number | null
+          price_from: string | null
           provider_id: string | null
           published: boolean | null
           purchasable: boolean | null
@@ -184,11 +183,10 @@ export type Database = {
           meta_description?: string | null
           meta_image?: string | null
           meta_title?: string | null
-          modality?: Database["public"]["Enums"]["modality"]
+          modality?: Database["public"]["Enums"]["modality"] | null
           payment_type?: string | null
           phone?: string | null
-          price_from?: number | null
-          price_to?: number | null
+          price_from?: string | null
           provider_id?: string | null
           published?: boolean | null
           purchasable?: boolean | null
@@ -223,11 +221,10 @@ export type Database = {
           meta_description?: string | null
           meta_image?: string | null
           meta_title?: string | null
-          modality?: Database["public"]["Enums"]["modality"]
+          modality?: Database["public"]["Enums"]["modality"] | null
           payment_type?: string | null
           phone?: string | null
-          price_from?: number | null
-          price_to?: number | null
+          price_from?: string | null
           provider_id?: string | null
           published?: boolean | null
           purchasable?: boolean | null
@@ -476,44 +473,44 @@ export type Database = {
     }
     Functions: {
       calculate_distance: {
-        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
       create_category: {
         Args: {
-          category_name: string
-          category_slug: string
+          category_color?: string
           category_description?: string
           category_icon?: string
-          category_color?: string
+          category_name: string
+          category_slug: string
         }
         Returns: string
       }
       get_contents_within_radius: {
         Args: { center_lat: number; center_lon: number; radius_km?: number }
         Returns: {
-          id: string
-          title: string
-          description: string
           city: string
+          description: string
+          distance_km: number
+          id: string
           latitude: number
           longitude: number
-          distance_km: number
+          title: string
         }[]
       }
       update_app_text: {
-        Args: { text_key: string; new_value: string }
+        Args: { new_value: string; text_key: string }
         Returns: undefined
       }
       update_category: {
         Args: {
+          category_active?: boolean
+          category_color?: string
+          category_description?: string
+          category_icon?: string
           category_id: string
           category_name: string
           category_slug: string
-          category_description?: string
-          category_icon?: string
-          category_color?: string
-          category_active?: boolean
         }
         Returns: undefined
       }

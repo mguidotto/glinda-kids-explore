@@ -244,7 +244,6 @@ const ContentDetail = () => {
                 address={content.address}
                 modality={content.modality}
                 price_from={content.price_from}
-                price_to={content.price_to}
                 category={content.categories}
                 tags={content.content_tags?.map(ct => ct.tags)}
                 eventDate={eventDate}
@@ -296,7 +295,6 @@ const ContentDetail = () => {
                  id={content.id}
                  title={content.title}
                  priceFrom={content.price_from}
-                 priceTo={content.price_to}
                  purchasable={content.purchasable}
                  bookingRequired={content.booking_required}
                  stripePriceId={content.stripe_price_id}

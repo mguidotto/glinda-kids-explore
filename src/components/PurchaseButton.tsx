@@ -61,22 +61,11 @@ const PurchaseButton = ({ content }: PurchaseButtonProps) => {
   };
 
   const renderPriceInfo = () => {
-    if (content.price_from === content.price_to && content.price_from) {
+    if (content.price_from) {
       return (
         <div className="flex items-center gap-1">
           <Euro className="h-4 w-4 text-green-600" />
-          <span className="font-bold text-green-600">{content.price_from}€</span>
-        </div>
-      );
-    }
-
-    if (content.price_from && content.price_to) {
-      return (
-        <div className="flex items-center gap-1">
-          <Euro className="h-4 w-4 text-green-600" />
-          <span className="font-bold text-green-600">
-            {content.price_from}€ - {content.price_to}€
-          </span>
+          <span className="font-bold text-green-600">{content.price_from}</span>
         </div>
       );
     }

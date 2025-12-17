@@ -19,4 +19,21 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  ssgOptions: {
+    // Routes to pre-render at build time
+    includedRoutes: (paths: string[]) => {
+      // Pre-render static pages
+      return [
+        '/',
+        '/about',
+        '/contact',
+        '/privacy',
+        '/search',
+      ];
+    },
+    // Generate nested directory structure
+    dirStyle: 'nested',
+    // Script loading
+    script: 'async',
+  },
 }));

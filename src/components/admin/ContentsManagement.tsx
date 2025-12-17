@@ -62,10 +62,9 @@ const ContentsManagement = () => {
     city: "",
     address: "",
     price_from: "",
-    price_to: "",
     published: false,
     featured: false,
-    modality: "unspecified" as string, // Changed from "" to "unspecified"
+    modality: "unspecified" as string,
     website: "",
     phone: "",
     email: "",
@@ -319,8 +318,7 @@ const ContentsManagement = () => {
         provider_id: formData.provider_id === "none" ? null : formData.provider_id || null,
         city: formData.city || null,
         address: formData.address || null,
-        price_from: formData.price_from ? parseFloat(formData.price_from) : null,
-        price_to: formData.price_to ? parseFloat(formData.price_to) : null,
+        price_from: formData.price_from || null,
         published: formData.published,
         featured: formData.featured,
         modality: modalityValue,
@@ -430,10 +428,9 @@ const ContentsManagement = () => {
       city: "",
       address: "",
       price_from: "",
-      price_to: "",
       published: false,
       featured: false,
-      modality: "unspecified", // Changed from "" to "unspecified"
+      modality: "unspecified",
       website: "",
       phone: "",
       email: "",
@@ -466,8 +463,7 @@ const ContentsManagement = () => {
       provider_id: content.provider_id || "",
       city: content.city || "",
       address: content.address || "",
-      price_from: content.price_from?.toString() || "",
-      price_to: content.price_to?.toString() || "",
+      price_from: content.price_from || "",
       published: content.published ?? false,
       featured: content.featured ?? false,
       modality: content.modality || "unspecified", // Convert null to "unspecified"
@@ -1081,17 +1077,6 @@ const ContentsManagement = () => {
                           step="0.01"
                           value={formData.price_from}
                           onChange={(e) => setFormData(prev => ({ ...prev, price_from: e.target.value }))}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="price_to">Prezzo A (€)</Label>
-                        <Input
-                          id="price_to"
-                          type="number"
-                          step="0.01"
-                          value={formData.price_to}
-                          onChange={(e) => setFormData(prev => ({ ...prev, price_to: e.target.value }))}
                         />
                       </div>
                     </div>

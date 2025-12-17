@@ -1,7 +1,13 @@
+import { ViteReactSSG } from 'vite-react-ssg';
+import { routes } from './routes';
+import './index.css';
 
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-
-createRoot(document.getElementById("root")!).render(<App />);
+export const createRoot = ViteReactSSG(
+  {
+    routes,
+    basename: import.meta.env.BASE_URL,
+  },
+  ({ isClient }) => {
+    // Custom setup - runs on both client and server
+  }
+);
